@@ -9,20 +9,13 @@ public:
   Screen* currentScreen = nullptr;
 
   void setScreen(Screen* screen) {
+    Serial.println("ScreenManager::setScreen()");
     if (currentScreen) delete currentScreen;
     currentScreen = screen;
   }
 
-  void update() {
+  void update() const {
     if (currentScreen) currentScreen->update();
-  }
-
-  void render() {
-    if (currentScreen && currentScreen->needsRefresh())
-    {
-      currentScreen->render();
-      currentScreen->refresh(false);
-    }
   }
 
   ~ScreenManager() {

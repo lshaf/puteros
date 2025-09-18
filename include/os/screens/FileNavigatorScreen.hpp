@@ -15,13 +15,14 @@ class FileNavigatorScreen final : public Screen
   int selectedIndex = 0;
   int previousIndex = 0;
 
-  M5Canvas canvas;
+  M5Canvas selector;
 
   typedef enum
   {
     NAV_UP,
     NAV_DOWN,
     NAV_ENTER,
+    NAV_BACK,
   } NavAction_t;
 
   void listDirectory(const std::string& path);
@@ -31,5 +32,4 @@ class FileNavigatorScreen final : public Screen
 public:
   explicit FileNavigatorScreen(std::string  path);
   void update() override;
-  void render() override;
 };

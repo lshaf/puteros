@@ -2,13 +2,11 @@
 #include "os/screens/FileNavigatorScreen.hpp"
 #include <SD.h>
 
-#include <utility>
-
-
 FileNavigatorScreen::FileNavigatorScreen(std::string  startPath)
-    : currentPath(std::move(startPath)), canvas(&M5Cardputer.Lcd) {
+    : currentPath(std::move(startPath)), selector(&M5Cardputer.Lcd) {
+    Serial.println("FileNavigatorScreen::FileNavigatorScreen()");
+    selector.createSprite(_body.width(), 12);
     listDirectory(currentPath);
-    canvas.createSprite(M5.Lcd.width(), 10);
 }
 
 void FileNavigatorScreen::listDirectory(const std::string& path) {
@@ -17,10 +15,23 @@ void FileNavigatorScreen::listDirectory(const std::string& path) {
     if (!dir) return;
     File entry;
     while ((entry = dir.openNextFile())) {
-        entries.push_back(entry.name());
+        entries.emplace_back(entry.name());
         entry.close();
     }
     dir.close();
+
+    _header.fillSprite(TFT_BLACK);
+    _header.setTextColor(TFT_WHITE);
+    _header.setTextSize(2);
+    _header.setCursor(0, 0);
+    _header.printf("SDCard: %s", path.c_str());
+
+    _body.fillSprite(BLACK);
+    _body.setTextColor(TFT_WHITE);
+    for (int i = 0; i < entries.size(); i++) {
+        _body.drawString(entries[i].c_str(), 3, i * _body.fontHeight() + 2 + i * 2);
+    }
+
     previousIndex = -1;
     selectedIndex = 0;
     updateSelection();
@@ -30,16 +41,17 @@ void FileNavigatorScreen::updateSelection()
 {
     if (previousIndex >= 0 && previousIndex < entries.size())
     {
-        canvas.fillSprite(BLACK);
-        canvas.setTextColor(TFT_WHITE);
-        canvas.drawString(entries[previousIndex].c_str(), 1, 1);
-        canvas.pushSprite(0, 10 + (previousIndex * 10));
+        selector.fillSprite(BLACK);
+        selector.setTextColor(TFT_WHITE);
+        selector.drawString(entries[previousIndex].c_str(), 3, 2);
+        selector.pushSprite(&_body, 0, previousIndex * (_body.fontHeight() + 2));
     }
 
-    canvas.fillSprite(BLUE);
-    canvas.setTextColor(TFT_WHITE);
-    canvas.drawString(entries[selectedIndex].c_str(), 1, 1);
-    canvas.pushSprite(0, 10 + (selectedIndex * 10));
+    selector.fillSprite(BLUE);
+    selector.setTextColor(TFT_WHITE);
+    selector.drawString(entries[selectedIndex].c_str(), 3, 2);
+    selector.pushSprite(&_body, 0, selectedIndex * (_body.fontHeight() + 2));
+    render();
 }
 
 void FileNavigatorScreen::navigate(NavAction_t direction)
@@ -57,7 +69,7 @@ void FileNavigatorScreen::navigate(NavAction_t direction)
     if (direction == NAV_ENTER && !entries.empty())
     {
         const std::string selected = entries[selectedIndex];
-        const std::string newPath = currentPath + "/" + selected;
+        const std::string newPath = (currentPath == "/" ? "" : currentPath) + "/" + selected;
         File f = SD.open(newPath.c_str());
         if (f && f.isDirectory())
         {
@@ -70,13 +82,19 @@ void FileNavigatorScreen::navigate(NavAction_t direction)
 
         f.close();
     }
+    if (direction == NAV_BACK && currentPath != "/")
+    {
+        size_t pos = currentPath.find_last_of('/');
+        if (pos != std::string::npos)
+        {
+            currentPath = currentPath.substr(0, pos);
+            if (currentPath.empty()) currentPath = "/";
+            listDirectory(currentPath);
+        }
+    }
 
-    Serial.print("CurrentIndex: ");
-    Serial.println(selectedIndex);
     updateSelection();
 }
-
-
 
 void FileNavigatorScreen::update() {
     auto key = &M5Cardputer.Keyboard;
@@ -85,16 +103,6 @@ void FileNavigatorScreen::update() {
         if (key->isKeyPressed(';')) navigate(NAV_UP);
         if (key->isKeyPressed('.') && selectedIndex < entries.size() - 1) navigate(NAV_DOWN);
         if (key->isKeyPressed(KEY_ENTER)) navigate(NAV_ENTER);
-    }
-}
-
-void FileNavigatorScreen::render() {
-    const auto display = &M5Cardputer.Lcd;
-    display->fillScreen(TFT_BLACK);
-    display->setCursor(1, 1);
-    display->println(("SDCard: " + currentPath).c_str());
-    for (size_t i = 0; i < entries.size(); ++i) {
-        display->setCursor(1, 10 + ((i * 10) + 1));
-        display->println(entries[i].c_str());
+        if (key->isKeyPressed(KEY_BACKSPACE)) navigate(NAV_BACK);
     }
 }
