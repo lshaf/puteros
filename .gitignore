@@ -1,0 +1,27 @@
+# PlatformIO build and environment folders
+.pio/
+.pioenvs/
+.piolibdeps/
+.pio/libdeps/
+.pio/build/
+
+# IDE files
+.vscode/
+.clion/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compiled object files and binaries
+*.exe
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+
+# Logs and temporary files
+*.log
+*.tmp
