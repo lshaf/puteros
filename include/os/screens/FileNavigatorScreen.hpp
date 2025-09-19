@@ -3,33 +3,22 @@
 //
 #pragma once
 
-#include "../Screen.hpp"
-#include <M5Cardputer.h>
-#include <vector>
+#pragma once
+
+#include "../core/ListScreen.hpp"
 #include <string>
+#include <vector>
 
-class FileNavigatorScreen final : public Screen
-{
+class FileNavigatorScreen final : public ListScreen {
   std::string currentPath = "/";
-  std::vector<std::string> entries;
-  int selectedIndex = 0;
-  int previousIndex = 0;
-
-  M5Canvas selector;
-
-  typedef enum
-  {
-    NAV_UP,
-    NAV_DOWN,
-    NAV_ENTER,
-    NAV_BACK,
-  } NavAction_t;
 
   void listDirectory(const std::string& path);
-  void updateSelection();
-  void navigate(NavAction_t direction);
+
+protected:
+  void onEnter(const std::string& entry) override;
+  void onBack() override;
 
 public:
-  explicit FileNavigatorScreen(std::string  path);
+  explicit FileNavigatorScreen(const std::string& path);
   void update() override;
 };

@@ -2,16 +2,13 @@
 #include <M5Cardputer.h>
 #include <SD.h>
 
-#include "os/ScreenManager.hpp"
-#include "os/screens/FileNavigatorScreen.hpp"
+#include "../include/os/core/ScreenManager.hpp"
 #include "os/screens/HelloScreen.hpp"
 
 #define SD_SPI_SCK_PIN  40
 #define SD_SPI_MISO_PIN 39
 #define SD_SPI_MOSI_PIN 14
 #define SD_SPI_CS_PIN   12
-
-ScreenManager screenManager;
 
 void setup()
 {
@@ -50,11 +47,11 @@ void setup()
   );
 
   Serial.println("start main");
-  screenManager.setScreen(new FileNavigatorScreen("/"));
+  ScreenManager::getInstance().setScreen(new HelloScreen());
 }
 
 void loop()
 {
   M5Cardputer.update();
-  screenManager.update();
+  ScreenManager::getInstance().update();
 }

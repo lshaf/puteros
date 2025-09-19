@@ -3,24 +3,30 @@
 //
 #pragma once
 
-#include "../Screen.hpp"
+#include "../core/Screen.hpp"
+#include "FileNavigatorScreen.hpp"
 
 class HelloScreen final : public Screen
 {
 public:
   HelloScreen() {
-    _header.fillSprite(TFT_LIGHTGRAY);
     _header.setTextColor(TFT_WHITE);
-    _header.drawString("Hello Screen", 2, 4);
+    _header.setTextSize(1.5);
+    _header.drawString("PuterOS", 2, _header.height() / 2 - _header.fontHeight() / 2);
 
-    _body.fillSprite(TFT_LIGHTGRAY);
     _body.setTextColor(TFT_WHITE);
-    _body.drawString("Welcome to the Hello Screen!", 0, 0);
+    _body.drawCenterString("Press ENTER to Start", _body.width() / 2, _body.height() / 2 - _body.fontHeight() / 2);
 
     render();
   }
 
   void update() override {
-    // No dynamic content to update in this simple screen
+    if (_keyboard->isPressed() && _keyboard->isChange())
+    {
+      if (_keyboard->isKeyPressed(KEY_ENTER))
+      {
+        ScreenManager::getInstance().setScreen(new FileNavigatorScreen("/"));
+      }
+    }
   }
 };

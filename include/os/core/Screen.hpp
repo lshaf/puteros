@@ -11,9 +11,10 @@ class Screen
 protected:
   M5Canvas _header;
   M5Canvas _body;
+  Keyboard_Class* _keyboard;
 public:
   Screen()
-    : _header(&M5Cardputer.Lcd), _body(&M5Cardputer.Lcd)
+    : _header(&M5Cardputer.Lcd), _body(&M5Cardputer.Lcd), _keyboard(&M5Cardputer.Keyboard)
   {
     _header.createSprite(M5Cardputer.Lcd.width() - 6, 16);
     _body.createSprite(M5Cardputer.Lcd.width() - 16, M5Cardputer.Lcd.height() - 34);

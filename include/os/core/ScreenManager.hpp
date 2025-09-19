@@ -7,9 +7,12 @@
 class ScreenManager {
 public:
   Screen* currentScreen = nullptr;
+  static ScreenManager& getInstance() {
+    static ScreenManager instance;
+    return instance;
+  }
 
   void setScreen(Screen* screen) {
-    Serial.println("ScreenManager::setScreen()");
     if (currentScreen) delete currentScreen;
     currentScreen = screen;
   }
@@ -21,4 +24,8 @@ public:
   ~ScreenManager() {
     if (currentScreen) delete currentScreen;
   }
+private:
+  ScreenManager() = default;
+  ScreenManager(const ScreenManager&) = delete;
+  ScreenManager& operator=(const ScreenManager&) = delete;
 };
