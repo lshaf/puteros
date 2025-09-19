@@ -1,7 +1,7 @@
 //
 // Created by l-sha on 9/19/2025.
 //
-#include "os/core//ListScreen.hpp"
+#include "os/core/ListScreen.hpp"
 
 ListScreen::ListScreen() : selector(&M5Cardputer.Lcd) {
     selector.createSprite(_body.width(), 12);

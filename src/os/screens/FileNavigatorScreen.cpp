@@ -2,8 +2,13 @@
 #include "os/screens/FileNavigatorScreen.hpp"
 #include <SD.h>
 
-FileNavigatorScreen::FileNavigatorScreen(const std::string& path)
-    : currentPath(path) {
+#include "os/core/ScreenManager.hpp"
+#include "os/screens/HelloScreen.hpp"
+
+#include <utility>
+
+FileNavigatorScreen::FileNavigatorScreen(std::string  path)
+    : currentPath(std::move(path)) {
     listDirectory(currentPath);
 }
 
@@ -47,6 +52,9 @@ void FileNavigatorScreen::onBack() {
             if (currentPath.empty()) currentPath = "/";
             listDirectory(currentPath);
         }
+    } else
+    {
+        ScreenManager::getInstance().setScreen(new HelloScreen());
     }
 }
 

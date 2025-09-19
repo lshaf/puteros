@@ -19,6 +19,6 @@ protected:
   void onBack() override;
 
 public:
-  explicit FileNavigatorScreen(const std::string& path);
+  explicit FileNavigatorScreen(std::string  path);
   void update() override;
 };
