@@ -20,7 +20,7 @@ void ListScreen::setEntries(const std::vector<std::string>& newEntries) {
 void ListScreen::showList() {
     _body.fillSprite(BLACK);
     _body.setTextColor(TFT_WHITE);
-    int totalItem = std::min(perPage, (int)entries.size() - currentPage * perPage);
+    const int totalItem = std::min(perPage, static_cast<int>(entries.size()) - currentPage * perPage);
     for (int i = 0; i < totalItem; i++) {
         _body.drawString(entries[currentPage * perPage + i].c_str(), 3, i * _body.fontHeight() + 2 + i * 2);
     }
