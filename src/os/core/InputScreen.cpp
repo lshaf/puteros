@@ -21,6 +21,7 @@ void InputScreen::updateBody() {
 }
 
 void InputScreen::update() {
+  refreshBattery();
   const unsigned long now = millis();
   if (now - lastBlink >= 500) {
     showCursor = !showCursor;

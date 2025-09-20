@@ -92,6 +92,7 @@ void ListScreen::navigate(const NavAction_t direction) {
 }
 
 void ListScreen::update() {
+    refreshBattery();
     if (_keyboard->isChange() && _keyboard->isPressed()) {
         if (_keyboard->isKeyPressed(';')) navigate(NAV_UP);
         if (_keyboard->isKeyPressed('.')) navigate(NAV_DOWN);

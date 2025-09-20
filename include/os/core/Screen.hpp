@@ -10,12 +10,17 @@
 
 class Screen
 {
+private:
+  bool batteryShouldRefresh() const
+  {
+    return (millis() - lastBatteryTimeRender) > 30000;
+  }
 protected:
   M5Canvas _header;
   M5Canvas _body;
   Keyboard_Class* _keyboard;
 
-  int lastPercentBattery = -1;
+  unsigned long lastBatteryTimeRender = 0;
   bool hideBattery = false;
 
   typedef enum
@@ -30,7 +35,6 @@ public:
   {
     _header.createSprite(M5Cardputer.Lcd.width() - 6, 16);
     _body.createSprite(M5Cardputer.Lcd.width() - 16, M5Cardputer.Lcd.height() - 34);
-    lastPercentBattery = M5Cardputer.Power.getBatteryLevel();
   }
 
   virtual ~Screen() = default;
@@ -46,10 +50,8 @@ public:
 
   void refreshBattery()
   {
-    const int currentBattery = M5Cardputer.Power.getBatteryLevel();
-    if (currentBattery != lastPercentBattery)
+    if (batteryShouldRefresh())
     {
-      lastPercentBattery = currentBattery;
       render(RENDER_HEADER);
     }
   }
@@ -57,7 +59,11 @@ public:
   void render(const RenderType type = RENDER_ALL)
   {
     M5Cardputer.Lcd.drawRoundRect(3, 22, M5Cardputer.Lcd.width() - 6, M5Cardputer.Lcd.height() - 25, 4, BLUE);
-    if (!hideBattery) drawBatteryIndicator(&_header, _header.width() - 29, 2, lastPercentBattery);
+    if (!hideBattery)
+    {
+      lastBatteryTimeRender = millis();
+      drawBatteryIndicator(&_header, _header.width() - 29, 2, M5Cardputer.Power.getBatteryLevel());
+    }
     if (type == RENDER_HEADER || type == RENDER_ALL) _header.pushSprite(3, 3);
     if (type == RENDER_BODY || type == RENDER_ALL) _body.pushSprite(8, 26);
   }
