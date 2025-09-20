@@ -37,7 +37,7 @@ void setup()
     while (true);
   }
 ;
-  ScreenManager::getInstance().setScreen(new WelcomeScreen());
+  ScreenManager::to(new WelcomeScreen());
 }
 
 void loop()

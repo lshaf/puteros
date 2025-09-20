@@ -12,6 +12,11 @@ public:
     return instance;
   }
 
+  static void to(Screen* screen)
+  {
+    getInstance().setScreen(screen);
+  }
+
   void setScreen(Screen* screen) {
     if (currentScreen) delete currentScreen;
     currentScreen = screen;

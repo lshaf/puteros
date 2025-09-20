@@ -1,11 +1,10 @@
 // src/os/screens/FileNavigatorScreen.cpp
-#include "os/screens/FileNavigatorScreen.hpp"
 #include <SD.h>
+#include <utility>
 
 #include "os/core/ScreenManager.hpp"
-#include "os/screens/WelcomeScreen.hpp"
-
-#include <utility>
+#include "os/screens/FileNavigatorScreen.hpp"
+#include "os/screens/MainMenuScreen.hpp"
 
 FileNavigatorScreen::FileNavigatorScreen(std::string  path)
     : currentPath(std::move(path)) {
@@ -50,7 +49,7 @@ void FileNavigatorScreen::onBack() {
         }
     } else
     {
-        ScreenManager::getInstance().setScreen(new WelcomeScreen());
+        ScreenManager::to(new MainMenuScreen());
     }
 }
 

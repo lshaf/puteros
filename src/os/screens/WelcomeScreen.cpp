@@ -28,7 +28,7 @@ void WelcomeScreen::update()
   {
     if (_keyboard->isKeyPressed(KEY_ENTER))
     {
-      ScreenManager::getInstance().setScreen(new MainMenuScreen());
+      ScreenManager::to(new MainMenuScreen());
     }
 
     if (_keyboard->isKeyPressed(KEY_BACKSPACE))

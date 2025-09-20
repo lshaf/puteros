@@ -4,6 +4,7 @@
 #include "os/screens/MainMenuScreen.hpp"
 
 #include "os/core/ScreenManager.hpp"
+#include "os/screens/FileNavigatorScreen.hpp"
 
 MainMenuScreen::MainMenuScreen()
 {
@@ -14,7 +15,7 @@ MainMenuScreen::MainMenuScreen()
 
 void MainMenuScreen::onBack()
 {
-  ScreenManager::getInstance().setScreen(new WelcomeScreen());
+  ScreenManager::to(new WelcomeScreen());
 }
 
 void MainMenuScreen::onEnter(const std::string& entry)
@@ -30,7 +31,7 @@ void MainMenuScreen::onEnter(const std::string& entry)
     M5Cardputer.Speaker.tone(5000, 1000);
   } else if (entry == "Files")
   {
-    M5Cardputer.Speaker.tone(4000, 1000);
+    ScreenManager::to(new FileNavigatorScreen("/"));
   } else if (entry == "Settings")
   {
     M5Cardputer.Speaker.tone(3000, 1000);
