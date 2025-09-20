@@ -23,7 +23,6 @@ WelcomeScreen::WelcomeScreen()
 
 void WelcomeScreen::update()
 {
-  refreshBattery();
   if (_keyboard->isChange() && _keyboard->isPressed())
   {
     if (_keyboard->isKeyPressed(KEY_ENTER))

@@ -1,10 +1,11 @@
 //
 // Created by l-sha on 9/20/2025.
 //
-#include "os/screens/MainMenuScreen.hpp"
-
 #include "os/core/ScreenManager.hpp"
+
+#include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/FileNavigatorScreen.hpp"
+#include "os/screens/WelcomeScreen.hpp"
 
 MainMenuScreen::MainMenuScreen()
 {
@@ -15,25 +16,56 @@ MainMenuScreen::MainMenuScreen()
 
 void MainMenuScreen::onBack()
 {
-  ScreenManager::to(new WelcomeScreen());
+  if (currentState == STATE_MAIN)
+  {
+    ScreenManager::to(new WelcomeScreen());
+  } else
+  {
+    currentState = STATE_MAIN;
+    setTitle("Main Menu");
+    setEntries(MAIN_MENU);
+    render();
+  }
+}
+
+void MainMenuScreen::reworkMenu(const std::vector<MenuEntry>& menu)
+{
+  std::vector<std::string> labels;
+  for (const auto& item : menu)
+  {
+    labels.push_back(item.label);
+  }
+  setEntries(labels);
+  render();
 }
 
 void MainMenuScreen::onEnter(const std::string& entry)
 {
-  if (entry == "Wifi")
+  if (currentState == STATE_MAIN)
   {
-    M5Cardputer.Speaker.tone(7000, 1000);
-  } else if (entry == "Bluetooth")
-  {
-    M5Cardputer.Speaker.tone(6000, 1000);
-  } else if (entry == "NFC")
-  {
-    M5Cardputer.Speaker.tone(5000, 1000);
-  } else if (entry == "Files")
-  {
-    ScreenManager::to(new FileNavigatorScreen("/"));
-  } else if (entry == "Settings")
-  {
-    M5Cardputer.Speaker.tone(3000, 1000);
+    if (entry == "Wifi")
+    {
+      setTitle(entry);
+      currentState = STATE_WIFI;
+      reworkMenu(WIFI_MENU);
+    } else if (entry == "Bluetooth")
+    {
+      setTitle(entry);
+      currentState = STATE_BLUETOOTH;
+      reworkMenu(BLUETOOTH_MENU);
+    } else if (entry == "NFC")
+    {
+      setTitle(entry);
+      currentState = STATE_NFC;
+      reworkMenu(NFC_MENU);
+    } else if (entry == "Files")
+    {
+      ScreenManager::to(new FileNavigatorScreen("/"));
+    } else if (entry == "Settings")
+    {
+      setTitle(entry);
+      currentState = STATE_SETTINGS;
+      reworkMenu(SETTINGS_MENU);
+    }
   }
 }

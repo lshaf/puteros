@@ -23,7 +23,7 @@ void FileNavigatorScreen::listDirectory(const std::string& path) {
     dir.close();
 
     currentPath = path;
-    setTitle(("Path: " + currentPath).c_str());
+    setTitle("Path: " + currentPath);
     setEntries(files);
 }
 

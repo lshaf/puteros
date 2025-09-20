@@ -7,7 +7,6 @@
 
 #include "../core/ListScreen.hpp"
 #include <string>
-#include <vector>
 
 class FileNavigatorScreen final : public ListScreen {
   std::string currentPath = "/";
