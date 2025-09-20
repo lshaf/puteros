@@ -34,16 +34,10 @@ void InputScreen::update() {
   if (_keyboard->isChange() && _keyboard->isPressed())
   {
     const auto state = _keyboard->keysState();
-    for (auto i: state.word) buffer.push_back(i);
+    for (const auto i: state.word) buffer.push_back(i);
     if (state.del) { if (!buffer.empty()) buffer.pop_back(); }
     if (state.enter) done = true;
 
-    Serial.print("Debug Key: ");
-    Serial.print("M" + String(state.modifiers) + "//");
-    for (auto i: state.hid_keys) Serial.print(String(i) + "//");
-    for (auto i: state.modifier_keys) Serial.print("[" + String(i) + "]");
-    for (auto i: state.word) Serial.print(String(i));
-    Serial.println();
     updateBody();
   }
 }

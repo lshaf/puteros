@@ -3,9 +3,9 @@
 #include "Screen.hpp"
 #include <string>
 
-class InputScreen : public Screen {
+class InputScreen final : public Screen {
 public:
-  InputScreen(const std::string& title, const std::string& initial = "");
+  explicit InputScreen(const std::string& title, const std::string& initial = "");
   void update() override;
   bool isDone() const { return done; }
   const std::string& getResult() const { return buffer; }
