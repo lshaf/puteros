@@ -6,26 +6,59 @@
 
 #include <M5Cardputer.h>
 
+#include "os/component/BatteryIndicator.hpp"
+
 class Screen
 {
 protected:
   M5Canvas _header;
   M5Canvas _body;
   Keyboard_Class* _keyboard;
+
+  int lastPercentBattery = -1;
+  bool hideBattery = false;
+
+  typedef enum
+  {
+    RENDER_ALL,
+    RENDER_HEADER,
+    RENDER_BODY
+  } RenderType;
 public:
   Screen()
     : _header(&M5Cardputer.Lcd), _body(&M5Cardputer.Lcd), _keyboard(&M5Cardputer.Keyboard)
   {
     _header.createSprite(M5Cardputer.Lcd.width() - 6, 16);
     _body.createSprite(M5Cardputer.Lcd.width() - 16, M5Cardputer.Lcd.height() - 34);
+    lastPercentBattery = M5Cardputer.Power.getBatteryLevel();
   }
 
   virtual ~Screen() = default;
   virtual void update() = 0;
-  void render()
+
+  void setTitle(const std::string& title)
+  {
+    _header.fillSprite(TFT_BLACK);
+    _header.setTextColor(TFT_WHITE);
+    _header.setTextSize(1.5);
+    _header.drawString(title.c_str(), 2, _header.height() / 2 - _header.fontHeight() / 2);
+  }
+
+  void refreshBattery()
+  {
+    const int currentBattery = M5Cardputer.Power.getBatteryLevel();
+    if (currentBattery != lastPercentBattery)
+    {
+      lastPercentBattery = currentBattery;
+      render(RENDER_HEADER);
+    }
+  }
+
+  void render(const RenderType type = RENDER_ALL)
   {
     M5Cardputer.Lcd.drawRoundRect(3, 22, M5Cardputer.Lcd.width() - 6, M5Cardputer.Lcd.height() - 25, 4, BLUE);
-    _header.pushSprite(3, 3);
-    _body.pushSprite(8, 26);
+    if (!hideBattery) drawBatteryIndicator(&_header, _header.width() - 29, 2, lastPercentBattery);
+    if (type == RENDER_HEADER || type == RENDER_ALL) _header.pushSprite(3, 3);
+    if (type == RENDER_BODY || type == RENDER_ALL) _body.pushSprite(8, 26);
   }
 };

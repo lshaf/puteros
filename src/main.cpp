@@ -3,14 +3,12 @@
 #include <SD.h>
 
 #include "os/core/ScreenManager.hpp"
-#include "os/screens/HelloScreen.hpp"
+#include "os/screens/WelcomeScreen.hpp"
 
 #define SD_SPI_SCK_PIN  40
 #define SD_SPI_MISO_PIN 39
 #define SD_SPI_MOSI_PIN 14
 #define SD_SPI_CS_PIN   12
-
-Lua lua;
 
 void setup()
 {
@@ -36,10 +34,10 @@ void setup()
       M5Cardputer.Lcd.height() / 2 - M5Cardputer.Lcd.fontHeight() / 2
     );
 
-    while (1);
+    while (true);
   }
 ;
-  ScreenManager::getInstance().setScreen(new HelloScreen());
+  ScreenManager::getInstance().setScreen(new WelcomeScreen());
 }
 
 void loop()

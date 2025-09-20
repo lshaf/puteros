@@ -5,7 +5,7 @@
 
 ListScreen::ListScreen() : selector(&M5Cardputer.Lcd) {
     selector.createSprite(_body.width(), 12);
-    _body.setTextScroll(true);
+    visibleCount = _body.height() / (_body.fontHeight() + 2);
 }
 
 void ListScreen::setEntries(const std::vector<std::string>& newEntries) {
@@ -13,6 +13,7 @@ void ListScreen::setEntries(const std::vector<std::string>& newEntries) {
     currentPage = 0;
     selectedIndex = 0;
     previousIndex = -1;
+    scrollOffset = 0;
     showList();
     updateSelection();
 }
@@ -20,61 +21,69 @@ void ListScreen::setEntries(const std::vector<std::string>& newEntries) {
 void ListScreen::showList() {
     _body.fillSprite(BLACK);
     _body.setTextColor(TFT_WHITE);
-    const int totalItem = std::min(perPage, static_cast<int>(entries.size()) - currentPage * perPage);
+    const int totalItem = std::min(visibleCount, static_cast<int>(entries.size()) - scrollOffset);
     for (int i = 0; i < totalItem; i++) {
-        _body.drawString(entries[currentPage * perPage + i].c_str(), 3, i * _body.fontHeight() + 2 + i * 2);
+        _body.drawString(entries[scrollOffset + i].c_str(), 3, i * _body.fontHeight() + 2 + i * 2);
     }
 }
 
 void ListScreen::updateSelection() {
     if (previousIndex >= 0 && previousIndex < entries.size()) {
-        selector.fillSprite(BLACK);
-        selector.setTextColor(TFT_WHITE);
-        selector.drawString(entries[currentPage * perPage + previousIndex].c_str(), 3, 2);
-        selector.pushSprite(&_body, 0, previousIndex * (_body.fontHeight() + 2));
+        const int prevVisible = previousIndex - scrollOffset;
+        if (prevVisible >= 0 && prevVisible < visibleCount)
+        {
+            selector.fillSprite(BLACK);
+            selector.setTextColor(TFT_WHITE);
+            selector.drawString(entries[previousIndex].c_str(), 3, 2);
+            selector.pushSprite(&_body, 0, prevVisible * (_body.fontHeight() + 2));
+        }
     }
-    selector.fillSprite(BLUE);
-    selector.setTextColor(TFT_WHITE);
-    selector.drawString(entries[currentPage * perPage + selectedIndex].c_str(), 3, 2);
-    selector.pushSprite(&_body, 0, selectedIndex * (_body.fontHeight() + 2));
+    const int selVisible = selectedIndex - scrollOffset;
+    if (selVisible >= 0 && selVisible < visibleCount) {
+        selector.fillSprite(BLUE);
+        selector.setTextColor(TFT_WHITE);
+        selector.drawString(entries[selectedIndex].c_str(), 3, 2);
+        selector.pushSprite(&_body, 0, selVisible * (_body.fontHeight() + 2));
+    }
     render();
 }
 
-void ListScreen::navigate(NavAction_t direction) {
-    if (direction == NAV_UP && currentPage * perPage + selectedIndex > 0) {
+void ListScreen::navigate(const NavAction_t direction) {
+    if (direction == NAV_UP && selectedIndex > 0) {
         previousIndex = selectedIndex;
         selectedIndex--;
-        if (selectedIndex < 0) {
-            currentPage--;
-            selectedIndex = perPage - 1;
-            previousIndex = -1;
+        if (selectedIndex < scrollOffset) {
+            scrollOffset--;
             showList();
         }
     }
-    if (direction == NAV_DOWN && currentPage * perPage + selectedIndex < entries.size() - 1) {
+    if (direction == NAV_DOWN && selectedIndex < entries.size() - 1) {
         previousIndex = selectedIndex;
         selectedIndex++;
-        if (selectedIndex >= perPage) {
-            currentPage++;
-            selectedIndex = 0;
-            previousIndex = -1;
+        if (selectedIndex >= scrollOffset + visibleCount) {
+            scrollOffset++;
             showList();
         }
     }
-    if (direction == NAV_PREV && currentPage > 0) {
-        currentPage--;
-        previousIndex = -1;
-        selectedIndex = 0;
-        showList();
+    // Add to ListScreen::navigate
+    if (direction == NAV_NEXT && selectedIndex < entries.size() - 1) {
+        previousIndex = selectedIndex;
+        selectedIndex = std::min(selectedIndex + 10, static_cast<int>(entries.size()) - 1);
+        if (selectedIndex >= scrollOffset + visibleCount) {
+            scrollOffset = selectedIndex - visibleCount + 1;
+            showList();
+        }
     }
-    if (direction == NAV_NEXT && (currentPage + 1) * perPage < entries.size()) {
-        currentPage++;
-        previousIndex = -1;
-        selectedIndex = 0;
-        showList();
+    if (direction == NAV_PREV && selectedIndex > 0) {
+        previousIndex = selectedIndex;
+        selectedIndex = std::max(selectedIndex - 10, 0);
+        if (selectedIndex < scrollOffset) {
+            scrollOffset = selectedIndex;
+            showList();
+        }
     }
     if (direction == NAV_ENTER && !entries.empty()) {
-        onEnter(entries[currentPage * perPage + selectedIndex]);
+        onEnter(entries[selectedIndex]);
     }
     if (direction == NAV_BACK) {
         onBack();

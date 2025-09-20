@@ -5,10 +5,7 @@
 InputScreen::InputScreen(const std::string& title, const std::string& initial)
     : title(title), buffer(initial)
 {
-  _header.fillSprite(TFT_BLACK);
-  _header.setTextColor(TFT_WHITE);
-  _header.setTextSize(1.5);
-  _header.drawString(title.c_str(), 2, _header.height() / 2 - _header.fontHeight() / 2);
+  setTitle(title);
   render();
 }
 

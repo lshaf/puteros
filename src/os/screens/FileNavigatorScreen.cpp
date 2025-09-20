@@ -3,7 +3,7 @@
 #include <SD.h>
 
 #include "os/core/ScreenManager.hpp"
-#include "os/screens/HelloScreen.hpp"
+#include "os/screens/WelcomeScreen.hpp"
 
 #include <utility>
 
@@ -24,11 +24,7 @@ void FileNavigatorScreen::listDirectory(const std::string& path) {
     dir.close();
 
     currentPath = path;
-    _header.fillSprite(TFT_BLACK);
-    _header.setTextColor(TFT_WHITE);
-    _header.setTextSize(1.5);
-    _header.drawString(("Path: " + currentPath).c_str(), 2, _header.height() / 2 - _header.fontHeight() / 2);
-
+    setTitle(("Path: " + currentPath).c_str());
     setEntries(files);
 }
 
@@ -54,7 +50,7 @@ void FileNavigatorScreen::onBack() {
         }
     } else
     {
-        ScreenManager::getInstance().setScreen(new HelloScreen());
+        ScreenManager::getInstance().setScreen(new WelcomeScreen());
     }
 }
 

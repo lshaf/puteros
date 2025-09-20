@@ -14,6 +14,9 @@ protected:
   const int perPage = 10;
   int currentPage = 0;
 
+  int scrollOffset = 0;
+  int visibleCount = 0; // Set in constructor based on screen size
+
   M5Canvas selector;
 
   enum NavAction_t {
