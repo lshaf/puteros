@@ -71,4 +71,12 @@ public:
     auto body = createBody();
     renderBody(&body);
   }
+
+  static void drawStatusBody(const std::string& status)
+  {
+    auto body = createBody();
+    body.setTextColor(TFT_WHITE);
+    body.drawCenterString(status.c_str(), body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+    renderBody(&body);
+  }
 };

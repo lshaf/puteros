@@ -23,6 +23,7 @@ private:
     STATE_NFC,
     STATE_SETTINGS
   } currentState = STATE_MAIN;
+  std::vector<MenuEntry> currentEntries{};
   std::vector<std::string> MAIN_MENU = {"Wifi", "Bluetooth", "NFC", "Files", "Settings"};
   std::vector<MenuEntry> WIFI_MENU = {
     {"Connect", new WifiConnectScreen()},

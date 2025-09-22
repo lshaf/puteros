@@ -22,6 +22,12 @@ void ListScreen::render()
   auto _body = Template::createBody();
   visibleCount = _body.height() / (_body.fontHeight() + 2);
 
+  if (entries.empty())
+  {
+    Template::clearBody();
+    return;
+  }
+
   _body.setTextColor(TFT_WHITE);
   const int totalItem = std::min(visibleCount, static_cast<int>(entries.size()) - scrollOffset);
   for (int i = 0; i < totalItem; i++)

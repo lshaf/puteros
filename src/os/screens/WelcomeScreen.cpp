@@ -21,10 +21,7 @@ void WelcomeScreen::update()
     if (_keyboard->isKeyPressed('`'))
     {
       const auto input = InputScreen::popup("Your Name");
-      auto body = Template::createBody();
-      body.setTextColor(TFT_WHITE);
-      body.drawCenterString(("Hello, " + input + "!").c_str(), body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
-      Template::renderBody(&body);
+      Template::drawStatusBody(("Hello, " + input + "!").c_str());
     }
   }
 }
@@ -32,11 +29,5 @@ void WelcomeScreen::update()
 void WelcomeScreen::render()
 {
   Template::renderHead(_title, _withBattery);
-
-  M5Canvas body;
-  const auto size = Template::bodySize();
-  body.createSprite(size.width, size.height);
-  body.setTextColor(TFT_WHITE);
-  body.drawCenterString("Press ENTER to Start", body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
-  Template::renderBody(&body);
+  Template::drawStatusBody("Press ENTER to Start");
 }

@@ -21,6 +21,7 @@ void MainMenuScreen::onBack()
   } else
   {
     currentState = STATE_MAIN;
+    currentEntries.clear();
     Template::renderHead("Main Menu");
     setEntries(MAIN_MENU);
     render();
@@ -29,6 +30,7 @@ void MainMenuScreen::onBack()
 
 void MainMenuScreen::reworkMenu(const std::vector<MenuEntry>& menu)
 {
+  currentEntries = menu;
   std::vector<std::string> labels;
   for (const auto& item : menu)
   {
@@ -65,6 +67,27 @@ void MainMenuScreen::onEnter(const std::string& entry)
       Template::renderHead(entry);
       currentState = STATE_SETTINGS;
       reworkMenu(SETTINGS_MENU);
+    }
+  } else if (currentEntries.size() > 0)
+  {
+    for (const auto& item : currentEntries)
+    {
+      if (item.label == entry)
+      {
+        if (item.screen != nullptr)
+        {
+          _global->setScreen(item.screen);
+        } else
+        {
+          // Placeholder for unimplemented features
+          Template::renderHead(entry);
+          auto body = Template::createBody();
+          body.setTextColor(TFT_WHITE);
+          body.drawCenterString("Not Implemented Yet", body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+          Template::renderBody(&body);
+        }
+        break;
+      }
     }
   }
 }

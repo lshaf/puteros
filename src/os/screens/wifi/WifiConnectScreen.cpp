@@ -16,14 +16,15 @@ WifiConnectScreen::~WifiConnectScreen()
 
 void WifiConnectScreen::init()
 {
-  ListScreen::init();
-  WiFiClass::mode(WIFI_STA);
+  WiFi.mode(WIFI_STA);
   showWifiList();
 }
 
 void WifiConnectScreen::showWifiList()
 {
   Template::renderHead("Scan WiFi", true);
+  Template::drawStatusBody("Scanning...");
+
   std::vector<std::string> wifiList = {};
   const int totalWifi = WiFi.scanNetworks();
   for (int i = 0; i < totalWifi; i++)
@@ -33,6 +34,7 @@ void WifiConnectScreen::showWifiList()
     wifiList.emplace_back(buffer);
   }
 
+  setEntries(wifiList);
   render();
 }
 
@@ -45,24 +47,25 @@ void WifiConnectScreen::onEnter(const std::string& entry)
 {
   if (currentState == STATE_SELECT_WIFI)
   {
-    const auto password = InputScreen::popup(entry);
-    WiFi.begin(entry.c_str(), password.c_str());
-    Template::renderHead("Connecting", true);
-
     setEntries({});
-    render();
+
+    const std::string ssid = entry.substr(entry.find(']') + 2);
+    const auto password = InputScreen::popup(entry.c_str());
+    WiFi.begin(ssid.c_str(), password.c_str());
+    Template::renderHead("Connecting");
+    Template::drawStatusBody("Connecting to " + ssid + "...");
 
     int attempts = 0;
-    while (WiFiClass::status() != WL_CONNECTED && attempts < 6)
+    while (WiFi.status() != WL_CONNECTED && attempts < 6)
     {
       delay(500);
       attempts++;
     }
 
-    if (WiFiClass::status() != WL_CONNECTED) {
-      showWifiList();
+    if (WiFi.status() != WL_CONNECTED) {
+      _global->setScreen(new MainMenuScreen());
     } else {
-      Template::renderHead("Wifi Menu", true);
+      Template::renderHead("Wifi Menu");
       setEntries({"Clock", "Exit"});
       currentState = STATE_MENU;
       render();
