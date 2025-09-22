@@ -20,4 +20,5 @@ protected:
 public:
   explicit FileNavigatorScreen(std::string  path);
   void update() override;
+  void init() override;
 };

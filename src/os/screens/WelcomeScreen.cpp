@@ -2,42 +2,41 @@
 // Created by l-sha on 9/20/2025.
 //
 
+#include "os/component/Template.hpp"
 #include "os/screens/WelcomeScreen.hpp"
 
 #include "os/core/InputScreen.hpp"
-#include "os/core/ScreenManager.hpp"
 #include "os/screens/MainMenuScreen.hpp"
-
-WelcomeScreen::WelcomeScreen()
-{
-  _header.setTextColor(TFT_WHITE);
-  _header.setTextSize(1.5);
-  _header.drawString("PuterOS", 2, _header.height() / 2 - _header.fontHeight() / 2);
-
-  _body.setTextColor(TFT_WHITE);
-  _body.drawCenterString("Press ENTER to Start", _body.width() / 2, _body.height() / 2 - _body.fontHeight() / 2);
-
-  render();
-}
-
 
 void WelcomeScreen::update()
 {
-  refreshBattery();
+  const auto _keyboard = &M5Cardputer.Keyboard;
   if (_keyboard->isChange() && _keyboard->isPressed())
   {
     if (_keyboard->isKeyPressed(KEY_ENTER))
     {
-      ScreenManager::to(new MainMenuScreen());
+      _global->setScreen(new MainMenuScreen());
     }
 
-    if (_keyboard->isKeyPressed(KEY_BACKSPACE))
+    if (_keyboard->isKeyPressed('`'))
     {
       const auto input = InputScreen::popup("Your Name");
-      _body.fillSprite(BLACK);
-      _body.setTextColor(TFT_WHITE);
-      _body.drawCenterString(("Hello, " + input + "!").c_str(), _body.width() / 2, _body.height() / 2 - _body.fontHeight() / 2);
-      render(RENDER_BODY);
+      auto body = Template::createBody();
+      body.setTextColor(TFT_WHITE);
+      body.drawCenterString(("Hello, " + input + "!").c_str(), body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+      Template::renderBody(&body);
     }
   }
+}
+
+void WelcomeScreen::render()
+{
+  Template::renderHead(_title, _withBattery);
+
+  M5Canvas body;
+  const auto size = Template::bodySize();
+  body.createSprite(size.width, size.height);
+  body.setTextColor(TFT_WHITE);
+  body.drawCenterString("Press ENTER to Start", body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+  Template::renderBody(&body);
 }

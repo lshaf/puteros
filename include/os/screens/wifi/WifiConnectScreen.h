@@ -7,8 +7,20 @@
 
 class WifiConnectScreen final : public ListScreen
 {
+private:
+  enum
+  {
+    STATE_SELECT_WIFI,
+    STATE_MENU,
+    STATE_CLOCK
+  } currentState = STATE_SELECT_WIFI;
+
+  void showWifiList();
 public:
-  WifiConnectScreen();
+  ~WifiConnectScreen() override;
+
+  void init() override;
   void onBack() override;
+  void update() override;
   void onEnter(const std::string& entry) override;
 };

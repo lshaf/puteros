@@ -10,7 +10,7 @@ void drawBatteryIndicator(M5Canvas* container, const int x, const int y, const i
     constexpr int height = 13;
     constexpr int tipWidth = 2;
     constexpr int tipHeight = height / 2;
-    auto canvas = M5Canvas(&M5Cardputer.Lcd);
+    M5Canvas canvas(container);
 
     canvas.createSprite(width + tipWidth, height);
     canvas.drawRoundRect(0, 0, width, height, 2, TFT_WHITE);
@@ -24,8 +24,7 @@ void drawBatteryIndicator(M5Canvas* container, const int x, const int y, const i
     // Draw percent in the middle
     char buf[8];
     snprintf(buf, sizeof(buf), "%d", percent);
-    const int textHeight = canvas.fontHeight();
     canvas.setTextColor(TFT_BLUE);
     canvas.drawCenterString(buf, width / 2, 3);
-    canvas.pushSprite(container, x, y);
+    canvas.pushSprite(x, y);
 }

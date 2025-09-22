@@ -2,11 +2,14 @@
 // Created by l-sha on 9/19/2025.
 //
 #pragma once
-#include "Screen.hpp"
+
 #include <vector>
 #include <string>
 
-class ListScreen : public Screen {
+#include "ScreenState.hpp"
+#include "os/component/Template.hpp"
+
+class ListScreen : public ScreenState {
 protected:
   std::vector<std::string> entries;
   int selectedIndex = 0;
@@ -31,12 +34,12 @@ protected:
   virtual void onEnter(const std::string& entry) {}
   virtual void onBack() {}
 
-  void showList();
-  void updateSelection();
-  void navigate(NavAction_t direction);
-
+  void navigate(NavAction_t direction, bool render = true);
 public:
-  ListScreen();
+  ListScreen(): selector(&M5Cardputer.Lcd) {};
+  ~ListScreen() override { entries.clear(); };
   void setEntries(const std::vector<std::string>& newEntries);
   void update() override;
+  void init() override;
+  void render() override;
 };

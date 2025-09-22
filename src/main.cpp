@@ -2,7 +2,7 @@
 #include <M5Cardputer.h>
 #include <SD.h>
 
-#include "os/core/ScreenManager.hpp"
+#include "os/GlobalState.hpp"
 #include "os/screens/WelcomeScreen.hpp"
 
 #define SD_SPI_SCK_PIN  40
@@ -36,12 +36,16 @@ void setup()
 
     while (true);
   }
-;
-  ScreenManager::to(new WelcomeScreen());
+
+  const auto _global = &GlobalState::getInstance();
+  _global->setScreen(new WelcomeScreen());
 }
 
 void loop()
 {
   M5Cardputer.update();
-  ScreenManager::getInstance().update();
+
+  const auto _global = &GlobalState::getInstance();
+  const auto screen = _global->getScreen();
+  if (screen != nullptr) screen->update();
 }

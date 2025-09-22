@@ -2,14 +2,18 @@
 #include <SD.h>
 #include <utility>
 
-#include "os/core/ScreenManager.hpp"
 #include "os/screens/FileNavigatorScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 
 FileNavigatorScreen::FileNavigatorScreen(std::string  path)
-    : currentPath(std::move(path)) {
+    : currentPath(std::move(path)) {}
+
+void FileNavigatorScreen::init()
+{
+    ListScreen::init();
     listDirectory(currentPath);
 }
+
 
 void FileNavigatorScreen::listDirectory(const std::string& path) {
     std::vector<std::string> files;
@@ -23,7 +27,13 @@ void FileNavigatorScreen::listDirectory(const std::string& path) {
     dir.close();
 
     currentPath = path;
-    setTitle("Path: " + currentPath);
+
+    std::string title;
+    const size_t pos = path.find_last_of('/');
+    if (pos == std::string::npos || pos == path.length() - 1) title = "/";
+    else title = path.substr(pos + 1);
+
+    Template::renderHead(title);
     setEntries(files);
 }
 
@@ -49,7 +59,7 @@ void FileNavigatorScreen::onBack() {
         }
     } else
     {
-        ScreenManager::to(new MainMenuScreen());
+        _global->setScreen(new MainMenuScreen());
     }
 }
 

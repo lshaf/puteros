@@ -1,28 +1,27 @@
 //
 // Created by l-sha on 9/20/2025.
 //
-#include "os/core/ScreenManager.hpp"
-
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/FileNavigatorScreen.hpp"
 #include "os/screens/WelcomeScreen.hpp"
 
-MainMenuScreen::MainMenuScreen()
+void MainMenuScreen::init()
 {
-  setTitle("Main Menu");
+  ListScreen::init();
+  Template::renderHead("Main Menu");
   setEntries({"Wifi", "Bluetooth", "NFC", "Files", "Settings"});
-  render();
+  Serial.println("MainMenuScreen::init()");
 }
 
 void MainMenuScreen::onBack()
 {
   if (currentState == STATE_MAIN)
   {
-    ScreenManager::to(new WelcomeScreen());
+    _global->setScreen(new WelcomeScreen());
   } else
   {
     currentState = STATE_MAIN;
-    setTitle("Main Menu");
+    Template::renderHead("Main Menu");
     setEntries(MAIN_MENU);
     render();
   }
@@ -45,25 +44,25 @@ void MainMenuScreen::onEnter(const std::string& entry)
   {
     if (entry == "Wifi")
     {
-      setTitle(entry);
+      Template::renderHead(entry);
       currentState = STATE_WIFI;
       reworkMenu(WIFI_MENU);
     } else if (entry == "Bluetooth")
     {
-      setTitle(entry);
+      Template::renderHead(entry);
       currentState = STATE_BLUETOOTH;
       reworkMenu(BLUETOOTH_MENU);
     } else if (entry == "NFC")
     {
-      setTitle(entry);
+      Template::renderHead(entry);
       currentState = STATE_NFC;
       reworkMenu(NFC_MENU);
     } else if (entry == "Files")
     {
-      ScreenManager::to(new FileNavigatorScreen("/"));
+      _global->setScreen(new FileNavigatorScreen("/"));
     } else if (entry == "Settings")
     {
-      setTitle(entry);
+      Template::renderHead(entry);
       currentState = STATE_SETTINGS;
       reworkMenu(SETTINGS_MENU);
     }

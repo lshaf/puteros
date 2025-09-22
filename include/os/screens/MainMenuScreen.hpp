@@ -4,6 +4,7 @@
 #pragma once
 
 #include "os/core/ListScreen.hpp"
+#include "os/component/Template.hpp"
 #include "os/screens/wifi/WifiConnectScreen.h"
 
 class MainMenuScreen final : public ListScreen
@@ -41,7 +42,7 @@ private:
   };
 
 public:
-  MainMenuScreen();
+  void init() override;
   void onBack() override;
   void onEnter(const std::string& entry) override;
   void reworkMenu(const std::vector<MenuEntry>& menu);
