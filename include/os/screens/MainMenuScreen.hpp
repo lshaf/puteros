@@ -17,10 +17,8 @@ private:
   enum MenuState
   {
     STATE_MAIN,
-    STATE_WIFI,
     STATE_BLUETOOTH,
-    STATE_NFC,
-    STATE_SETTINGS
+    STATE_NFC
   } currentState = STATE_MAIN;
   std::vector<MenuEntry> currentEntries{};
   std::vector<std::string> MAIN_MENU = {"Wifi", "Bluetooth", "NFC", "Files", "Settings"};
@@ -31,10 +29,6 @@ private:
   std::vector<MenuEntry> NFC_MENU = {
     {"M5 NFC", nullptr},
     {"PN532", nullptr},
-  };
-  std::vector<MenuEntry> SETTINGS_MENU = {
-    {"Brightness", nullptr},
-    {"About", nullptr},
   };
 
 public:

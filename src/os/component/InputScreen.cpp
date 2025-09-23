@@ -1,5 +1,7 @@
 // InputScreen.cpp
-#include "os/core/InputScreen.hpp"
+
+#include "os/component/Template.hpp"
+#include "os/component/InputScreen.hpp"
 #include "M5Cardputer.h"
 
 InputScreen::InputScreen(const std::string& title, const std::string& initial)

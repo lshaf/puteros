@@ -56,7 +56,7 @@ void WifiConnectClockScreen::render()
   struct tm timeInfo;
   if (!getLocalTime(&timeInfo))
   {
-    Template::drawStatusBody("Failed to obtain time");
+    Template::drawStatusBody("Retrying...");
     return;
   }
 

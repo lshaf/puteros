@@ -2,8 +2,7 @@
 #pragma once
 
 #include <string>
-#include "ScreenState.hpp"
-#include "os/component/Template.hpp"
+#include "../core/ScreenState.hpp"
 
 class InputScreen final : public ScreenState {
 public:

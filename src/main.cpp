@@ -39,6 +39,9 @@ void setup()
 
   const auto _global = &GlobalState::getInstance();
   _global->setScreen(new WelcomeScreen());
+  const auto config = _global->getConfig();
+  const auto brightness = config->get("brightness", "90").toInt();
+  M5Cardputer.Lcd.setBrightness(brightness / 100.0 * 255);
 }
 
 void loop()

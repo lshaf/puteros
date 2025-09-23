@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include <M5Cardputer.h>
+#include "core/Config.h"
 #include "core/Screen.hpp"
 
 class GlobalState {
@@ -35,6 +35,16 @@ public:
     return currentScreen;
   }
 
+  Config* getConfig()
+  {
+    if (config == nullptr)
+    {
+      config = new Config("/puteros/config");
+    }
+
+    return config;
+  }
 private:
   Screen* currentScreen = nullptr;
+  Config* config = nullptr;
 };

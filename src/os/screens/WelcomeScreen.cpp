@@ -5,7 +5,7 @@
 #include "os/component/Template.hpp"
 #include "os/screens/WelcomeScreen.hpp"
 
-#include "os/core/InputScreen.hpp"
+#include "os/component/InputScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 
 void WelcomeScreen::update()

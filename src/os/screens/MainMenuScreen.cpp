@@ -3,6 +3,7 @@
 //
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/FileNavigatorScreen.hpp"
+#include "os/screens/SettingScreen.h"
 #include "os/screens/WelcomeScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 
@@ -61,9 +62,7 @@ void MainMenuScreen::onEnter(const std::string& entry)
       _global->setScreen(new FileNavigatorScreen("/"));
     } else if (entry == "Settings")
     {
-      Template::renderHead(entry);
-      currentState = STATE_SETTINGS;
-      reworkMenu(SETTINGS_MENU);
+      _global->setScreen(new SettingScreen());
     }
   } else if (!currentEntries.empty())
   {

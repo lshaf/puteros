@@ -31,8 +31,8 @@ protected:
     NAV_BACK,
 };
 
-  virtual void onEnter(const std::string& entry) {}
-  virtual void onBack() {}
+  virtual void onEnter(const std::string& entry) = 0;
+  virtual void onBack() = 0;
 
   void navigate(NavAction_t direction, bool render = true);
 public:

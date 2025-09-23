@@ -6,7 +6,7 @@
 #include "os/component/Template.hpp"
 #include "os/screens/wifi/WifiNetworkScreen.h"
 
-#include "os/core/InputScreen.hpp"
+#include "os/component/InputScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 #include "os/screens/wifi/connect/WiNetClockScreen.h"
 #include "os/screens/wifi/connect/WiNetInformationScreen.h"
