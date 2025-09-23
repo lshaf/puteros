@@ -4,13 +4,12 @@
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/FileNavigatorScreen.hpp"
 #include "os/screens/WelcomeScreen.hpp"
+#include "os/screens/wifi/WifiMenuScreen.h"
 
 void MainMenuScreen::init()
 {
-  ListScreen::init();
   Template::renderHead("Main Menu");
   setEntries({"Wifi", "Bluetooth", "NFC", "Files", "Settings"});
-  Serial.println("MainMenuScreen::init()");
 }
 
 void MainMenuScreen::onBack()
@@ -46,9 +45,7 @@ void MainMenuScreen::onEnter(const std::string& entry)
   {
     if (entry == "Wifi")
     {
-      Template::renderHead(entry);
-      currentState = STATE_WIFI;
-      reworkMenu(WIFI_MENU);
+      _global->setScreen(new WifiMenuScreen());
     } else if (entry == "Bluetooth")
     {
       Template::renderHead(entry);
@@ -68,7 +65,7 @@ void MainMenuScreen::onEnter(const std::string& entry)
       currentState = STATE_SETTINGS;
       reworkMenu(SETTINGS_MENU);
     }
-  } else if (currentEntries.size() > 0)
+  } else if (!currentEntries.empty())
   {
     for (const auto& item : currentEntries)
     {

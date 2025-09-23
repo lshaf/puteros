@@ -21,7 +21,7 @@ void WelcomeScreen::update()
     if (_keyboard->isKeyPressed('`'))
     {
       const auto input = InputScreen::popup("Your Name");
-      Template::drawStatusBody(("Hello, " + input + "!").c_str());
+      Template::drawStatusBody("Hello, " + input + "!");
     }
   }
 }

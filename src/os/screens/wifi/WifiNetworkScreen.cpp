@@ -4,23 +4,33 @@
 #include <WiFi.h>
 
 #include "os/component/Template.hpp"
-#include "os/screens/wifi/WifiConnectScreen.h"
+#include "os/screens/wifi/WifiNetworkScreen.h"
 
 #include "os/core/InputScreen.hpp"
-#include "os/screens/MainMenuScreen.hpp"
+#include "os/screens/wifi/WifiMenuScreen.h"
+#include "os/screens/wifi/connect/WiNetClockScreen.h"
+#include "os/screens/wifi/connect/WiNetInformationScreen.h"
 
-WifiConnectScreen::~WifiConnectScreen()
-{
-  WiFi.disconnect(true);
-}
-
-void WifiConnectScreen::init()
+void WifiNetworkScreen::init()
 {
   WiFi.mode(WIFI_STA);
-  showWifiList();
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    showMenu();
+  } else
+  {
+    showWifiList();
+  }
 }
 
-void WifiConnectScreen::showWifiList()
+void WifiNetworkScreen::showMenu()
+{
+  currentState = STATE_MENU;
+  Template::renderHead("Network");
+  setEntries({ "Information", "Clock" });
+}
+
+void WifiNetworkScreen::showWifiList()
 {
   Template::renderHead("Scan WiFi", true);
   Template::drawStatusBody("Scanning...");
@@ -38,19 +48,20 @@ void WifiConnectScreen::showWifiList()
   render();
 }
 
-void WifiConnectScreen::onBack()
+void WifiNetworkScreen::onBack()
 {
-  _global->setScreen(new MainMenuScreen());
+  WiFi.disconnect(true);
+  _global->setScreen(new WifiMenuScreen());
 }
 
-void WifiConnectScreen::onEnter(const std::string& entry)
+void WifiNetworkScreen::onEnter(const std::string& entry)
 {
   if (currentState == STATE_SELECT_WIFI)
   {
     setEntries({});
 
     const std::string ssid = entry.substr(entry.find(']') + 2);
-    const auto password = InputScreen::popup(entry.c_str());
+    const auto password = InputScreen::popup(entry);
     WiFi.begin(ssid.c_str(), password.c_str());
     Template::renderHead("Connecting");
     Template::drawStatusBody("Connecting to " + ssid + "...");
@@ -63,25 +74,23 @@ void WifiConnectScreen::onEnter(const std::string& entry)
     }
 
     if (WiFi.status() != WL_CONNECTED) {
-      _global->setScreen(new MainMenuScreen());
+      onBack();
     } else {
-      Template::renderHead("Wifi Menu");
-      setEntries({"Clock", "Exit"});
-      currentState = STATE_MENU;
-      render();
+      showMenu();
     }
-  }
-
-  if (currentState == STATE_MENU)
+  } else if (currentState == STATE_MENU)
   {
-    if (entry == "Exit")
+    if (entry == "Clock")
     {
-      _global->setScreen(new MainMenuScreen());
+      _global->setScreen(new WifiConnectClockScreen());
+    } else if (entry == "Information")
+    {
+      _global->setScreen(new WiNetInformationScreen());
     }
   }
 }
 
-void WifiConnectScreen::update()
+void WifiNetworkScreen::update()
 {
   ListScreen::update();
 }

@@ -5,7 +5,6 @@
 
 #include "os/core/ListScreen.hpp"
 #include "os/component/Template.hpp"
-#include "os/screens/wifi/WifiConnectScreen.h"
 
 class MainMenuScreen final : public ListScreen
 {
@@ -25,10 +24,6 @@ private:
   } currentState = STATE_MAIN;
   std::vector<MenuEntry> currentEntries{};
   std::vector<std::string> MAIN_MENU = {"Wifi", "Bluetooth", "NFC", "Files", "Settings"};
-  std::vector<MenuEntry> WIFI_MENU = {
-    {"Connect", new WifiConnectScreen()},
-    {"Package Analyzer", nullptr},
-  };
   std::vector<MenuEntry> BLUETOOTH_MENU = {
     {"Keyboard", nullptr},
     {"BadBLE", nullptr},

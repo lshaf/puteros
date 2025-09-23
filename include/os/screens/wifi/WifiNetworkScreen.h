@@ -5,20 +5,18 @@
 
 #include "os/core/ListScreen.hpp"
 
-class WifiConnectScreen final : public ListScreen
+class WifiNetworkScreen final : public ListScreen
 {
 private:
   enum
   {
     STATE_SELECT_WIFI,
-    STATE_MENU,
-    STATE_CLOCK
+    STATE_MENU
   } currentState = STATE_SELECT_WIFI;
 
   void showWifiList();
+  void showMenu();
 public:
-  ~WifiConnectScreen() override;
-
   void init() override;
   void onBack() override;
   void update() override;
