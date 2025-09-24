@@ -5,7 +5,7 @@
 #include <WiFi.h>
 
 #include "os/screens/wifi/WifiNetworkScreen.h"
-#include "os/screens/wifi/connect/WiNetInformationScreen.h"
+#include "os/screens/wifi/network/WiNetInformationScreen.h"
 
 void WiNetInformationScreen::init()
 {

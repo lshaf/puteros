@@ -6,7 +6,7 @@
 #include <time.h>
 
 #include "os/component/Template.hpp"
-#include "os/screens/wifi/connect/WiNetClockScreen.h"
+#include "os/screens/wifi/network/WiNetClockScreen.h"
 
 #include "os/screens/wifi/WifiNetworkScreen.h"
 #include "os/screens/wifi/WifiMenuScreen.h"
@@ -18,7 +18,7 @@ void WifiConnectClockScreen::init()
     _global->setScreen(new WifiMenuScreen());
   }
 
-  Template::renderHead("Clock");
+  Template::renderHead("World Clock");
   Template::drawStatusBody("Connecting to Server");
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
 }
@@ -51,7 +51,7 @@ void WifiConnectClockScreen::update()
 
 void WifiConnectClockScreen::render()
 {
-  Template::renderHead("Clock");
+  Template::renderHead("World Clock");
 
   struct tm timeInfo;
   if (!getLocalTime(&timeInfo))

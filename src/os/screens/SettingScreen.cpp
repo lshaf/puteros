@@ -23,8 +23,8 @@ void SettingScreen::renderAbout()
   body.fillSprite(BLACK);
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1.5);
-  body.drawCenterString("PuterOS v1.0.0", body.width() / 2, body.height() / 2 - body.fontHeight());
-  body.drawCenterString("Powered by M5Stack", body.width() / 2, body.height() / 2 + body.fontHeight());
+  body.drawCenterString("PuterOS v1.0.0", body.width() / 2, body.height() / 2 - body.fontHeight() / 3);
+  body.drawCenterString("Powered by M5Stack", body.width() / 2, body.height() / 2 + body.fontHeight() / 3);
   Template::renderBody(&body);
 }
 

@@ -8,8 +8,9 @@
 
 #include "os/component/InputScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
-#include "os/screens/wifi/connect/WiNetClockScreen.h"
-#include "os/screens/wifi/connect/WiNetInformationScreen.h"
+#include "os/screens/wifi/network/WiNetClockScreen.h"
+#include "os/screens/wifi/network/WiNetInformationScreen.h"
+#include "os/screens/wifi/network/WiNetIPScannerScreen.h"
 
 void WifiNetworkScreen::init()
 {
@@ -27,7 +28,7 @@ void WifiNetworkScreen::showMenu()
 {
   currentState = STATE_MENU;
   Template::renderHead("Network");
-  setEntries({ "Information", "Clock" });
+  setEntries({ "Information", "World Clock", "IP Scanner" });
 }
 
 void WifiNetworkScreen::showWifiList()
@@ -80,12 +81,15 @@ void WifiNetworkScreen::onEnter(const std::string& entry)
     }
   } else if (currentState == STATE_MENU)
   {
-    if (entry == "Clock")
+    if (entry == "World Clock")
     {
       _global->setScreen(new WifiConnectClockScreen());
     } else if (entry == "Information")
     {
       _global->setScreen(new WiNetInformationScreen());
+    } else if (entry == "IP Scanner")
+    {
+      _global->setScreen(new WiNetIPScannerScreen());
     }
   }
 }

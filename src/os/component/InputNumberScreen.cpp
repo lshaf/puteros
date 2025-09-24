@@ -29,7 +29,6 @@ void InputNumberScreen::render()
 
 void InputNumberScreen::update() {
   const auto _keyboard = &M5Cardputer.Keyboard;
-  const unsigned long now = millis();
 
   if (_keyboard->isChange() && _keyboard->isPressed()) {
     const auto state = _keyboard->keysState();
@@ -47,7 +46,7 @@ void InputNumberScreen::update() {
       buffer = std::to_string(value);
     } else
     {
-      buffer = "0";
+      buffer = std::to_string(min_input);
     }
 
     render();

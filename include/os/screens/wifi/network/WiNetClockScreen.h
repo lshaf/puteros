@@ -8,7 +8,7 @@ class WifiConnectClockScreen final : public ScreenState
 {
 private:
   int offsetMinutes = 0;
-  int lastRenderTime = 0;
+  unsigned long lastRenderTime = 0;
   bool timeToRefresh() const
   {
     return millis() - lastRenderTime > 500;
