@@ -6,10 +6,7 @@
 #include "os/component/Template.hpp"
 
 InputNumberScreen::InputNumberScreen(const std::string& title, const int initial)
-    : title(title), buffer(std::to_string(initial))
-{
-  init();
-}
+    : title(title), buffer(std::to_string(initial)) {}
 
 void InputNumberScreen::init()
 {
@@ -24,6 +21,16 @@ void InputNumberScreen::render()
   body.setTextColor(TFT_WHITE);
   body.setTextSize(2.5);
   body.drawCenterString(buffer.c_str(), body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+
+  char buff[25];
+  sprintf(buff, "%d - %d", min_input, max_input);
+  body.setTextSize(1);
+  body.drawCenterString(buff, body.width() / 2, body.height() / 2 - body.fontHeight() * 2 - 5);
+  if (isInvalid)
+  {
+    body.setTextColor(TFT_RED);
+    body.drawCenterString("Invalid Value", body.width() / 2, body.height() / 2 + body.fontHeight() + 2);
+  }
   Template::renderBody(&body);
 }
 
@@ -31,32 +38,33 @@ void InputNumberScreen::update() {
   const auto _keyboard = &M5Cardputer.Keyboard;
 
   if (_keyboard->isChange() && _keyboard->isPressed()) {
+    isInvalid = false;
     const auto state = _keyboard->keysState();
     for (const auto i : state.word) {
       if (std::isdigit(i)) buffer.push_back(i); // Only append digits
     }
     if (state.del) { if (!buffer.empty()) buffer.pop_back(); }
-    if (state.enter) done = true;
 
     // Validate the number within range
-    if (!buffer.empty()) {
-      int value = std::stoi(buffer);
-      if (value < min_input) value = min_input;
-      if (value > max_input) value = max_input;
-      buffer = std::to_string(value);
-    } else
+    if (buffer.empty()) buffer = "0";
+    else
     {
-      buffer = std::to_string(min_input);
+      unsigned int v = std::stoi(buffer);
+      if (v >= 1000) v = 1000;
+      if (v < min_input || v > max_input) isInvalid = true;
+      buffer = std::to_string(v);
     }
+    if (state.enter && !isInvalid) done = true;
 
     render();
   }
 }
 
-int InputNumberScreen::popup(const std::string& title, const int initial, const int min, const int max)
+int InputNumberScreen::popup(const std::string& title, const int initial, const unsigned int min, const unsigned int max)
 {
   const auto input = new InputNumberScreen(title, initial);
   input->setRange(min, max);
+  input->init();
   while (!input->isDone())
   {
     M5Cardputer.update();
