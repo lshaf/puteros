@@ -21,9 +21,9 @@ void WiNetIPScannerScreen::configuration()
   currentState = STATE_CONFIGURATION;
   Template::renderHead("IP Scanner");
   setEntries({
-    "Start IP: " + std::to_string(startIp),
-    "End IP: " + std::to_string(endIp),
-  "Start Scan"
+    {"Start IP", std::to_string(startIp)},
+    {"End IP", std::to_string(endIp)},
+    {"Start Scan"}
   });
 }
 
@@ -37,27 +37,28 @@ void WiNetIPScannerScreen::scanIP()
   auto currentIP = WiFi.localIP();
   if (currentIP[0] == 0 && currentIP[1] == 0 && currentIP[2] == 0 && currentIP[3] == 0)
   {
-    setEntries({"No devices found"});
+    setEntries({{"No devices found"}});
     return;
   }
 
   IPAddress wifiIp = WiFi.localIP();
   for (int i = startIp; i < endIp; i++)
   {
-    IPAddress ip(wifiIp[0], wifiIp[1], wifiIp[2], i);
-    if (Ping.ping(ip, 1))
-    {
-      ipList.emplace_back(ip.toString().c_str());
-    }
-
     const int percent = static_cast<int>((i - startIp) / static_cast<float>(endIp - startIp) * 100);
     String progress = "[" + String(percent) + "%] Scanning...";
     Template::drawStatusBody(progress.c_str());
+
+    IPAddress ip(wifiIp[0], wifiIp[1], wifiIp[2], i);
+    if (Ping.ping(ip, 1))
+    {
+      const auto avg = String(Ping.averageTime()) + " ms";
+      ipList.push_back({ip.toString().c_str(), avg.c_str()});
+    }
   }
 
   if (ipList.empty())
   {
-    ipList.emplace_back("No devices found");
+    ipList.push_back({"No devices found"});
   }
 
   currentState = STATE_RESULT_IP;
@@ -69,89 +70,84 @@ void WiNetIPScannerScreen::scanPort(const std::string& ip)
   currentState = STATE_SCANNING_PORT;
   Template::renderHead("Port Scan");
   Template::drawStatusBody("Start Scanning...");
-  const std::vector<int> commonPorts = {
-    21, // FTP
-    22, // SSH
-    23, // Telnet
-    25, // SMTP
-    53, // DNS
-    80, // HTTP
-    110, // POP3
-    139, // NetBIOS
-    143, // IMAP
-    443, // HTTPS
-    445, // Microsoft-DS
-    465, // SMTPS
-    587, // SMTP (submission)
-    993, // IMAPS
-    995, // POP3S
-    1723, // PPTP
-    3306, // MySQL
-    3389, // RDP
-    5900, // VNC
-    8080, // HTTP-alt
-    8443, // HTTPS-alt
-    8888, // Alternate HTTP
-    5000, // UPnP/Web servers
-    5432, // PostgreSQL
-    6379, // Redis
-    27017, // MongoDB
-    8000, // Alternate HTTP
-    10000, // Webmin
+  const std::vector<std::pair<int, std::string>> commonPorts = {
+    {21, "FTP"},
+    {22, "SSH"},
+    {23, "Telnet"},
+    {25, "SMTP"},
+    {53, "DNS"},
+    {80, "HTTP"},
+    {110, "POP3"},
+    {139, "NetBIOS"},
+    {143, "IMAP"},
+    {443, "HTTPS"},
+    {445, "Microsoft-DS"},
+    {465, "SMTPS"},
+    {587, "SMTP (submission)"},
+    {993, "IMAPS"},
+    {995, "POP3S"},
+    {1723, "PPTP"},
+    {3306, "MySQL"},
+    {3389, "RDP"},
+    {5900, "VNC"},
+    {8080, "HTTP-alt"},
+    {8443, "HTTPS-alt"},
+    {8888, "Alternate HTTP"},
+    {5000, "UPnP/Web servers"},
+    {5432, "PostgreSQL"},
+    {6379, "Redis"},
+    {27017, "MongoDB"},
+    {8000, "Alternate HTTP"},
+    {10000, "Webmin"}
   };
 
-  std::vector<std::string> openPorts;
+  std::vector<ListEntryItem> openPorts;
 
-  const int portCount = commonPorts.size();
-  for (int i = 0; i < portCount; i++) {
-    WiFiClient client;
-    const int port = commonPorts[i];
-    if (client.connect(ip.c_str(), port)) {
-      client.stop();
-      openPorts.emplace_back(ip + ":" + std::to_string(port));
-    }
-
+  const unsigned int portCount = commonPorts.size();
+  for (int i = 0; i < portCount; i++)
+  {
     const int percent = static_cast<int>(i / static_cast<float>(portCount) * 100);
     String progress = "[" + String(percent) + "%] Scanning...";
     Template::drawStatusBody(progress.c_str());
+
+    WiFiClient client;
+    const int port = commonPorts[i].first;
+    if (client.connect(ip.c_str(), port)) {
+      client.stop();
+      openPorts.push_back({ip + ":" + std::to_string(port), commonPorts[i].second});
+    }
   }
 
   if (openPorts.empty()) {
-    openPorts.emplace_back("No port open");
+    openPorts.push_back({"No port open"});
   }
 
   currentState = STATE_RESULT_PORT;
   setEntries(openPorts);
 }
 
-void WiNetIPScannerScreen::onEnter(const std::string& entry)
+void WiNetIPScannerScreen::onEnter(const ListEntryItem entry)
 {
   if (currentState == STATE_RESULT_IP)
   {
-    if (entry == "No devices found")
+    if (entry.label == "No devices found")
     {
       onBack();
     } else
     {
-      scanPort(entry);
+      scanPort(entry.label);
     }
   } else if (currentState == STATE_CONFIGURATION)
   {
-    if (entry.find("Start IP") != std::string::npos)
+    if (entry.label == "Start IP")
     {
-      startIp = InputNumberScreen::popup("Start IP", startIp, 1, 254);
-      if (startIp > endIp)
-        endIp = startIp;
-
+      startIp = InputNumberScreen::popup("Start IP", startIp, 1, endIp);
       configuration();
-    } else if (entry.find("End IP") != std::string::npos)
+    } else if (entry.label == "End IP")
     {
-      endIp = InputNumberScreen::popup("End IP", endIp, 1, 254);
-      if (endIp < startIp)
-        startIp = endIp;
-
+      endIp = InputNumberScreen::popup("End IP", endIp, startIp, 254);
       configuration();
-    } else if (entry == "Start Scan")
+    } else if (entry.label == "Start Scan")
     {
       scanIP();
     }
@@ -173,4 +169,10 @@ void WiNetIPScannerScreen::onBack()
   {
     _global->setScreen(new WifiNetworkScreen());
   }
+}
+
+void WiNetIPScannerScreen::onEscape()
+{
+  ipList.clear();
+  _global->setScreen(new WifiNetworkScreen());
 }
