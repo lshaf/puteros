@@ -10,8 +10,9 @@
 void SettingScreen::init()
 {
   currentState = STATE_MAIN;
+  const String brightnessValue = _config->get(CONFIG_BRIGHTNESS, "90");
   Template::renderHead("Settings");
-  setEntries({"Brightness", "About"});
+  setEntries({{"Brightness", brightnessValue.c_str()}, {"About", ""}});
 }
 
 void SettingScreen::renderAbout()
@@ -23,28 +24,26 @@ void SettingScreen::renderAbout()
   body.fillSprite(BLACK);
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1.5);
-  body.drawCenterString("PuterOS v1.0.0", body.width() / 2, body.height() / 2 - body.fontHeight() / 3);
-  body.drawCenterString("Powered by M5Stack", body.width() / 2, body.height() / 2 + body.fontHeight() / 3);
+  body.drawCenterString("PuterOS v1.0.0", body.width() / 2, body.height() / 2 - body.fontHeight());
+  body.drawCenterString("Powered by M5Stack", body.width() / 2, body.height() / 2);
   Template::renderBody(&body);
 }
 
-void SettingScreen::onEnter(const std::string& entry)
+void SettingScreen::onEnter(const ListEntryItem entry)
 {
-  if (entry == "Brightness")
+  if (entry.label == "Brightness")
   {
-    const auto config = _global->getConfig();
-    const auto brightnessKey = "brightness";
-    const int currentBrightness = config->get(brightnessKey, "90").toInt();
-    const int newBrightness = InputNumberScreen::popup("Brightness", currentBrightness, 0, 100);
-    if (newBrightness != currentBrightness)
+    const int currentValue = std::stoi(entry.value);
+    const int newBrightness = InputNumberScreen::popup("Brightness", currentValue, 5, 100);
+    if (newBrightness != currentValue)
     {
-      config->set(brightnessKey, String(newBrightness));
-      const bool saved = config->save();
+      _config->set(CONFIG_BRIGHTNESS, String(newBrightness));
+      const bool saved = _config->save();
       if (saved) M5Cardputer.Lcd.setBrightness(newBrightness / 100.0 * 255);
     }
 
-    render();
-  } else if (entry == "About")
+    init();
+  } else if (entry.label == "About")
   {
     renderAbout();
   }
