@@ -42,6 +42,10 @@ void WiNetInformationScreen::render()
   body.println("Subnet");
   body.println();
 
+
+  body.drawRightString(String(WiFi.channel()), body.width() - 3, body.getCursorY());
+  body.println("Channel");
+
   body.drawRightString(WiFi.SSID().c_str(), body.width() - 3, body.getCursorY());
   body.println("SSID");
 
@@ -56,9 +60,6 @@ void WiNetInformationScreen::render()
 
   body.drawRightString(WiFi.BSSIDstr().c_str(), body.width() - 3, body.getCursorY());
   body.println("BSSID");
-
-  body.drawRightString(String(WiFi.channel()), body.width() - 3, body.getCursorY());
-  body.println("Channel");
 
   Template::renderBody(&body);
 }
