@@ -20,5 +20,5 @@ public:
   void init() override;
   void onBack() override;
   void update() override;
-  void onEnter(const std::string& entry) override;
+  void onEnter(const ListEntryItem entry) override;
 };

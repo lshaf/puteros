@@ -10,7 +10,7 @@
 void MainMenuScreen::init()
 {
   Template::renderHead("Main Menu");
-  setEntries({"Wifi", "Bluetooth", "NFC", "Files", "Settings"});
+  setEntries(MAIN_MENU);
 }
 
 void MainMenuScreen::onBack()
@@ -22,45 +22,42 @@ void MainMenuScreen::onBack()
   {
     currentState = STATE_MAIN;
     currentEntries.clear();
-    Template::renderHead("Main Menu");
-    setEntries(MAIN_MENU);
-    render();
+    init();
   }
 }
 
 void MainMenuScreen::reworkMenu(const std::vector<MenuEntry>& menu)
 {
   currentEntries = menu;
-  std::vector<std::string> labels;
+  std::vector<ListEntryItem> labels;
   for (const auto& item : menu)
   {
-    labels.push_back(item.label);
+    labels.push_back({item.label, ""});
   }
   setEntries(labels);
-  render();
 }
 
-void MainMenuScreen::onEnter(const std::string& entry)
+void MainMenuScreen::onEnter(ListEntryItem entry)
 {
   if (currentState == STATE_MAIN)
   {
-    if (entry == "Wifi")
+    if (entry.label == "Wifi")
     {
       _global->setScreen(new WifiMenuScreen());
-    } else if (entry == "Bluetooth")
+    } else if (entry.label == "Bluetooth")
     {
-      Template::renderHead(entry);
+      Template::renderHead(entry.label);
       currentState = STATE_BLUETOOTH;
       reworkMenu(BLUETOOTH_MENU);
-    } else if (entry == "NFC")
+    } else if (entry.label == "NFC")
     {
-      Template::renderHead(entry);
+      Template::renderHead(entry.label);
       currentState = STATE_NFC;
       reworkMenu(NFC_MENU);
-    } else if (entry == "Files")
+    } else if (entry.label == "Files")
     {
       _global->setScreen(new FileNavigatorScreen("/"));
-    } else if (entry == "Settings")
+    } else if (entry.label == "Settings")
     {
       _global->setScreen(new SettingScreen());
     }
@@ -68,7 +65,7 @@ void MainMenuScreen::onEnter(const std::string& entry)
   {
     for (const auto& item : currentEntries)
     {
-      if (item.label == entry)
+      if (item.label == entry.label)
       {
         if (item.screen != nullptr)
         {
@@ -76,7 +73,7 @@ void MainMenuScreen::onEnter(const std::string& entry)
         } else
         {
           // Placeholder for unimplemented features
-          Template::renderHead(entry);
+          Template::renderHead(entry.label);
           auto body = Template::createBody();
           body.setTextColor(TFT_WHITE);
           body.drawCenterString("Not Implemented Yet", body.width() / 2, body.height() / 2 - body.fontHeight() / 2);

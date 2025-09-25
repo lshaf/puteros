@@ -15,7 +15,7 @@ private:
 
   void renderAbout();
 protected:
-  void onEnter(const std::string& entry) override;
+  void onEnter(ListEntryItem entry) override;
   void onBack() override;
 
 public:

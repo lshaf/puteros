@@ -28,7 +28,7 @@ void WifiNetworkScreen::showMenu()
 {
   currentState = STATE_MENU;
   Template::renderHead("Network");
-  setEntries({ "Information", "World Clock", "IP Scanner" });
+  setEntries({ {"Information"}, {"World Clock"}, {"IP Scanner"} });
 }
 
 void WifiNetworkScreen::showWifiList()
@@ -36,13 +36,16 @@ void WifiNetworkScreen::showWifiList()
   Template::renderHead("Scan WiFi", true);
   Template::drawStatusBody("Scanning...");
 
-  std::vector<std::string> wifiList = {};
+  std::vector<ListEntryItem> wifiList = {};
   const int totalWifi = WiFi.scanNetworks();
   for (int i = 0; i < totalWifi; i++)
   {
     char buffer[51];
     sprintf(buffer, "[%d] %s", WiFi.RSSI(i), WiFi.SSID(i).c_str());
-    wifiList.emplace_back(buffer);
+    wifiList.push_back({
+      buffer,
+      WiFi.BSSIDstr(i).c_str()
+    });
   }
 
   setEntries(wifiList);
@@ -55,14 +58,14 @@ void WifiNetworkScreen::onBack()
   _global->setScreen(new WifiMenuScreen());
 }
 
-void WifiNetworkScreen::onEnter(const std::string& entry)
+void WifiNetworkScreen::onEnter(const ListEntryItem entry)
 {
   if (currentState == STATE_SELECT_WIFI)
   {
     setEntries({});
 
-    const std::string ssid = entry.substr(entry.find(']') + 2);
-    const auto password = InputScreen::popup(entry);
+    const std::string ssid = entry.label.substr(entry.label.find(']') + 2);
+    const auto password = InputScreen::popup(entry.label);
     WiFi.begin(ssid.c_str(), password.c_str());
     Template::renderHead("Connecting");
     Template::drawStatusBody("Connecting to " + ssid + "...");
@@ -81,13 +84,13 @@ void WifiNetworkScreen::onEnter(const std::string& entry)
     }
   } else if (currentState == STATE_MENU)
   {
-    if (entry == "World Clock")
+    if (entry.label == "World Clock")
     {
       _global->setScreen(new WifiConnectClockScreen());
-    } else if (entry == "Information")
+    } else if (entry.label == "Information")
     {
       _global->setScreen(new WiNetInformationScreen());
-    } else if (entry == "IP Scanner")
+    } else if (entry.label == "IP Scanner")
     {
       _global->setScreen(new WiNetIPScannerScreen());
     }

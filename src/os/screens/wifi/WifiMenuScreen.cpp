@@ -7,9 +7,9 @@
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/wifi/WifiNetworkScreen.h"
 
-void WifiMenuScreen::onEnter(const std::string& entry)
+void WifiMenuScreen::onEnter(const ListEntryItem entry)
 {
-  if (entry == "Network")
+  if (entry.label == "Network")
   {
     _global->setScreen(new WifiNetworkScreen());
   }

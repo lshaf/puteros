@@ -10,18 +10,18 @@ FileNavigatorScreen::FileNavigatorScreen(std::string  path)
 
 void FileNavigatorScreen::init()
 {
-    ListScreen::init();
     listDirectory(currentPath);
 }
 
 
 void FileNavigatorScreen::listDirectory(const std::string& path) {
-    std::vector<std::string> files;
+    std::vector<ListEntryItem> files;
     File dir = SD.open(path.c_str());
     if (!dir) return;
     File entry;
     while ((entry = dir.openNextFile())) {
-        files.emplace_back(entry.name());
+        const std::string type = !entry.isDirectory() ? "FIL" : "DIR";
+        files.push_back({entry.name(), type});
         entry.close();
     }
     dir.close();
@@ -37,8 +37,9 @@ void FileNavigatorScreen::listDirectory(const std::string& path) {
     setEntries(files);
 }
 
-void FileNavigatorScreen::onEnter(const std::string& entry) {
-    const std::string newPath = (currentPath == "/" ? "" : currentPath) + "/" + entry;
+void FileNavigatorScreen::onEnter(ListEntryItem entry) {
+    const std::string& name = entry.label;
+    const std::string newPath = (currentPath == "/" ? "" : currentPath) + "/" + name;
     File f = SD.open(newPath.c_str());
     if (f && f.isDirectory()) {
         currentPath = newPath;
@@ -61,6 +62,10 @@ void FileNavigatorScreen::onBack() {
     {
         _global->setScreen(new MainMenuScreen());
     }
+}
+
+void FileNavigatorScreen::onEscape() {
+    _global->setScreen(new MainMenuScreen());
 }
 
 void FileNavigatorScreen::update() {

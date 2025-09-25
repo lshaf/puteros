@@ -14,8 +14,9 @@ class FileNavigatorScreen final : public ListScreen {
   void listDirectory(const std::string& path);
 
 protected:
-  void onEnter(const std::string& entry) override;
+  void onEnter(ListEntryItem entry) override;
   void onBack() override;
+  void onEscape() override;
 
 public:
   explicit FileNavigatorScreen(std::string  path);

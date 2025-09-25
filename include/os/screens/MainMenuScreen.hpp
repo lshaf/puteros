@@ -21,7 +21,13 @@ private:
     STATE_NFC
   } currentState = STATE_MAIN;
   std::vector<MenuEntry> currentEntries{};
-  std::vector<std::string> MAIN_MENU = {"Wifi", "Bluetooth", "NFC", "Files", "Settings"};
+  std::vector<ListEntryItem> MAIN_MENU = {
+    {"Wifi"},
+    {"Bluetooth"},
+    {"NFC"},
+    {"Files"},
+    {"Settings"}
+  };
   std::vector<MenuEntry> BLUETOOTH_MENU = {
     {"Keyboard", nullptr},
     {"BadBLE", nullptr},
@@ -34,6 +40,6 @@ private:
 public:
   void init() override;
   void onBack() override;
-  void onEnter(const std::string& entry) override;
+  void onEnter(ListEntryItem entry) override;
   void reworkMenu(const std::vector<MenuEntry>& menu);
 };

@@ -17,7 +17,7 @@ private:
     STATE_RESULT_PORT
   } currentState = STATE_CONFIGURATION;
 
-  std::vector<std::string> ipList = {};
+  std::vector<ListEntryItem> ipList = {};
   int startIp = 1;
   int endIp = 254;
 
@@ -26,6 +26,7 @@ private:
   void configuration();
 protected:
   void init() override;
-  void onEnter(const std::string& entry) override;
+  void onEnter(ListEntryItem entry) override;
   void onBack() override;
+  void onEscape() override;
 };
