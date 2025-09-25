@@ -3,11 +3,7 @@
 //
 #include "os/core/ListScreen.hpp"
 
-void ListScreen::init()
-{
-}
-
-void ListScreen::setEntries(const std::vector<std::string>& newEntries)
+void ListScreen::setEntries(const std::vector<ListEntryItem>& newEntries)
 {
   entries = newEntries;
   currentPage = 0;
@@ -32,35 +28,24 @@ void ListScreen::render()
   const int totalItem = std::min(visibleCount, static_cast<int>(entries.size()) - scrollOffset);
   for (int i = 0; i < totalItem; i++)
   {
-    _body.drawString(entries[scrollOffset + i].c_str(), 3, i * _body.fontHeight() + 2 + i * 2);
-  }
-
-  selector.createSprite(_body.width(), 12);
-  if (previousIndex >= 0 && previousIndex < entries.size())
-  {
-    const int prevVisible = previousIndex - scrollOffset;
-    if (prevVisible >= 0 && prevVisible < visibleCount)
+    const auto selectedIndexVisible = selectedIndex - scrollOffset;
+    if (i == selectedIndexVisible)
     {
-      selector.fillSprite(BLACK);
-      selector.setTextColor(TFT_WHITE);
-      selector.drawString(entries[previousIndex].c_str(), 3, 2);
-      selector.pushSprite(&_body, 0, prevVisible * (_body.fontHeight() + 2));
+      _body.fillRect(0, selectedIndexVisible  * _body.fontHeight() + selectedIndexVisible * 2, _body.width(), _body.fontHeight() + 3, BLUE);
+    }
+
+    auto item = entries[scrollOffset + i];
+    _body.drawString(item.label.c_str(), 3, i * _body.fontHeight() + 2 + i * 2);
+    if (!item.value.empty())
+    {
+      _body.drawRightString(item.value.c_str(), _body.width() - 3, i * _body.fontHeight() + 2 + i * 2);
     }
   }
-  const int selVisible = selectedIndex - scrollOffset;
-  if (selVisible >= 0 && selVisible < visibleCount)
-  {
-    selector.fillSprite(BLUE);
-    selector.setTextColor(TFT_WHITE);
-    selector.drawString(entries[selectedIndex].c_str(), 3, 2);
-    selector.pushSprite(&_body, 0, selVisible * (_body.fontHeight() + 2));
-  }
-  selector.deleteSprite();
 
   Template::renderBody(&_body);
 }
 
-void ListScreen::navigate(const NavAction_t direction, const bool render)
+void ListScreen::navigate(const NavAction_t direction)
 {
   if (direction == NAV_UP && selectedIndex > 0)
   {
@@ -100,16 +85,7 @@ void ListScreen::navigate(const NavAction_t direction, const bool render)
     }
   }
 
-  if (direction == NAV_ENTER && !entries.empty())
-  {
-    onEnter(entries[selectedIndex]);
-  }
-  if (direction == NAV_BACK)
-  {
-    onBack();
-  }
-
-  if (render) this->render();
+  this->render();
 }
 
 void ListScreen::update()
@@ -121,7 +97,8 @@ void ListScreen::update()
     if (_keyboard->isKeyPressed('.')) navigate(NAV_DOWN);
     if (_keyboard->isKeyPressed(',')) navigate(NAV_PREV);
     if (_keyboard->isKeyPressed('/')) navigate(NAV_NEXT);
-    if (_keyboard->isKeyPressed(KEY_ENTER)) navigate(NAV_ENTER, false);
-    if (_keyboard->isKeyPressed(KEY_BACKSPACE)) navigate(NAV_BACK, false);
+    if (_keyboard->isKeyPressed(KEY_ENTER) && !entries.empty()) onEnter(entries[selectedIndex]);
+    if (_keyboard->isKeyPressed(KEY_BACKSPACE)) onBack();
+    if (_keyboard->isKeyPressed('`')) onEscape();
   }
 }
