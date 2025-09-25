@@ -51,7 +51,7 @@ void WiNetIPScannerScreen::scanIP()
     IPAddress ip(wifiIp[0], wifiIp[1], wifiIp[2], i);
     if (Ping.ping(ip, 1))
     {
-      const auto avg = String(Ping.averageTime()) + " ms";
+      const auto avg = String(ceil(Ping.averageTime())) + " ms";
       ipList.push_back({ip.toString().c_str(), avg.c_str()});
     }
   }
