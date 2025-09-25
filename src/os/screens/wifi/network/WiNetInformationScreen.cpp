@@ -28,37 +28,37 @@ void WiNetInformationScreen::update()
 void WiNetInformationScreen::render()
 {
   auto body = Template::createBody();
-  body.print("IP:");
-  body.println(WiFi.localIP().toString().c_str());
 
-  body.print("DNS IP:");
-  body.println(WiFi.dnsIP().toString().c_str());
+  body.drawRightString(WiFi.localIP().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("IP");
 
-  body.print("Gateway IP:");
-  body.println(WiFi.gatewayIP().toString().c_str());
+  body.drawRightString(WiFi.dnsIP().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("DNS IP");
 
-  body.print("Subnet Mask:");
-  body.println(WiFi.subnetMask().toString().c_str());
+  body.drawRightString(WiFi.gatewayIP().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("Gateway");
+
+  body.drawRightString(WiFi.subnetMask().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("Subnet");
   body.println();
 
-  body.print("SSID:");
-  body.println(WiFi.SSID().c_str());
+  body.drawRightString(WiFi.SSID().c_str(), body.width() - 3, body.getCursorY());
+  body.println("SSID");
 
-  body.print("RSSI: ");
-  body.print(WiFi.RSSI());
-  body.println(" dBm");
+  body.drawRightString(String(WiFi.RSSI()) + " dBm", body.width() - 3, body.getCursorY());
+  body.println("RSSI");
 
-  body.print("Hostname:");
-  body.println(WiFi.getHostname());
+  body.drawRightString(WiFi.getHostname(), body.width() - 3, body.getCursorY());
+  body.println("Hostname");
 
-  body.print("MAC Address:");
-  body.println(WiFi.macAddress().c_str());
+  body.drawRightString(WiFi.macAddress().c_str(), body.width() - 3, body.getCursorY());
+  body.println("MAC");
 
-  body.print("BSSID:");
-  body.println(WiFi.BSSIDstr().c_str());
+  body.drawRightString(WiFi.BSSIDstr().c_str(), body.width() - 3, body.getCursorY());
+  body.println("BSSID");
 
-  body.print("Channel: ");
-  body.println(WiFi.channel());
+  body.drawRightString(String(WiFi.channel()), body.width() - 3, body.getCursorY());
+  body.println("Channel");
 
   Template::renderBody(&body);
 }
