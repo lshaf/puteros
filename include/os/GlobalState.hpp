@@ -6,6 +6,8 @@
 #include "core/Config.h"
 #include "core/Screen.hpp"
 
+#define CONFIG_BRIGHTNESS "brightness"
+
 class GlobalState {
 public:
   GlobalState() = default;

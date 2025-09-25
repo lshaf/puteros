@@ -10,6 +10,7 @@ class ScreenState: public Screen
 {
 protected:
   GlobalState* _global;
+  Config* _config;
 public:
-  ScreenState(): _global(&GlobalState::getInstance()) {};
+  ScreenState(): _global(&GlobalState::getInstance()), _config(_global->getConfig()) {};
 };
