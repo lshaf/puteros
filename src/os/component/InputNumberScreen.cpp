@@ -41,19 +41,16 @@ void InputNumberScreen::update() {
     isInvalid = false;
     const auto state = _keyboard->keysState();
     for (const auto i : state.word) {
-      if (std::isdigit(i)) buffer.push_back(i); // Only append digits
+      if (std::isdigit(i)) buffer.push_back(i);
     }
     if (state.del) { if (!buffer.empty()) buffer.pop_back(); }
 
-    // Validate the number within range
     if (buffer.empty()) buffer = "0";
-    else
-    {
-      unsigned int v = std::stoi(buffer);
-      if (v >= 1000) v = 1000;
-      if (v < min_input || v > max_input) isInvalid = true;
-      buffer = std::to_string(v);
-    }
+    unsigned int v = std::stoi(buffer);
+    if (v >= cap_input) v = cap_input;
+    if (v < min_input || v > max_input) isInvalid = true;
+    buffer = std::to_string(v);
+
     if (state.enter && !isInvalid) done = true;
 
     render();
