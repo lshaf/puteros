@@ -9,7 +9,11 @@ class WifiMenuScreen final : public ListScreen
 public:
   void init() override
   {
-    setEntries({{"Network"}, {"Package Analyzer"}});
+    setEntries({
+      {"Network"},
+      {"WiFi Analyzer"},
+      {"Packet Analyzer"}
+    });
     Template::renderHead("WiFi");
   };
 

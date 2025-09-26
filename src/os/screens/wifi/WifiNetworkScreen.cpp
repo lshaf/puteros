@@ -49,7 +49,6 @@ void WifiNetworkScreen::showWifiList()
   }
 
   setEntries(wifiList);
-  render();
 }
 
 void WifiNetworkScreen::onBack()
