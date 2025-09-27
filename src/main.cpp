@@ -15,7 +15,7 @@ void setup()
   M5Cardputer.begin();
 
   Serial.begin(115200);
-  M5Cardputer.Lcd.setTextColor(BLUE, BLACK);
+  M5Cardputer.Lcd.setTextColor(DARKCYAN, BLACK);
   M5Cardputer.Lcd.setTextSize(2.5);
   M5Cardputer.Lcd.drawCenterString(
     "PuterOS",

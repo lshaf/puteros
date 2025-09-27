@@ -71,35 +71,28 @@ void WiNetIPScannerScreen::scanPort(const std::string& ip)
   Template::renderHead("Port Scan");
   Template::drawStatusBody("Start Scanning...");
   const std::vector<std::pair<int, std::string>> commonPorts = {
-    {21, "FTP"},
-    {22, "SSH"},
-    {23, "Telnet"},
-    {25, "SMTP"},
-    {53, "DNS"},
-    {80, "HTTP"},
-    {110, "POP3"},
-    {139, "NetBIOS"},
-    {143, "IMAP"},
-    {443, "HTTPS"},
-    {445, "Microsoft-DS"},
-    {465, "SMTPS"},
-    {587, "SMTP (submission)"},
-    {993, "IMAPS"},
-    {995, "POP3S"},
-    {1723, "PPTP"},
-    {3306, "MySQL"},
-    {3389, "RDP"},
-    {5900, "VNC"},
-    {8080, "HTTP-alt"},
-    {8443, "HTTPS-alt"},
-    {8888, "Alternate HTTP"},
-    {5000, "UPnP/Web servers"},
-    {5432, "PostgreSQL"},
-    {6379, "Redis"},
-    {27017, "MongoDB"},
-    {8000, "Alternate HTTP"},
-    {10000, "Webmin"}
+    {20, "FTP Data"},      {21, "FTP"},            {22, "SSH"},             {23, "Telnet"},
+    {25, "SMTP"},          {53, "DNS"},            {67, "DHCP"},            {68, "DHCP"},
+    {69, "TFTP"},          {80, "HTTP"},           {110, "POP3"},           {123, "NTP"},
+    {135, "MS-RPC"},       {137, "NetBIOS"},       {139, "NetBIOS"},        {143, "IMAP"},
+    {161, "SNMP"},         {162, "SNMP Trap"},     {389, "LDAP"},           {443, "HTTPS"},
+    {445, "SMB/Microsoft-DS"}, {465, "SMTPS"},     {514, "Syslog"},         {554, "RTSP"},
+    {587, "SMTP (submission)"}, {631, "IPP"},      {636, "LDAPS"},          {873, "rsync"},
+    {993, "IMAPS"},        {995, "POP3S"},         {1024, "Reserved"},      {1025, "NFS/IIS"},
+    {1194, "OpenVPN"},     {1352, "LotusNotes"},   {1433, "MSSQL"},         {1521, "Oracle"},
+    {1720, "H.323"},       {1723, "PPTP"},         {2049, "NFS"},           {2181, "Zookeeper"},
+    {2222, "SSH Alt"},     {2375, "Docker"},       {2376, "DockerTLS"},     {27017, "MongoDB"},
+    {32768, "RPC"},        {3306, "MySQL"},        {3389, "RDP"},           {3690, "SVN"},
+    {49152, "WinRPC"},     {49153, "WinRPC"},      {49154, "WinRPC"},       {49155, "WinRPC"},
+    {49156, "WinRPC"},     {49157, "WinRPC"},      {5000, "UPnP/Web servers"}, {5060, "SIP/PostgreSQL"},
+    {5061, "SIPS (TLS)"},  {5062, "SIP Alt"},      {5080, "SIP Alt"},       {5081, "SIPS Alt"},
+    {5160, "SIP (PJSIP)"}, {5432, "PostgreSQL"},   {5555, "ADB"},           {5900, "VNC"},
+    {5985, "WinRM HTTP"},  {5986, "WinRM HTTPS"},  {6060, "SIP Alt"},       {6061, "SIPS Alt"},
+    {6379, "Redis"},       {8000, "Alternate HTTP"},{8080, "HTTP Proxy/HTTP-alt"}, {8443, "HTTPS Alt/HTTPS-alt"},
+    {8888, "Alternate HTTP"}, {9000, "SonarQube"}, {9100, "PJL/JetDirect"}, {9200, "Elastic"},
+    {9999, "Urchin"},      {10000, "Webmin"},      {11211, "Memcached"}
   };
+
 
   std::vector<ListEntryItem> openPorts;
 
