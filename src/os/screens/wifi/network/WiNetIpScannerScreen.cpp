@@ -34,21 +34,21 @@ void WiNetIPScannerScreen::scanIP()
   Template::renderHead("IP Scanner");
   Template::drawStatusBody("Scanning...");
 
-  auto currentIP = WiFi.localIP();
+  IPAddress currentIP = WiFi.localIP();
   if (currentIP[0] == 0 && currentIP[1] == 0 && currentIP[2] == 0 && currentIP[3] == 0)
   {
     setEntries({{"No devices found"}});
     return;
   }
 
-  IPAddress wifiIp = WiFi.localIP();
   for (int i = startIp; i < endIp; i++)
   {
     const int percent = static_cast<int>((i - startIp) / static_cast<float>(endIp - startIp) * 100);
     String progress = "[" + String(percent) + "%] Scanning...";
     Template::drawStatusBody(progress.c_str());
 
-    IPAddress ip(wifiIp[0], wifiIp[1], wifiIp[2], i);
+    if (i == currentIP[3]) continue;
+    IPAddress ip(currentIP[0], currentIP[1], currentIP[2], i);
     if (Ping.ping(ip, 1))
     {
       const auto avg = String(ceil(Ping.averageTime())) + " ms";
