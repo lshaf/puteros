@@ -12,7 +12,7 @@ public:
     setEntries({
       {"Network"},
       {"WiFi Analyzer"},
-      {"Packet Analyzer"}
+      {"Packet Monitor"}
     });
     Template::renderHead("WiFi");
   };
