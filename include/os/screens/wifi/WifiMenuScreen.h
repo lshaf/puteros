@@ -12,7 +12,8 @@ public:
     setEntries({
       {"Network"},
       {"WiFi Analyzer"},
-      {"Packet Monitor"}
+      {"Packet Monitor"},
+      {"WiFi Deauther"}
     });
     Template::renderHead("WiFi");
   };
