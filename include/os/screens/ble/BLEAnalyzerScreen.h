@@ -16,6 +16,7 @@ public:
   void init() override;
   void startScan();
   void showResult();
+  void showInfo();
   void stopScan()
   {
     if (bleScan != nullptr)
@@ -23,6 +24,10 @@ public:
       bleScan->stop();
       NimBLEDevice::deinit(true);
       bleScan = nullptr;
+    }
+    if (selectedDevice != nullptr)
+    {
+      selectedDevice = nullptr;
     }
   }
 
@@ -36,9 +41,13 @@ private:
   {
     STATE_SCAN,
     STATE_LIST,
+    STATE_SERVICE_UUID,
+    STATE_SERVICE_DATA,
+    STATE_MANUFACTURE_DATA,
     STATE_INFO
   } currentState = STATE_SCAN;
 
   NimBLEScan* bleScan = nullptr;
   NimBLEScanResults scanResults;
+  const NimBLEAdvertisedDevice* selectedDevice = nullptr;
 };
