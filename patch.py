@@ -1,15 +1,11 @@
-import hashlib
 from typing import TYPE_CHECKING, Any
-import requests
 
 if TYPE_CHECKING:
     Import: Any = None
     env: Any = {}
 
-import glob
-import gzip
-from os import makedirs, remove, rename
-from os.path import basename, dirname, exists, isfile, join
+from os import remove, rename
+from os.path import isfile, join
 
 Import("env")  # type: ignore
 

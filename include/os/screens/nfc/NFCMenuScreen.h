@@ -8,11 +8,7 @@
 class NFCMenuScreen final : public ListScreen
 {
 public:
-  void init() override
-  {
-    Template::renderHead("NFC");
-    Template::drawStatusBody("In Development");
-  }
+  void init() override;
 
 protected:
   void onEnter(ListEntryItem entry) override;
