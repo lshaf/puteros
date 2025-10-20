@@ -2,8 +2,8 @@
 // Created by L Shaf on 19/10/25.
 //
 
-#include "../../../../include/os/screens/nfc/NFCPN532Screen.h"
-
+#include <unordered_map>
+#include "os/screens/nfc/NFCPN532Screen.h"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/nfc/NFCMenuScreen.h"
 
@@ -48,6 +48,7 @@ void NFCPN532Screen::goPN532KillerMenu()
   Template::renderHead("PN532Killer");
   setEntries({
     {"Scan UID"},
+    {"MIFARE Classic Read Memory"}
   });
 }
 
@@ -99,6 +100,94 @@ void NFCPN532Screen::callScanUid()
   Template::renderBody(&_body);
 }
 
+void NFCPN532Screen::callMemoryReader()
+{
+  currentState = STATE_MEMORY_READER;
+
+  setEntries({});
+  Template::drawStatusBody("Scanning ISO14443...");
+  _module.setNormalMode();
+
+  const auto hf14result = _module.hf14aScan();
+  if (hf14result.uid.empty())
+  {
+    Template::drawStatusBody("No ISO14443 Tag Found.");
+    delayMicroseconds(1500);
+    goActualMenu();
+    return;
+  }
+
+  std::vector<ListEntryItem> memoryEntries = {
+    {"UID", hf14result.uid_hex.c_str()},
+    {"ATQA", hf14result.atqa_hex.c_str()},
+    {"SAK", hf14result.sak_hex.c_str()},
+    {"Memory:"}
+  };
+
+  _module.resetReaderState();
+  const auto uid = hf14result.uid;
+  std::unordered_map<int, ExtendedPN532Killer::MfcKey> sectorKeyCache;
+  for (int block = 0;block < 16;block++)
+  {
+    std::vector<uint8_t> blockData;
+    Template::drawStatusBody("Reading block " + std::to_string(block) + "...");
+    int currentSector = floor(block / 16);
+    auto cachedKey = sectorKeyCache.find(currentSector);
+    if (cachedKey == sectorKeyCache.end())
+    {
+      for (const auto& key : _defaultKeys)
+      {
+        blockData = _module.mf1ReadBlock(uid, block, key);
+        if (!blockData.empty())
+        {
+          sectorKeyCache[currentSector] = key;
+          break;
+        }
+      }
+
+      if (blockData.empty())
+        sectorKeyCache[currentSector] = _defaultKeys[0];
+    } else
+    {
+        blockData = _module.mf1ReadBlock(uid, block, cachedKey->second);
+    }
+
+    if (blockData.empty())
+    {
+      memoryEntries.push_back({
+        "??:??:??:??:??:??:??:??",
+        "Block " + std::to_string(block)
+      });
+      memoryEntries.push_back({
+        "??:??:??:??:??:??:??:??",
+        "Block " + std::to_string(block)
+      });
+    } else
+    {
+      char buffer[50];
+      sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
+        blockData[0], blockData[1], blockData[2], blockData[3],
+        blockData[4], blockData[5], blockData[6], blockData[7]
+      );
+      memoryEntries.push_back({
+        buffer,
+        "Block " + std::to_string(block)
+      });
+
+      sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
+        blockData[8], blockData[9], blockData[10], blockData[11],
+        blockData[12], blockData[13], blockData[14], blockData[15]
+      );
+      memoryEntries.push_back({
+        buffer,
+        "Block " + std::to_string(block)
+      });
+    }
+  }
+
+  setEntries(memoryEntries);
+}
+
 void NFCPN532Screen::onEnter(ListEntryItem entry)
 {
   if (currentState == STATE_PN532_KILLER || currentState == STATE_PN532)
@@ -106,13 +195,22 @@ void NFCPN532Screen::onEnter(ListEntryItem entry)
     if (entry.label == "Scan UID")
     {
       callScanUid();
+    } else if (entry.label == "MIFARE Classic Read Memory")
+    {
+      callMemoryReader();
     }
   }
 }
 
 void NFCPN532Screen::onBack()
 {
-  _global->setScreen(new NFCMenuScreen());
+  if (currentState == STATE_MEMORY_READER)
+  {
+    goActualMenu();
+  } else
+  {
+    _global->setScreen(new NFCMenuScreen());
+  }
 }
 
 void NFCPN532Screen::onEscape()
