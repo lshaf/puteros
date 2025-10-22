@@ -25,10 +25,57 @@ bool ExtendedPN532Killer::mf1AuthenticateBlock(const uint8_t block, const uint8_
     return !resp.empty() && resp[0] == 0x00;
 }
 
+byte ExtendedPN532Killer::getCardType(byte sak)
+{
+    if (sak & 0x04) { // UID not complete
+        return CARD_TYPE_NOT_COMPLETE;
+    }
+
+    switch (sak) {
+    case 0x09:	return CARD_TYPE_MIFARE_MINI;
+    case 0x08:	return CARD_TYPE_MIFARE_1K;
+    case 0x18:	return CARD_TYPE_MIFARE_4K;
+    case 0x00:	return CARD_TYPE_MIFARE_UL;
+    case 0x10:
+    case 0x11:	return CARD_TYPE_MIFARE_PLUS;
+    case 0x01:	return CARD_TYPE_TNP3XXX;
+    default:	break;
+    }
+
+    if (sak & 0x20) {
+        return CARD_TYPE_ISO_14443_4;
+    }
+
+    if (sak & 0x40) {
+        return CARD_TYPE_ISO_18092;
+    }
+
+    return CARD_TYPE_UNKNOWN;
+}
+
+std::string ExtendedPN532Killer::getCardTypeStr(byte sak)
+{
+    const auto cardType = getCardType(sak);
+    switch (cardType)
+    {
+    case CARD_TYPE_MIFARE_MINI: return "MIFARE Mini";
+    case CARD_TYPE_MIFARE_1K: return "MIFARE Classic 1K";
+    case CARD_TYPE_MIFARE_4K: return "MIFARE Classic 4K";
+    case CARD_TYPE_MIFARE_UL: return "MIFARE Ultralight";
+    case CARD_TYPE_MIFARE_PLUS: return "MIFARE Plus";
+    case CARD_TYPE_TNP3XXX: return "TNP3XXX";
+    case CARD_TYPE_ISO_14443_4: return "ISO/IEC 14443-4";
+    case CARD_TYPE_ISO_18092: return "ISO/IEC 18092 (NFC)";
+    case CARD_TYPE_NOT_COMPLETE: return "UID Not Complete";
+    case CARD_TYPE_UNKNOWN:
+    default: return "Unknown";
+    }
+}
+
 std::vector<uint8_t> ExtendedPN532Killer::mf1ReadBlock(const std::vector<uint8_t>& uid, const uint8_t block, MfcKey key)
 {
     // compute sector index for authentication tracking
-    const uint8_t current_sector = (block < 128) ? (block / 4) : static_cast<uint8_t>(((block - 128) / 16) + 32);
+    const int current_sector = (block < 128) ? (block / 4) : static_cast<uint8_t>(((block - 128) / 16) + 32);
 
     // authenticate if we're not already authenticated for this sector
     if (mf1AuthenticatedSector != current_sector) {

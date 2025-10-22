@@ -76,6 +76,8 @@ void NFCPN532Screen::callScanUid()
   if (!hf14result.uid.empty())
   {
     isFound = true;
+    _body.setTextSize(1);
+    _body.drawCenterString(_module.getCardTypeStr(hf14result.sak).c_str(), _body.width() / 2, _body.height() / 2 - _body.fontHeight() * 3);
     _body.setTextSize(2);
     _body.drawCenterString("ISO14443", _body.width() / 2, _body.height() / 2 - _body.fontHeight());
     _body.drawCenterString(hf14result.uid_hex.c_str(), _body.width() / 2, _body.height() / 2);
@@ -88,6 +90,8 @@ void NFCPN532Screen::callScanUid()
     if (!hf15result.uid.empty())
     {
       isFound = true;
+      _body.setTextSize(1);
+      _body.drawCenterString(_module.getCardTypeStr(hf14result.sak).c_str(), _body.width() / 2, _body.height() / 2 - _body.fontHeight() * 3);
       _body.setTextSize(2);
       _body.drawCenterString("ISO15693", _body.width() / 2, _body.height() / 2 - _body.fontHeight());
       _body.drawCenterString(hf15result.uid_hex.c_str(), _body.width() / 2, _body.height() / 2);
@@ -118,6 +122,7 @@ void NFCPN532Screen::callMemoryReader()
   }
 
   std::vector<ListEntryItem> memoryEntries = {
+    {"Card", _module.getCardTypeStr(hf14result.sak)},
     {"UID", hf14result.uid_hex.c_str()},
     {"ATQA", hf14result.atqa_hex.c_str()},
     {"SAK", hf14result.sak_hex.c_str()},
