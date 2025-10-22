@@ -105,7 +105,7 @@ void NFCPN532Screen::callScanUid()
   Template::renderBody(&_body);
 }
 
-std::string NFCPN532Screen::convertKeyToString(const NullableMfcKey& key)
+std::string NFCPN532Screen::convertKeyToString(const NFCUtility::MIFARE_Key& key)
 {
   if (!key) return "??:??:??:??:??:??";
   char buffer[20];
@@ -196,10 +196,10 @@ void NFCPN532Screen::callAuthenticate()
         Template::drawStatusBody("Auth sector "+sectorProgress+" key A...");
       else
         Template::drawStatusBody("Auth sector "+sectorProgress+" key B...");
-      for (const auto& key : _defaultKeys)
+      for (const auto& key : NFCUtility::getDefaultKeys())
       {
         const int blockIndex = (sector < 32) ? (sector * 4 + 3) : (128 + (sector - 32) * 16 + 15);
-        const auto isCorrect = _module.mf1AuthenticateBlock(blockIndex, keyType, key, _currentCard.uid);
+        const auto isCorrect = _module.mf1AuthenticateBlock(blockIndex, keyType, key.value(), _currentCard.uid);
         if (isCorrect)
         {
           if (keyType == _module.MFC_KEY_TYPE_A)
