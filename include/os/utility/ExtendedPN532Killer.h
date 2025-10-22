@@ -33,7 +33,7 @@ public:
   explicit ExtendedPN532Killer(HardwareSerial &serial);
   ~ExtendedPN532Killer() override = default;
 
-  byte getCardType(byte sak);
+  CardType getCardType(byte sak);
   std::string getCardTypeStr(byte sak);
   bool mf1AuthenticateBlock(uint8_t block, uint8_t keyType, MfcKey key, std::vector<uint8_t> uid);
   std::vector<uint8_t> mf1ReadBlock(const std::vector<uint8_t>& uid, uint8_t block, MfcKey key);

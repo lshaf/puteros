@@ -10,7 +10,8 @@ void NFCMenuScreen::init()
 {
   Template::renderHead("NFC");
   setEntries({
-    {"PN532"},
+    {"M5 RFID"},
+    {"MToolsTech PN532"},
   });
 }
 
@@ -21,7 +22,7 @@ void NFCMenuScreen::onBack()
 
 void NFCMenuScreen::onEnter(ListEntryItem entry)
 {
-  if (entry.label == "PN532")
+  if (entry.label == "MToolsTech PN532")
   {
     _global->setScreen(new NFCPN532Screen());
   }

@@ -2,6 +2,7 @@
 // Created by l-sha on 09/10/2025.
 //
 
+#include <Arduino.h>
 #include "os/utility/HelperUtility.h"
 
 std::string HelperUtility::stringToHex(const std::string& input)
@@ -13,4 +14,10 @@ std::string HelperUtility::stringToHex(const std::string& input)
     hex += buf;
   }
   return hex;
+}
+
+void HelperUtility::delayMicroseconds(unsigned long us)
+{
+  unsigned long start = micros();
+  while (micros() - start < us) {}
 }

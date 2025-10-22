@@ -2,10 +2,10 @@
 // Created by L Shaf on 19/10/25.
 //
 
-#include <unordered_map>
 #include "os/screens/nfc/NFCPN532Screen.h"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/nfc/NFCMenuScreen.h"
+#include "os/utility/HelperUtility.h"
 
 
 NFCPN532Screen::~NFCPN532Screen()
@@ -19,12 +19,12 @@ void NFCPN532Screen::init()
 {
   Serial1.begin(115000, SERIAL_8N1, 2, 1);
   Template::drawStatusBody("Check PN532 module...");
-  delayMicroseconds(500);
+  HelperUtility::delayMicroseconds(500);
   const bool _ok = _module.setNormalMode();
   if (!_ok)
   {
     Template::drawStatusBody("Failed to communicate with PN532.");
-    delayMicroseconds(1500);
+    HelperUtility::delayMicroseconds(1500);
     onEscape();
     return;
   }
@@ -39,6 +39,7 @@ void NFCPN532Screen::goPN532Menu()
   Template::renderHead("PN532");
   setEntries({
     {"Scan UID"},
+    {"MIFARE Classic"}
   });
 }
 
@@ -48,7 +49,7 @@ void NFCPN532Screen::goPN532KillerMenu()
   Template::renderHead("PN532Killer");
   setEntries({
     {"Scan UID"},
-    {"MIFARE Classic Read Memory"}
+    {"MIFARE Classic"}
   });
 }
 
@@ -104,57 +105,156 @@ void NFCPN532Screen::callScanUid()
   Template::renderBody(&_body);
 }
 
-void NFCPN532Screen::callMemoryReader()
+std::string NFCPN532Screen::convertKeyToString(const NullableMfcKey& key)
 {
-  currentState = STATE_MEMORY_READER;
+  if (!key) return "??:??:??:??:??:??";
+  char buffer[20];
+  const auto _kv = key.value();
+  sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
+    _kv[0], _kv[1],
+    _kv[2], _kv[3],
+    _kv[4], _kv[5]
+  );
+
+  return buffer;
+}
+
+void NFCPN532Screen::goShowDiscoveredKeys()
+{
+  currentState = STATE_SHOW_KEY;
+  std::vector<ListEntryItem> temporaryKeys = {
+    {"Card", _module.getCardTypeStr(_currentCard.sak)},
+    {"UID", _currentCard.uid_hex.c_str()},
+    {"ATQA", _currentCard.atqa_hex.c_str()},
+    {"SAK", _currentCard.sak_hex.c_str()},
+    {"Keys:"}
+  };
+  const auto cardDetail = _mf1CardDetails.find(_module.getCardType(_currentCard.sak));
+  for (int sector = 0;sector < cardDetail->second.first;sector++)
+  {
+    std::string sectorLabel = "Sector " + std::to_string(sector);
+    temporaryKeys.push_back({
+      convertKeyToString(_mf1AuthKeys[sector].first),
+      sectorLabel + "A",
+    });
+    temporaryKeys.push_back({
+      convertKeyToString(_mf1AuthKeys[sector].second),
+      sectorLabel + "A",
+    });
+  }
+
+  setEntries(temporaryKeys);
+}
+
+
+void NFCPN532Screen::goMifareClassicMenu()
+{
+  currentState = STATE_MIFARE_CLASSIC;
+  setEntries({
+    {"Discovered Keys"},
+    {"Dump Memory"}
+  });
+}
+
+void NFCPN532Screen::callAuthenticate()
+{
+  currentState = STATE_AUTHENTICATE;
 
   setEntries({});
   Template::drawStatusBody("Scanning ISO14443...");
   _module.setNormalMode();
 
-  const auto hf14result = _module.hf14aScan();
-  if (hf14result.uid.empty())
+  _currentCard = _module.hf14aScan();
+  if (_currentCard.uid.empty())
   {
     Template::drawStatusBody("No ISO14443 Tag Found.");
-    delayMicroseconds(1500);
+    HelperUtility::delayMicroseconds(1500);
     goActualMenu();
     return;
   }
 
+  const auto cardType = _module.getCardType(_currentCard.sak);
+  const auto cardDetail = _mf1CardDetails.find(cardType);
+  if (cardDetail == _mf1CardDetails.end())
+  {
+    Template::drawStatusBody("No Supported Tag Found.");
+    HelperUtility::delayMicroseconds(1500);
+    goActualMenu();
+    return;
+  }
+
+  std::vector<uint8_t> keyList = {
+    _module.MFC_KEY_TYPE_A,
+    _module.MFC_KEY_TYPE_B
+  };
+  for (int sector = 0;sector < cardDetail->second.first;sector++)
+  {
+    for (const auto &keyType : keyList)
+    {
+      std::string sectorProgress = std::to_string(sector) + " / " + std::to_string(cardDetail->second.first - 1);
+      if (keyType == _module.MFC_KEY_TYPE_A)
+        Template::drawStatusBody("Auth sector "+sectorProgress+" key A...");
+      else
+        Template::drawStatusBody("Auth sector "+sectorProgress+" key B...");
+      for (const auto& key : _defaultKeys)
+      {
+        const int blockIndex = (sector < 32) ? (sector * 4 + 3) : (128 + (sector - 32) * 16 + 15);
+        const auto isCorrect = _module.mf1AuthenticateBlock(blockIndex, keyType, key, _currentCard.uid);
+        if (isCorrect)
+        {
+          if (keyType == _module.MFC_KEY_TYPE_A)
+            _mf1AuthKeys[sector].first = key;
+          else
+            _mf1AuthKeys[sector].second = key;
+          break;
+        }
+      }
+    }
+  }
+
+  goMifareClassicMenu();
+}
+
+void NFCPN532Screen::callMemoryReader()
+{
+  currentState = STATE_MEMORY_READER;
   std::vector<ListEntryItem> memoryEntries = {
-    {"Card", _module.getCardTypeStr(hf14result.sak)},
-    {"UID", hf14result.uid_hex.c_str()},
-    {"ATQA", hf14result.atqa_hex.c_str()},
-    {"SAK", hf14result.sak_hex.c_str()},
+    {"Card", _module.getCardTypeStr(_currentCard.sak)},
+    {"UID", _currentCard.uid_hex.c_str()},
+    {"ATQA", _currentCard.atqa_hex.c_str()},
+    {"SAK", _currentCard.sak_hex.c_str()},
     {"Memory:"}
   };
 
   _module.resetReaderState();
-  const auto uid = hf14result.uid;
-  std::unordered_map<int, ExtendedPN532Killer::MfcKey> sectorKeyCache;
-  for (int block = 0;block < 16;block++)
+  const auto cardDetail = _mf1CardDetails.find(_module.getCardType(_currentCard.sak));
+  const auto uid = _currentCard.uid;
+  for (int block = 0;block < cardDetail->second.second;block++)
   {
     std::vector<uint8_t> blockData;
-    Template::drawStatusBody("Reading block " + std::to_string(block) + "...");
-    int currentSector = floor(block / 16);
-    auto cachedKey = sectorKeyCache.find(currentSector);
-    if (cachedKey == sectorKeyCache.end())
+    std::string blockProgress = std::to_string(block) + " / " + std::to_string(cardDetail->second.second - 1);
+    Template::drawStatusBody("Reading block " + blockProgress + "...");
+    const int currentSector = (block < 128) ? (block / 4) : static_cast<uint8_t>(((block - 128) / 16) + 32);
+    if (!_mf1AuthKeys[currentSector].first && !_mf1AuthKeys[currentSector].second)
     {
-      for (const auto& key : _defaultKeys)
-      {
-        blockData = _module.mf1ReadBlock(uid, block, key);
-        if (!blockData.empty())
-        {
-          sectorKeyCache[currentSector] = key;
-          break;
-        }
-      }
+      memoryEntries.push_back({
+        "??:??:??:??:??:??:??:??",
+        "Block " + std::to_string(block)
+      });
+      memoryEntries.push_back({
+        "??:??:??:??:??:??:??:??",
+        "Block " + std::to_string(block)
+      });
+      continue;
+    }
 
-      if (blockData.empty())
-        sectorKeyCache[currentSector] = _defaultKeys[0];
-    } else
+    if (_mf1AuthKeys[currentSector].first)
     {
-        blockData = _module.mf1ReadBlock(uid, block, cachedKey->second);
+      blockData = _module.mf1ReadBlock(uid, block, _mf1AuthKeys[currentSector].first.value());
+    }
+    if (blockData.empty() and _mf1AuthKeys[currentSector].second)
+    {
+      blockData = _module.mf1ReadBlock(uid, block, _mf1AuthKeys[currentSector].second.value());
     }
 
     if (blockData.empty())
@@ -200,18 +300,29 @@ void NFCPN532Screen::onEnter(ListEntryItem entry)
     if (entry.label == "Scan UID")
     {
       callScanUid();
-    } else if (entry.label == "MIFARE Classic Read Memory")
+    } else if (entry.label == "MIFARE Classic")
     {
-      callMemoryReader();
+      callAuthenticate();
     }
+  } else if (currentState == STATE_MIFARE_CLASSIC)
+  {
+    if (entry.label == "Discovered Keys")
+      goShowDiscoveredKeys();
+    else if (entry.label == "Dump Memory")
+      callMemoryReader();
   }
 }
 
 void NFCPN532Screen::onBack()
 {
-  if (currentState == STATE_MEMORY_READER)
+  if (currentState == STATE_MIFARE_CLASSIC)
   {
+    _currentCard = {};
+    _mf1AuthKeys.fill({});
     goActualMenu();
+  } else if (currentState == STATE_MEMORY_READER || currentState == STATE_SHOW_KEY)
+  {
+    goMifareClassicMenu();
   } else
   {
     _global->setScreen(new NFCMenuScreen());
@@ -220,6 +331,8 @@ void NFCPN532Screen::onBack()
 
 void NFCPN532Screen::onEscape()
 {
+  _currentCard = {};
+  _mf1AuthKeys.fill({});
   _global->setScreen(new MainMenuScreen());
 }
 
@@ -241,7 +354,10 @@ void NFCPN532Screen::update()
         onEscape();
       }
     }
-  } else
+  } else if (currentState == STATE_AUTHENTICATE)
+  {
+    // does nothing or uninterruptible
+  }else
   {
     ListScreen::update();
   }

@@ -25,7 +25,7 @@ bool ExtendedPN532Killer::mf1AuthenticateBlock(const uint8_t block, const uint8_
     return !resp.empty() && resp[0] == 0x00;
 }
 
-byte ExtendedPN532Killer::getCardType(byte sak)
+ExtendedPN532Killer::CardType ExtendedPN532Killer::getCardType(byte sak)
 {
     if (sak & 0x04) { // UID not complete
         return CARD_TYPE_NOT_COMPLETE;
