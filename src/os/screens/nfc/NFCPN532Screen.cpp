@@ -18,6 +18,7 @@ NFCPN532Screen::~NFCPN532Screen()
 void NFCPN532Screen::init()
 {
   Serial1.begin(115000, SERIAL_8N1, 2, 1);
+  Template::renderHead("MToolsTec PN532");
   Template::drawStatusBody("Check PN532 module...");
   HelperUtility::delayMs(500);
   const bool _ok = _module.setNormalMode();
@@ -69,6 +70,7 @@ void NFCPN532Screen::callScanUid()
   currentState = STATE_SCAN_UID;
 
   setEntries({});
+  Template::renderHead("Scan UID");
   Template::drawStatusBody("Scanning ISO14443...");
   auto _body = Template::createBody();
   bool isFound = false;
@@ -112,6 +114,7 @@ void NFCPN532Screen::callScanUid()
 void NFCPN532Screen::goShowDiscoveredKeys()
 {
   currentState = STATE_SHOW_KEY;
+  Template::renderHead("Discovered Keys");
   std::vector<ListEntryItem> temporaryKeys = {
     {"Card", _module.getCardTypeStr(_currentCard.sak)},
     {"UID", _currentCard.uid_hex},
@@ -129,7 +132,7 @@ void NFCPN532Screen::goShowDiscoveredKeys()
     });
     temporaryKeys.push_back({
       _mf1AuthKeys[sector].second.c_str(),
-      sectorLabel + "A",
+      sectorLabel + "B",
     });
   }
 
@@ -151,6 +154,7 @@ void NFCPN532Screen::callAuthenticate()
   currentState = STATE_AUTHENTICATE;
 
   setEntries({});
+  Template::renderHead("Authenticate");
   Template::drawStatusBody("Scanning ISO14443...");
   _module.setNormalMode();
 
@@ -208,6 +212,7 @@ void NFCPN532Screen::callAuthenticate()
 void NFCPN532Screen::callMemoryReader()
 {
   currentState = STATE_MEMORY_READER;
+  Template::renderHead("Memory Reader");
   std::vector<ListEntryItem> memoryEntries = {
     {"Card", _module.getCardTypeStr(_currentCard.sak)},
     {"UID", _currentCard.uid_hex},
