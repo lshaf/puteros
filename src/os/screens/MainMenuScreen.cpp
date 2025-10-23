@@ -7,7 +7,21 @@
 #include "os/screens/WelcomeScreen.hpp"
 #include "os/screens/ble/BLEMenuScreen.h"
 #include "os/screens/nfc/NFCMenuScreen.h"
+#include "os/screens/utility/UtilityMenuScreen.h"
 #include "os/screens/wifi/WifiMenuScreen.h"
+
+void MainMenuScreen::init()
+{
+  Template::renderHead("Main Menu");
+  setEntries({
+    {"Wifi"},
+    {"Bluetooth"},
+    {"NFC"},
+    {"Files"},
+    {"Utility"},
+    {"Settings"}
+  });
+}
 
 void MainMenuScreen::onBack()
 {
@@ -31,5 +45,8 @@ void MainMenuScreen::onEnter(ListEntryItem entry)
   } else if (entry.label == "Settings")
   {
     _global->setScreen(new SettingScreen());
+  } else if (entry.label == "Utility")
+  {
+    _global->setScreen(new UtilityMenuScreen());
   }
 }

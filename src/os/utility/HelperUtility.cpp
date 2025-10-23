@@ -18,6 +18,6 @@ std::string HelperUtility::stringToHex(const std::string& input)
 
 void HelperUtility::delayMicroseconds(unsigned long us)
 {
-  unsigned long start = micros();
+  const unsigned long start = micros();
   while (micros() - start < us) {}
 }

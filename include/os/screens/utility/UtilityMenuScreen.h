@@ -1,16 +1,16 @@
 //
-// Created by l-sha on 9/20/2025.
+// Created by l-sha on 23/10/2025.
 //
-#pragma once
 
+#pragma once
 #include "os/core/ListScreen.hpp"
 
-class MainMenuScreen final : public ListScreen
+class UtilityMenuScreen final : public ListScreen
 {
 public:
   void init() override;
 
 protected:
-  void onBack() override;
   void onEnter(ListEntryItem entry) override;
+  void onBack() override;
 };
