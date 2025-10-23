@@ -27,7 +27,7 @@ void UtilI2CDetectorScreen::init()
   if (!started)
   {
     Template::drawStatusBody("I2C Init Failed");
-    HelperUtility::delayMicroseconds(1500);
+    HelperUtility::delayMs(1500);
     _global->setScreen(new UtilityMenuScreen());
     return;
   }

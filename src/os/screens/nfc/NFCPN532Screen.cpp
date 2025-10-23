@@ -19,13 +19,13 @@ void NFCPN532Screen::init()
 {
   Serial1.begin(115000, SERIAL_8N1, 2, 1);
   Template::drawStatusBody("Check PN532 module...");
-  HelperUtility::delayMicroseconds(500);
+  HelperUtility::delayMs(500);
   const bool _ok = _module.setNormalMode();
   if (!_ok)
   {
     Template::drawStatusBody("Failed to communicate with PN532.");
-    HelperUtility::delayMicroseconds(1500);
-    onEscape();
+    HelperUtility::delayMs(1500);
+    _global->setScreen(new NFCMenuScreen());
     return;
   }
 
@@ -99,8 +99,12 @@ void NFCPN532Screen::callScanUid()
     }
   }
 
+  if (!isFound)
+  {
+    _body.setTextSize(2);
+    _body.drawCenterString("No Tag Found.", _body.width() / 2, _body.height() / 2 - _body.fontHeight() / 2);
+  }
   _body.setTextSize(1);
-  if (!isFound) _body.print("No Tag Found.");
   _body.drawCenterString("Enter to scan, Back to menu.", _body.width() / 2, _body.height() - _body.fontHeight());
   Template::renderBody(&_body);
 }
@@ -168,7 +172,7 @@ void NFCPN532Screen::callAuthenticate()
   if (_currentCard.uid.empty())
   {
     Template::drawStatusBody("No ISO14443 Tag Found.");
-    HelperUtility::delayMicroseconds(1500);
+    HelperUtility::delayMs(1500);
     goActualMenu();
     return;
   }
@@ -178,7 +182,7 @@ void NFCPN532Screen::callAuthenticate()
   if (cardDetail == _mf1CardDetails.end())
   {
     Template::drawStatusBody("No Supported Tag Found.");
-    HelperUtility::delayMicroseconds(1500);
+    HelperUtility::delayMs(1500);
     goActualMenu();
     return;
   }

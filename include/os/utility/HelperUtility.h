@@ -10,5 +10,5 @@ class HelperUtility
 {
 public:
   static std::string stringToHex(const std::string& input);
-  static void delayMicroseconds(unsigned long us);
+  static void delayMs(unsigned long us);
 };

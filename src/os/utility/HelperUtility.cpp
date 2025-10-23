@@ -16,8 +16,9 @@ std::string HelperUtility::stringToHex(const std::string& input)
   return hex;
 }
 
-void HelperUtility::delayMicroseconds(unsigned long us)
+void HelperUtility::delayMs(unsigned long ms)
 {
+  const unsigned long us = ms * 1000;
   const unsigned long start = micros();
   while (micros() - start < us) {}
 }
