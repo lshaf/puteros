@@ -44,8 +44,6 @@ private:
     STATE_MEMORY_READER
   } currentState = STATE_PN532;
 
-  std::string convertKeyToString(const NFCUtility::MIFARE_Key& key);
-
   void goPN532Menu();
   void goPN532KillerMenu();
   void goMifareClassicMenu();

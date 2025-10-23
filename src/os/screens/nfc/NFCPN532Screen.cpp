@@ -109,28 +109,14 @@ void NFCPN532Screen::callScanUid()
   Template::renderBody(&_body);
 }
 
-std::string NFCPN532Screen::convertKeyToString(const NFCUtility::MIFARE_Key& key)
-{
-  if (!key) return "??:??:??:??:??:??";
-  char buffer[20];
-  const auto _kv = key.value();
-  sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
-    _kv[0], _kv[1],
-    _kv[2], _kv[3],
-    _kv[4], _kv[5]
-  );
-
-  return buffer;
-}
-
 void NFCPN532Screen::goShowDiscoveredKeys()
 {
   currentState = STATE_SHOW_KEY;
   std::vector<ListEntryItem> temporaryKeys = {
     {"Card", _module.getCardTypeStr(_currentCard.sak)},
-    {"UID", _currentCard.uid_hex.c_str()},
-    {"ATQA", _currentCard.atqa_hex.c_str()},
-    {"SAK", _currentCard.sak_hex.c_str()},
+    {"UID", _currentCard.uid_hex},
+    {"ATQA", _currentCard.atqa_hex},
+    {"SAK", _currentCard.sak_hex},
     {"Keys:"}
   };
   const auto cardDetail = _mf1CardDetails.find(_module.getCardType(_currentCard.sak));
@@ -138,11 +124,11 @@ void NFCPN532Screen::goShowDiscoveredKeys()
   {
     std::string sectorLabel = "Sector " + std::to_string(sector);
     temporaryKeys.push_back({
-      convertKeyToString(_mf1AuthKeys[sector].first),
+      _mf1AuthKeys[sector].first.c_str(),
       sectorLabel + "A",
     });
     temporaryKeys.push_back({
-      convertKeyToString(_mf1AuthKeys[sector].second),
+      _mf1AuthKeys[sector].second.c_str(),
       sectorLabel + "A",
     });
   }
@@ -224,9 +210,9 @@ void NFCPN532Screen::callMemoryReader()
   currentState = STATE_MEMORY_READER;
   std::vector<ListEntryItem> memoryEntries = {
     {"Card", _module.getCardTypeStr(_currentCard.sak)},
-    {"UID", _currentCard.uid_hex.c_str()},
-    {"ATQA", _currentCard.atqa_hex.c_str()},
-    {"SAK", _currentCard.sak_hex.c_str()},
+    {"UID", _currentCard.uid_hex},
+    {"ATQA", _currentCard.atqa_hex},
+    {"SAK", _currentCard.sak_hex},
     {"Memory:"}
   };
 

@@ -30,6 +30,18 @@ public:
 
     const mfKey& value() const { return key; }
     mfKey& value() { return key; }
+    std::string c_str() const
+    {
+      if (!has_value) return "??:??:??:??:??:??";
+      char buffer[20];
+      sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
+        key[0], key[1],
+        key[2], key[3],
+        key[4], key[5]
+      );
+
+      return buffer;
+    }
   };
 
   static std::array<MIFARE_Key, 9> getDefaultKeys() {
