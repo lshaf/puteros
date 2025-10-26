@@ -6,6 +6,7 @@
 #include "os/screens/SettingScreen.h"
 #include "os/screens/WelcomeScreen.hpp"
 #include "os/screens/ble/BLEMenuScreen.h"
+#include "os/screens/game/GameMenuScreen.h"
 #include "os/screens/nfc/NFCMenuScreen.h"
 #include "os/screens/utility/UtilityMenuScreen.h"
 #include "os/screens/wifi/WifiMenuScreen.h"
@@ -19,6 +20,7 @@ void MainMenuScreen::init()
     {"NFC"},
     {"Files"},
     {"Utility"},
+    {"Games"},
     {"Settings"}
   });
 }
@@ -48,5 +50,8 @@ void MainMenuScreen::onEnter(ListEntryItem entry)
   } else if (entry.label == "Utility")
   {
     _global->setScreen(new UtilityMenuScreen());
+  } else if (entry.label == "Games")
+  {
+    _global->setScreen(new GameMenuScreen());
   }
 }
