@@ -29,7 +29,7 @@ void setup()
   if (!SD.begin(SD_SPI_CS_PIN, SPI, 25000000))
   {
     M5Cardputer.Lcd.drawCenterString(
-      "SDCard is not loaded",
+      "SDCard not loaded",
       M5Cardputer.Lcd.width() / 2,
       M5Cardputer.Lcd.height() / 2 - M5Cardputer.Lcd.fontHeight() / 2
     );
@@ -41,7 +41,7 @@ void setup()
   _global->setScreen(new WelcomeScreen());
   const auto config = _global->getConfig();
   const auto brightness = config->get("brightness", "90").toInt();
-  M5Cardputer.Lcd.setBrightness(brightness / 100.0 * 255);
+  M5Cardputer.Lcd.setBrightness(static_cast<uint8_t>(brightness / 100.0 * 255));
 }
 
 void loop()

@@ -28,7 +28,7 @@ public:
   void renderGameOver();
   void renderWin();
   void resetState();
-  void navigate(State_e newState)
+  void navigate(const State_e newState)
   {
     currentState = newState;
     render();
@@ -36,7 +36,7 @@ public:
 
   void initGame();
 
-  std::string getDifficultyStr()
+  std::string getDifficultyStr() const
   {
     switch (currentDifficulty)
     {
@@ -47,18 +47,18 @@ public:
     }
   }
 
-  int getTimer()
+  int getTimer() const
   {
     switch (currentDifficulty)
     {
       case 0: return 120;
-      case 1: return 90;
+      case 1: return 75;
       case 2: return 90;
       default: return 120;
     }
   }
 
-  int getColorGuess(uint8_t index, uint8_t guessedNumber)
+  int getColorGuess(const uint8_t index, const uint8_t guessedNumber) const
   {
     if (guessedNumber == targetNumber[index]) return TFT_GREEN;
     for (int l = 0;l < 4;l++)
@@ -71,9 +71,9 @@ public:
 private:
   State_e currentState = STATE_MAIN_MENU;
   unsigned long lastRender = 0;
+  unsigned long endTime = 0;
 
   std::array<uint8_t, 4> playerInput[maxAttempt] = {};
-  int endTime = 0;
   int currentInputCursor = 0;
   uint8_t totalUserInput = 0;
   std::array<uint8_t, 4> currentInput = {};

@@ -17,25 +17,9 @@ WifiBeaconSpamScreen::~WifiBeaconSpamScreen()
 void WifiBeaconSpamScreen::init()
 {
   Template::renderHead("WiFi Spam");
+  Template::drawStatusBody("Loading...");
   attacker = new WifiAttackUtility();
   render();
-
-  for (int i = 0; i < 30; i++) {
-    ssidList.push_back(generateRandomSSID(15));
-  }
-}
-
-std::string WifiBeaconSpamScreen::generateRandomSSID(uint8_t length)
-{
-  std::string out;
-  out.reserve(length);
-  const uint8_t charset[] = "abcdefghijklmnopqrstuvwxyz0123456789";
-  const uint8_t charset_length = sizeof(charset);
-  while (out.size() < length) {
-    const uint8_t r = static_cast<uint8_t>(random(charset_length));
-    out.push_back(charset[r]);
-  }
-  return out;
 }
 
 void WifiBeaconSpamScreen::broadcastWifiBeacon()
@@ -63,19 +47,15 @@ void WifiBeaconSpamScreen::update()
 
 void WifiBeaconSpamScreen::render()
 {
-  if (millis() - lastRender >= 1000) {
+  if (millis() - lastRender >= 500) {
     lastRender = millis();
-    loading = (loading + 1) % 5;
     auto body = Template::createBody();
 
-    std::string loadingStr = "Spamming";
-    for (uint8_t i = 0; i < loading; i++) {
-      loadingStr += ".";
-    }
+    static int dotCount = 0;
+    const std::string loadingStr = "[" + std::string(1, loadingBar[dotCount]) + "] Spamming...";
+    dotCount = (dotCount + 1) % 4;
 
-    body.setTextSize(2);
     body.drawCenterString(loadingStr.c_str(), body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
-    body.setTextSize(1);
     body.drawCenterString("esc/back to stop", body.width() / 2, body.height() - body.fontHeight() - 2);
     Template::renderBody(&body);
   }

@@ -1,6 +1,7 @@
 #include "os/screens/game/DecodeGameScreen.h"
 #include "os/component/Template.hpp"
 #include "os/screens/game/GameMenuScreen.h"
+#include "os/utility/HelperUtility.h"
 
 DecodeGameScreen::~DecodeGameScreen()
 {
@@ -16,10 +17,8 @@ void DecodeGameScreen::update()
 {
   if (currentState == STATE_PLAY && millis() - lastRender >= 500)
   {
-
-    if (endTime - millis() <= 0)
+    if (millis() >= endTime)
     {
-      endTime = millis() + 10000;
       navigate(STATE_GAME_OVER);
     } else
     {
@@ -155,6 +154,7 @@ void DecodeGameScreen::renderMainMenu()
 
 void DecodeGameScreen::initGame()
 {
+  resetState();
   endTime = millis() + getTimer() * 1000;
   for (int i = 0; i < 4; i++)
   {
@@ -246,7 +246,6 @@ void DecodeGameScreen::renderGamePlay()
 
 void DecodeGameScreen::renderGameOver()
 {
-  resetState();
   auto body = Template::createBody();
   body.setTextSize(2);
   body.setTextColor(TFT_RED);
@@ -256,7 +255,6 @@ void DecodeGameScreen::renderGameOver()
 
 void DecodeGameScreen::renderWin()
 {
-  resetState();
   auto body = Template::createBody();
   body.setTextSize(2);
   body.setTextColor(TFT_GREEN);
