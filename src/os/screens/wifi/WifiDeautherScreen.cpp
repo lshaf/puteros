@@ -19,7 +19,7 @@ void WifiDeautherScreen::init()
   Template::renderHead("WiFi Deauther");
   currentState = STATE_MAIN;
   setEntries({
-    {"Target Wifi", target.ssid.c_str()},
+    {"Target Wifi", target.ssid},
     {"Start Deauth"},
   });
 }
@@ -38,7 +38,7 @@ void WifiDeautherScreen::onEnter(ListEntryItem entry)
         return;
       }
 
-      Template::drawStatusBody(("Deauthing " + target.ssid + "...").c_str());
+      Template::drawStatusBody("Deauthing " + target.ssid + "...");
       currentState = STATE_DEAUTHING;
       attacker = new WifiAttackUtility();
     } else if (entry.label == "Target Wifi")
@@ -115,7 +115,7 @@ void WifiDeautherScreen::update()
       attacker->deauthenticate(target.bssid, target.channel);
       // Show a simple animation or status update for user feedback
       static int dotCount = 0;
-      Template::drawStatusBody(("[" + std::string(1, loadingBar[dotCount]) + "] Deauthing " + target.ssid + "...").c_str());
+      Template::drawStatusBody("[" + std::string(1, loadingBar[dotCount]) + "] Deauthing " + target.ssid + "...");
       dotCount = (dotCount + 1) % 4;
       delay(100);
     }

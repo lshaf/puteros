@@ -7,16 +7,7 @@
 class WifiMenuScreen final : public ListScreen
 {
 public:
-  void init() override
-  {
-    Template::renderHead("WiFi");
-    setEntries({
-      {"Network"},
-      {"WiFi Analyzer"},
-      {"Packet Monitor"},
-      {"WiFi Deauther"}
-    });
-  };
+  void init() override;
 
   void onEnter(ListEntryItem entry) override;
   void onBack() override;

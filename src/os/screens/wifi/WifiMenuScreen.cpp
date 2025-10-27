@@ -5,9 +5,22 @@
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 #include "os/screens/wifi/WifiAnalyzerScreen.h"
+#include "os/screens/wifi/WifiBeaconSpamScreen.h"
 #include "os/screens/wifi/WifiDeautherScreen.h"
 #include "os/screens/wifi/WifiNetworkScreen.h"
 #include "os/screens/wifi/WifiPacketMonitorScreen.h"
+
+void WifiMenuScreen::init()
+{
+  Template::renderHead("WiFi");
+  setEntries({
+    {"Network"},
+    {"WiFi Analyzer"},
+    {"Packet Monitor"},
+    {"WiFi Deauther"},
+    {"Beacon Spam"}
+  });
+}
 
 void WifiMenuScreen::onEnter(const ListEntryItem entry)
 {
@@ -23,6 +36,9 @@ void WifiMenuScreen::onEnter(const ListEntryItem entry)
   } else if (entry.label == "WiFi Deauther")
   {
     _global->setScreen(new WifiDeautherScreen());
+  } else if (entry.label == "Beacon Spam")
+  {
+    _global->setScreen(new WifiBeaconSpamScreen());
   }
 }
 void WifiMenuScreen::onBack()
