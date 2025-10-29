@@ -73,10 +73,10 @@ public:
     renderBody(&body);
   }
 
-  static void drawStatusBody(const std::string& status)
+  static void drawStatusBody(const std::string& status, const int color = TFT_WHITE)
   {
     auto body = createBody();
-    body.setTextColor(TFT_WHITE);
+    body.setTextColor(color);
     HelperUtility::drawWrappedCenterString(body, status);
     renderBody(&body);
   }
