@@ -6,6 +6,7 @@
 
 #include <M5Cardputer.h>
 #include "BatteryIndicator.hpp"
+#include "os/utility/HelperUtility.h"
 
 class Template
 {
@@ -76,7 +77,7 @@ public:
   {
     auto body = createBody();
     body.setTextColor(TFT_WHITE);
-    body.drawCenterString(status.c_str(), body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+    HelperUtility::drawWrappedCenterString(body, status);
     renderBody(&body);
   }
 };
