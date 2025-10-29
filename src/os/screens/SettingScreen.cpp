@@ -3,16 +3,22 @@
 //
 
 #include "os/screens/SettingScreen.h"
-
 #include "os/component/InputNumberScreen.h"
+#include "os/component/InputScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
+#include "os/utility/HelperUtility.h"
 
 void SettingScreen::init()
 {
   currentState = STATE_MAIN;
   const String brightnessValue = _config->get(CONFIG_BRIGHTNESS, "90");
+  const String name = _config->get(CONFIG_DEVICE_NAME, "Puter");
   Template::renderHead("Settings");
-  setEntries({{"Brightness", brightnessValue.c_str()}, {"About", ""}});
+  setEntries({
+    {"Name", name.c_str()},
+    {"Brightness", brightnessValue.c_str()},
+    {"About", ""}
+  });
 }
 
 void SettingScreen::renderAbout()
@@ -39,7 +45,24 @@ void SettingScreen::onEnter(const ListEntryItem entry)
     {
       _config->set(CONFIG_BRIGHTNESS, String(newBrightness));
       const bool saved = _config->save();
-      if (saved) M5Cardputer.Lcd.setBrightness(newBrightness / 100.0 * 255);
+      if (saved) M5Cardputer.Lcd.setBrightness(static_cast<uint8_t>(newBrightness / 100.0 * 255));
+    }
+
+    init();
+  } else if (entry.label == "Name")
+  {
+    const auto newName = InputScreen::popup("Device Name", entry.value);
+    if (!newName.empty() && newName.size() <= 15)
+    {
+      if (newName != entry.value)
+      {
+        _config->set(CONFIG_DEVICE_NAME, newName.c_str());
+        _config->save();
+      }
+    } else
+    {
+      Template::drawStatusBody("Cannot have more than 15 characters.");
+      HelperUtility::delayMs(1500);
     }
 
     init();

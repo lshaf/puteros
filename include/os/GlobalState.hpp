@@ -7,6 +7,7 @@
 #include "core/Screen.hpp"
 
 #define CONFIG_BRIGHTNESS "brightness"
+#define CONFIG_DEVICE_NAME "device_name"
 
 class GlobalState {
 public:
