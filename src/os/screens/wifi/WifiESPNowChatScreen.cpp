@@ -80,6 +80,7 @@ void WifiESPNowChatScreen::update()
   {
     if (_keyboard->isKeyPressed(KEY_ENTER))
     {
+      currentState = STATE_COMPOSE;
       const std::string message = InputScreen::popup("Message");
       if (!message.empty()) sendMessage(message);
       else render();
@@ -92,6 +93,7 @@ void WifiESPNowChatScreen::update()
 
 void WifiESPNowChatScreen::render()
 {
+  currentState = STATE_CHAT;
   const int inputY = 14;
   auto body = Template::createBody();
   body.drawRoundRect(0, body.height() - inputY, body.width(), inputY, 2.5, BLUE);
@@ -132,8 +134,8 @@ void WifiESPNowChatScreen::onDataRecv(const uint8_t* mac_addr, const uint8_t* da
   memcpy(receivedMsg.sender, mac_addr, 6);
   memcpy(&receivedMsg.message, msg, sizeof(Message_s));
   messageQueue.push_back(receivedMsg);
-  render();
   M5Cardputer.Speaker.playWav(NOTIFICATION_SOUND, sizeof(NOTIFICATION_SOUND));
+  if (currentState == STATE_CHAT) render();
 }
 
 void WifiESPNowChatScreen::onDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)

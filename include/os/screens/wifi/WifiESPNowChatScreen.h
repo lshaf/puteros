@@ -35,6 +35,11 @@ public:
     if (instance) instance->onDataSent(mac_addr, status);
   }
 protected:
+  enum State_e
+  {
+    STATE_CHAT,
+    STATE_COMPOSE,
+  } currentState = STATE_CHAT;
   char DEFAULT_CODE[5] = {0x00, 0x01, 0x14, 0x25, 0x36};
   uint8_t BROADCAST_ADDRESS[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   struct Message_s
