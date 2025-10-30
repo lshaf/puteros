@@ -14,7 +14,6 @@ WifiESPNowChatScreen::WifiESPNowChatScreen()
 
 WifiESPNowChatScreen::~WifiESPNowChatScreen()
 {
-  esp_now_unregister_send_cb();
   esp_now_unregister_recv_cb();
   esp_now_deinit();
   instance = nullptr;
@@ -35,8 +34,6 @@ void WifiESPNowChatScreen::init()
   }
 
   esp_now_register_recv_cb(&WifiESPNowChatScreen::onDataRecvCb);
-  esp_now_register_send_cb(&WifiESPNowChatScreen::onDataSentCb);
-
   if (!esp_now_is_peer_exist(BROADCAST_ADDRESS))
   {
     esp_now_peer_info_t peerInfo = {};
@@ -87,6 +84,9 @@ void WifiESPNowChatScreen::update()
     } else if (_keyboard->isKeyPressed('`'))
     {
       _global->setScreen(new WifiMenuScreen());
+    } else if (_keyboard->isKeyPressed('p'))
+    {
+      sendMessage("!ping");
     }
   }
 }
@@ -135,27 +135,13 @@ void WifiESPNowChatScreen::onDataRecv(const uint8_t* mac_addr, const uint8_t* da
   memcpy(&receivedMsg.message, msg, sizeof(Message_s));
   messageQueue.push_back(receivedMsg);
   M5Cardputer.Speaker.playWav(NOTIFICATION_SOUND, sizeof(NOTIFICATION_SOUND));
+  if (memcmp(msg->text, "!ping", 5) == 0) sendMessage("!pong");
   if (currentState == STATE_CHAT) render();
-}
-
-void WifiESPNowChatScreen::onDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
-{
-  char buf[18];
-  snprintf(buf, sizeof(buf), "%02X:%02X:%02X:%02X:%02X:%02X",
-           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-
-  if (status == ESP_NOW_SEND_FAIL)
-  {
-    Serial.println(("ESP_NOW_SEND_FAIL " + std::string(buf)).c_str());
-  } else
-  {
-    Serial.println(("ESP_NOW_SEND " + std::string(buf)).c_str());
-  }
 }
 
 void WifiESPNowChatScreen::sendMessage(const std::string& message)
 {
-  const auto name = _config->get(CONFIG_DEVICE_NAME, "Puter");
+  const auto name = _config->get(APP_CONFIG_DEVICE_NAME, APP_CONFIG_DEVICE_NAME_DEFAULT);
   Message_s msg = {};
   msg.nameLength = sizeof(msg.name);
   msg.messageLength = message.length();

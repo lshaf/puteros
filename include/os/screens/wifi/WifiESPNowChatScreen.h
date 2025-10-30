@@ -22,17 +22,10 @@ public:
   void sendMessage(const std::string& message);
 
   static WifiESPNowChatScreen* instance;
-
   void onDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len);
-  void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
-
   static void onDataRecvCb(const uint8_t *mac_addr, const uint8_t *data, int data_len)
   {
     if (instance) instance->onDataRecv(mac_addr, data, data_len);
-  }
-  static void onDataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status)
-  {
-    if (instance) instance->onDataSent(mac_addr, status);
   }
 protected:
   enum State_e
