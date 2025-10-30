@@ -7,16 +7,19 @@
 #include "os/component/InputScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/utility/HelperUtility.h"
+#include "os/utility/SoundNotification.h"
 
 void SettingScreen::init()
 {
   currentState = STATE_MAIN;
-  const String brightnessValue = _config->get(CONFIG_BRIGHTNESS, "90");
-  const String name = _config->get(CONFIG_DEVICE_NAME, "Puter");
+  const String brightnessValue = _config->get(APP_CONFIG_BRIGHTNESS, APP_CONFIG_BRIGHTNESS_DEFAULT);
+  const String name = _config->get(APP_CONFIG_DEVICE_NAME, APP_CONFIG_DEVICE_NAME_DEFAULT);
+  const String volume = _config->get(APP_CONFIG_VOLUME, APP_CONFIG_VOLUME_DEFAULT);
   Template::renderHead("Settings");
   setEntries({
     {"Name", name.c_str()},
     {"Brightness", brightnessValue.c_str()},
+    {"Volume", volume.c_str()},
     {"About", ""}
   });
 }
@@ -43,9 +46,34 @@ void SettingScreen::onEnter(const ListEntryItem entry)
     const int newBrightness = InputNumberScreen::popup("Brightness", currentValue, 5, 100);
     if (newBrightness != currentValue)
     {
-      _config->set(CONFIG_BRIGHTNESS, String(newBrightness));
+      _config->set(APP_CONFIG_BRIGHTNESS, String(newBrightness));
       const bool saved = _config->save();
       if (saved) M5Cardputer.Lcd.setBrightness(static_cast<uint8_t>(newBrightness / 100.0 * 255));
+      else
+      {
+        Template::drawStatusBody("Failed to save brightness.", TFT_RED);
+        HelperUtility::delayMs(1500);
+      }
+    }
+
+    init();
+  } else if (entry.label == "Volume")
+  {
+    const int currentValue = std::stoi(entry.value);
+    const int newVolume = InputNumberScreen::popup("Volume", currentValue, 0, 100);
+    if (newVolume != currentValue)
+    {
+      _config->set(APP_CONFIG_VOLUME, String(newVolume));
+      const bool saved = _config->save();
+      if (saved)
+      {
+        M5Cardputer.Speaker.setVolume(static_cast<uint8_t>(newVolume / 100.0 * 255));
+        M5Cardputer.Speaker.playWav(NOTIFICATION_SOUND, sizeof(NOTIFICATION_SOUND));
+      } else
+      {
+        Template::drawStatusBody("Failed to save volume.", TFT_RED);
+        HelperUtility::delayMs(1500);
+      }
     }
 
     init();
@@ -56,8 +84,12 @@ void SettingScreen::onEnter(const ListEntryItem entry)
     {
       if (newName != entry.value)
       {
-        _config->set(CONFIG_DEVICE_NAME, newName.c_str());
-        _config->save();
+        _config->set(APP_CONFIG_DEVICE_NAME, newName.c_str());
+        if (!_config->save())
+        {
+          Template::drawStatusBody("Failed to save device name.", TFT_RED);
+          HelperUtility::delayMs(1500);
+        }
       }
     } else
     {
