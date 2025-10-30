@@ -3,6 +3,8 @@
 //
 #include "os/core/ListScreen.hpp"
 
+#include "os/utility/AudioUtility.h"
+
 void ListScreen::setEntries(const std::vector<ListEntryItem>& newEntries)
 {
   entries = newEntries;
@@ -85,6 +87,8 @@ void ListScreen::navigate(const NavAction_t direction)
     }
   }
 
+  const bool navSound = _config->get(APP_CONFIG_NAV_SOUND, APP_CONFIG_NAV_SOUND_DEFAULT).toInt();
+  if (navSound) AudioUtility::playRandomTone();
   this->render();
 }
 

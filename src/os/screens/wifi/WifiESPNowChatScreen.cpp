@@ -4,6 +4,7 @@
 
 #include "os/component/InputScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
+#include "os/utility/AudioUtility.h"
 
 WifiESPNowChatScreen* WifiESPNowChatScreen::instance = nullptr;
 
@@ -134,7 +135,7 @@ void WifiESPNowChatScreen::onDataRecv(const uint8_t* mac_addr, const uint8_t* da
   memcpy(receivedMsg.sender, mac_addr, 6);
   memcpy(&receivedMsg.message, msg, sizeof(Message_s));
   messageQueue.push_back(receivedMsg);
-  M5Cardputer.Speaker.playWav(NOTIFICATION_SOUND, sizeof(NOTIFICATION_SOUND));
+  AudioUtility::playNotification();
   if (memcmp(msg->text, "!ping", 5) == 0) sendMessage("!pong");
   if (currentState == STATE_CHAT) render();
 }

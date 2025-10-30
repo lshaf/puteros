@@ -13,6 +13,8 @@
 #define APP_CONFIG_DEVICE_NAME_DEFAULT "Puter"
 #define APP_CONFIG_VOLUME "volume"
 #define APP_CONFIG_VOLUME_DEFAULT "75"
+#define APP_CONFIG_NAV_SOUND "nav_sound"
+#define APP_CONFIG_NAV_SOUND_DEFAULT "0"
 
 #define SD_SPI_SCK_PIN  40
 #define SD_SPI_MISO_PIN 39

@@ -6,23 +6,39 @@
 #include "os/component/InputNumberScreen.h"
 #include "os/component/InputScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
+#include "os/utility/AudioUtility.h"
 #include "os/utility/HelperUtility.h"
 #include "os/utility/SoundNotification.h"
 
 void SettingScreen::init()
 {
+  refreshMenu(true);
+}
+
+void SettingScreen::refreshMenu(const bool reset)
+{
   currentState = STATE_MAIN;
   const String brightnessValue = _config->get(APP_CONFIG_BRIGHTNESS, APP_CONFIG_BRIGHTNESS_DEFAULT);
   const String name = _config->get(APP_CONFIG_DEVICE_NAME, APP_CONFIG_DEVICE_NAME_DEFAULT);
   const String volume = _config->get(APP_CONFIG_VOLUME, APP_CONFIG_VOLUME_DEFAULT);
+  const bool navSound = _config->get(APP_CONFIG_NAV_SOUND, APP_CONFIG_NAV_SOUND_DEFAULT).toInt();
   Template::renderHead("Settings");
-  setEntries({
+  std::vector<ListEntryItem> finalEntries = {
     {"Name", name.c_str()},
     {"Brightness", brightnessValue.c_str()},
     {"Volume", volume.c_str()},
+    {"Navigation Sound", navSound ? "On" : "Off"},
     {"About", ""}
-  });
+  };
+
+  if (reset) setEntries(finalEntries);
+  else
+  {
+    entries = finalEntries;
+    render();
+  }
 }
+
 
 void SettingScreen::renderAbout()
 {
@@ -56,7 +72,7 @@ void SettingScreen::onEnter(const ListEntryItem entry)
       }
     }
 
-    init();
+    refreshMenu();
   } else if (entry.label == "Volume")
   {
     const int currentValue = std::stoi(entry.value);
@@ -68,7 +84,7 @@ void SettingScreen::onEnter(const ListEntryItem entry)
       if (saved)
       {
         M5Cardputer.Speaker.setVolume(static_cast<uint8_t>(newVolume / 100.0 * 255));
-        M5Cardputer.Speaker.playWav(NOTIFICATION_SOUND, sizeof(NOTIFICATION_SOUND));
+        AudioUtility::playNotification();
       } else
       {
         Template::drawStatusBody("Failed to save volume.", TFT_RED);
@@ -76,7 +92,7 @@ void SettingScreen::onEnter(const ListEntryItem entry)
       }
     }
 
-    init();
+    refreshMenu();
   } else if (entry.label == "Name")
   {
     const auto newName = InputScreen::popup("Device Name", entry.value);
@@ -97,8 +113,18 @@ void SettingScreen::onEnter(const ListEntryItem entry)
       HelperUtility::delayMs(1500);
     }
 
-    init();
-  } else if (entry.label == "About")
+    refreshMenu();
+  } else if (entry.label == "Navigation Sound")
+  {
+    _config->set(APP_CONFIG_NAV_SOUND, entry.value == "Off" ? "1" : "0");
+    if (!_config->save())
+    {
+      Template::drawStatusBody("Failed to save navigation sound.", TFT_RED);
+      HelperUtility::delayMs(1500);
+    }
+
+    refreshMenu();
+  }else if (entry.label == "About")
   {
     renderAbout();
   }

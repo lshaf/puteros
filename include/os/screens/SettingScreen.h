@@ -14,6 +14,7 @@ private:
   } currentState = STATE_MAIN;
 
   void renderAbout();
+  void refreshMenu(bool reset = false);
 protected:
   void onEnter(ListEntryItem entry) override;
   void onBack() override;
