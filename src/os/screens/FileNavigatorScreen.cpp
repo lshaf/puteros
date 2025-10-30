@@ -10,7 +10,16 @@ FileNavigatorScreen::FileNavigatorScreen(std::string  path)
 
 void FileNavigatorScreen::init()
 {
-    listDirectory(currentPath);
+    if (_global->getIsSDCardLoaded())
+    {
+        listDirectory(currentPath);
+    } else
+    {
+        Template::renderHead("File Navigator");
+        Template::drawStatusBody("SD Card not loaded", TFT_RED);
+        HelperUtility::delayMs(1500);
+        _global->setScreen(new MainMenuScreen());
+    }
 }
 
 

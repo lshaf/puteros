@@ -1,14 +1,8 @@
 #include <Arduino.h>
 #include <M5Cardputer.h>
-#include <SD.h>
 
 #include "os/GlobalState.hpp"
 #include "os/screens/WelcomeScreen.hpp"
-
-#define SD_SPI_SCK_PIN  40
-#define SD_SPI_MISO_PIN 39
-#define SD_SPI_MOSI_PIN 14
-#define SD_SPI_CS_PIN   12
 
 void setup()
 {
@@ -23,25 +17,15 @@ void setup()
     M5Cardputer.Lcd.height() / 2 - M5Cardputer.Lcd.fontHeight() / 2
   );
 
-  // SD Card Initialization
-  SPI.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
-
-  if (!SD.begin(SD_SPI_CS_PIN, SPI, 25000000))
-  {
-    M5Cardputer.Lcd.drawCenterString(
-      "SDCard not loaded",
-      M5Cardputer.Lcd.width() / 2,
-      M5Cardputer.Lcd.height() / 2 - M5Cardputer.Lcd.fontHeight() / 2
-    );
-
-    while (true);
-  }
-
   const auto _global = &GlobalState::getInstance();
+  _global->loadSDCard();
   _global->setScreen(new WelcomeScreen());
   const auto config = _global->getConfig();
-  const auto brightness = config->get("brightness", "90").toInt();
+  const auto brightness = config->get("brightness", APP_CONFIG_BRIGHTNESS_DEFAULT).toInt();
   M5Cardputer.Lcd.setBrightness(static_cast<uint8_t>(brightness / 100.0 * 255));
+
+  const auto volume = config->get(APP_CONFIG_VOLUME, APP_CONFIG_VOLUME_DEFAULT).toInt();
+  M5Cardputer.Speaker.setVolume(static_cast<uint8_t>(volume / 100.0 * 255));
 }
 
 void loop()
