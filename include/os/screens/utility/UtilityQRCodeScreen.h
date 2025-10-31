@@ -14,14 +14,17 @@ protected:
   void onEnter(ListEntryItem entry) override;
   void onBack() override;
   void onEscape() override;
+
   void refreshOption();
+  void renderPathEntries(const std::string& path);
 
 private:
   bool isInverted = false;
   enum State_e
   {
     STATE_MENU,
-    STATE_QRCODE
+    STATE_QRCODE,
+    STATE_SELECT_FILE
   } currentState = STATE_MENU;
   enum Mode_e
   {
@@ -30,6 +33,8 @@ private:
   } currentMode = MODE_WRITE;
 
   std::string qrPath = "/puteros/qrcode";
+  std::string currentPath = "";
+  bool generateQRCode(File &file);
   bool generateQRCode(const std::string& data);
   void generateFolder();
 };

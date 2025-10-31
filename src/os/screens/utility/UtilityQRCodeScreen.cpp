@@ -45,6 +45,27 @@ void UtilityQRCodeScreen::refreshOption()
   render();
 }
 
+void UtilityQRCodeScreen::renderPathEntries(const std::string& path)
+{
+  currentState = STATE_SELECT_FILE;
+
+  auto dir = SD.open(path.c_str());
+  File currentFile;
+  std::vector<ListEntryItem> fileEntries;
+  while ((currentFile = dir.openNextFile()))
+  {
+    const std::string name = currentFile.name();
+    fileEntries.push_back({
+      name,
+      currentFile.isDirectory() ? "DIR" : "FIL"
+    });
+    currentFile.close();
+  }
+  dir.close();
+
+  setEntries(fileEntries);
+}
+
 
 void UtilityQRCodeScreen::onEnter(ListEntryItem entry)
 {
@@ -54,7 +75,6 @@ void UtilityQRCodeScreen::onEnter(ListEntryItem entry)
     init();
   } else if (currentState == STATE_MENU)
   {
-
     if (entry.label == "Inverted")
     {
       isInverted = !isInverted;
@@ -65,70 +85,66 @@ void UtilityQRCodeScreen::onEnter(ListEntryItem entry)
       refreshOption();
     } else if (entry.label == "Generate")
     {
-      std::string data;
       if (currentMode == MODE_FILE)
       {
-        if (!_global->getIsSDCardLoaded())
-        {
-          Template::renderStatus("SD Card not loaded", TFT_RED);
-          HelperUtility::delayMs(1500);
-          init();
-          return;
-        }
-
         generateFolder();
-        const std::string pathFile = InputFileScreen::popup("QR File", qrPath);
-        if (pathFile.empty())
-        {
-          init();
-          return;
-        }
-
-        File qrFile = SD.open(pathFile.c_str(), FILE_READ);
-        if (!qrFile)
-        {
-          qrFile.close();
-          Template::renderStatus("Failed to open file", TFT_RED);
-          HelperUtility::delayMs(1500);
-          init();
-          return;
-        }
-
-        const auto fileSize = qrFile.size();
-        if (fileSize > 1800)
-        {
-          qrFile.close();
-          Template::renderStatus("File was too big", TFT_RED);
-          HelperUtility::delayMs(1500);
-          init();
-          return;
-        }
-
-        data.clear();
-        data.resize(fileSize);
-        const size_t readBytes = qrFile.readBytes(&data[0], fileSize);
-        if (readBytes == 0) {
-          qrFile.close();
-          Template::renderStatus("Failed to read file", TFT_RED);
-          HelperUtility::delayMs(1500);
-          init();
-          return;
-        }
-
-        if (readBytes != fileSize) data.resize(readBytes);
-        qrFile.close();
+        currentPath = qrPath;
+        renderPathEntries(qrPath);
       } else
       {
-        data = InputTextScreen::popup("QR Data");
+        const std::string data = InputTextScreen::popup("QR Data");
         if (data.empty())
         {
           init();
           return;
         }
+
+        currentState = STATE_QRCODE;
+        if (!generateQRCode(data))
+        {
+          Template::renderStatus("QRCode generation is failed");
+          HelperUtility::delayMs(1500);
+          init();
+        }
+      }
+    }
+  } else if (currentState == STATE_SELECT_FILE)
+  {
+    if (entry.value == "DIR")
+    {
+      if (currentPath == "")
+        currentPath += entry.label;
+      else
+        currentPath += "/" + entry.label;
+
+      renderPathEntries(currentPath);
+    } else
+    {
+      if (currentPath == "")
+        currentPath = "/" + entry.label;
+      else
+        currentPath = currentPath + "/" + entry.label;
+
+      File qrFile = SD.open(currentPath.c_str());
+      if (!qrFile)
+      {
+        Template::renderStatus("Failed to open file");
+        HelperUtility::delayMs(1500);
+        renderPathEntries(qrPath);
+        return;
+      }
+
+      if (qrFile.size() > 1800)
+      {
+        Template::renderStatus("File size is too large");
+        HelperUtility::delayMs(1500);
+        renderPathEntries(qrPath);
+        qrFile.close();
+        return;
       }
 
       currentState = STATE_QRCODE;
-      if (!generateQRCode(data))
+      if (!generateQRCode(qrFile))
       {
         Template::renderStatus("QRCode generation is failed");
         HelperUtility::delayMs(1500);
@@ -146,6 +162,21 @@ void UtilityQRCodeScreen::onBack()
   {
     M5Cardputer.Lcd.fillScreen(TFT_BLACK);
     init();
+  } else if (currentState == STATE_SELECT_FILE)
+  {
+    if (currentPath == qrPath)
+    {
+      init();
+    } else
+    {
+      const int lastSlash = currentPath.rfind('/');
+      if (lastSlash > 0)
+        currentPath = currentPath.substr(0, lastSlash);
+      else
+        currentPath = "";
+
+      renderPathEntries(currentPath);
+    }
   }
 }
 
@@ -154,8 +185,30 @@ void UtilityQRCodeScreen::onEscape()
   if (currentState == STATE_QRCODE)
     M5Cardputer.Lcd.fillScreen(TFT_BLACK);
 
-  _global->setScreen(new MainMenuScreen());
+  if (currentState == STATE_SELECT_FILE)
+    init();
+  else
+    _global->setScreen(new MainMenuScreen());
 }
+
+bool UtilityQRCodeScreen::generateQRCode(File& qrFile)
+{
+  std::string data = "";
+
+  const size_t fileSize = qrFile.size();
+  data.resize(fileSize);
+
+  const size_t readBytes = qrFile.readBytes(&data[0], fileSize);
+  if (readBytes == 0) {
+    return false;
+  }
+
+  if (readBytes != fileSize) data.resize(readBytes);
+  qrFile.close();
+
+  return generateQRCode(data);
+}
+
 
 bool UtilityQRCodeScreen::generateQRCode(const std::string& data)
 {
