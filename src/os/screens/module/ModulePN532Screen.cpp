@@ -2,20 +2,20 @@
 // Created by L Shaf on 19/10/25.
 //
 
-#include "os/screens/nfc/NFCPN532Screen.h"
+#include "os/screens/module/ModulePN532Screen.h"
 #include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/nfc/NFCMenuScreen.h"
+#include "os/screens/module/ModuleMenuScreen.h"
 #include "os/utility/HelperUtility.h"
 
 
-NFCPN532Screen::~NFCPN532Screen()
+ModulePN532Screen::~ModulePN532Screen()
 {
   Serial1.flush();
   while (Serial1.available()) Serial1.read();
   Serial1.end();
 }
 
-void NFCPN532Screen::init()
+void ModulePN532Screen::init()
 {
   Serial1.begin(115000, SERIAL_8N1, 2, 1);
   Template::renderHead("MToolsTec PN532");
@@ -26,7 +26,7 @@ void NFCPN532Screen::init()
   {
     Template::renderStatus("Failed to communicate with PN532.");
     HelperUtility::delayMs(1500);
-    _global->setScreen(new NFCMenuScreen());
+    _global->setScreen(new ModuleMenuScreen());
     return;
   }
 
@@ -34,7 +34,7 @@ void NFCPN532Screen::init()
   goActualMenu();
 }
 
-void NFCPN532Screen::goPN532Menu()
+void ModulePN532Screen::goPN532Menu()
 {
   currentState = STATE_PN532;
   Template::renderHead("PN532");
@@ -44,7 +44,7 @@ void NFCPN532Screen::goPN532Menu()
   });
 }
 
-void NFCPN532Screen::goPN532KillerMenu()
+void ModulePN532Screen::goPN532KillerMenu()
 {
   currentState = STATE_PN532_KILLER;
   Template::renderHead("PN532Killer");
@@ -54,7 +54,7 @@ void NFCPN532Screen::goPN532KillerMenu()
   });
 }
 
-void NFCPN532Screen::goActualMenu()
+void ModulePN532Screen::goActualMenu()
 {
   if (_isKiller)
   {
@@ -65,7 +65,7 @@ void NFCPN532Screen::goActualMenu()
   }
 }
 
-void NFCPN532Screen::callScanUid()
+void ModulePN532Screen::callScanUid()
 {
   currentState = STATE_SCAN_UID;
 
@@ -111,7 +111,7 @@ void NFCPN532Screen::callScanUid()
   Template::renderBody(&_body);
 }
 
-void NFCPN532Screen::goShowDiscoveredKeys()
+void ModulePN532Screen::goShowDiscoveredKeys()
 {
   currentState = STATE_SHOW_KEY;
   Template::renderHead("Discovered Keys");
@@ -140,7 +140,7 @@ void NFCPN532Screen::goShowDiscoveredKeys()
 }
 
 
-void NFCPN532Screen::goMifareClassicMenu()
+void ModulePN532Screen::goMifareClassicMenu()
 {
   currentState = STATE_MIFARE_CLASSIC;
   setEntries({
@@ -149,7 +149,7 @@ void NFCPN532Screen::goMifareClassicMenu()
   });
 }
 
-void NFCPN532Screen::callAuthenticate()
+void ModulePN532Screen::callAuthenticate()
 {
   currentState = STATE_AUTHENTICATE;
 
@@ -209,7 +209,7 @@ void NFCPN532Screen::callAuthenticate()
   goMifareClassicMenu();
 }
 
-void NFCPN532Screen::callMemoryReader()
+void ModulePN532Screen::callMemoryReader()
 {
   currentState = STATE_MEMORY_READER;
   Template::renderHead("Memory Reader");
@@ -288,7 +288,7 @@ void NFCPN532Screen::callMemoryReader()
   setEntries(memoryEntries);
 }
 
-void NFCPN532Screen::onEnter(ListEntryItem entry)
+void ModulePN532Screen::onEnter(ListEntryItem entry)
 {
   if (currentState == STATE_PN532_KILLER || currentState == STATE_PN532)
   {
@@ -308,7 +308,7 @@ void NFCPN532Screen::onEnter(ListEntryItem entry)
   }
 }
 
-void NFCPN532Screen::onBack()
+void ModulePN532Screen::onBack()
 {
   if (currentState == STATE_MIFARE_CLASSIC)
   {
@@ -320,18 +320,18 @@ void NFCPN532Screen::onBack()
     goMifareClassicMenu();
   } else
   {
-    _global->setScreen(new NFCMenuScreen());
+    _global->setScreen(new ModuleMenuScreen());
   }
 }
 
-void NFCPN532Screen::onEscape()
+void ModulePN532Screen::onEscape()
 {
   _currentCard = {};
   _mf1AuthKeys.fill({});
   _global->setScreen(new MainMenuScreen());
 }
 
-void NFCPN532Screen::update()
+void ModulePN532Screen::update()
 {
   if (currentState == STATE_SCAN_UID)
   {

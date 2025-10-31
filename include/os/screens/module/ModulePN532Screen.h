@@ -9,11 +9,11 @@
 #include "os/utility/ExtendedPN532Killer.h"
 #include "os/utility/NFCUtility.h"
 
-class NFCPN532Screen final : public ListScreen
+class ModulePN532Screen final : public ListScreen
 {
 public:
   void init() override;
-  ~NFCPN532Screen() override;
+  ~ModulePN532Screen() override;
 protected:
   void onEnter(ListEntryItem entry) override;
   void onBack() override;

@@ -7,7 +7,7 @@
 #include "os/screens/WelcomeScreen.hpp"
 #include "os/screens/ble/BLEMenuScreen.h"
 #include "os/screens/game/GameMenuScreen.h"
-#include "os/screens/nfc/NFCMenuScreen.h"
+#include "os/screens/module/ModuleMenuScreen.h"
 #include "os/screens/utility/UtilityMenuScreen.h"
 #include "os/screens/wifi/WifiMenuScreen.h"
 
@@ -17,8 +17,8 @@ void MainMenuScreen::init()
   setEntries({
     {"Wifi"},
     {"Bluetooth"},
-    {"NFC"},
     {"Files"},
+    {"Modules"},
     {"Utility"},
     {"Games"},
     {"Settings"}
@@ -38,9 +38,9 @@ void MainMenuScreen::onEnter(ListEntryItem entry)
   } else if (entry.label == "Bluetooth")
   {
     _global->setScreen(new BLEMenuScreen());
-  } else if (entry.label == "NFC")
+  } else if (entry.label == "Modules")
   {
-    _global->setScreen(new NFCMenuScreen());
+    _global->setScreen(new ModuleMenuScreen());
   } else if (entry.label == "Files")
   {
     _global->setScreen(new FileNavigatorScreen("/"));

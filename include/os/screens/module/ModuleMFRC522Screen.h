@@ -9,12 +9,12 @@
 #include "os/core/ListScreen.hpp"
 #include "os/utility/NFCUtility.h"
 
-class NFCRC522Screen final : public ListScreen
+class ModuleMFRC522Screen final : public ListScreen
 {
 public:
   static constexpr uint8_t I2C_ADDRESS = 0x28;
   void init() override;
-  ~NFCRC522Screen() override;
+  ~ModuleMFRC522Screen() override;
 
 protected:
   void onEnter(ListEntryItem entry) override;

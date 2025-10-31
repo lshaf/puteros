@@ -5,7 +5,7 @@
 #pragma once
 #include "os/core/ListScreen.hpp"
 
-class NFCMenuScreen final : public ListScreen
+class ModuleMenuScreen final : public ListScreen
 {
 public:
   void init() override;

@@ -1,26 +1,26 @@
-#include "os/screens/nfc/NFCRC522Screen.h"
+#include "os/screens/module/ModuleMFRC522Screen.h"
 #include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/nfc/NFCMenuScreen.h"
+#include "os/screens/module/ModuleMenuScreen.h"
 #include "os/utility/HelperUtility.h"
 
-NFCRC522Screen::~NFCRC522Screen()
+ModuleMFRC522Screen::~ModuleMFRC522Screen()
 {
   _module.PICC_HaltA();
   _module.PCD_StopCrypto1();
   M5Cardputer.Ex_I2C.release();
 }
 
-void NFCRC522Screen::init()
+void ModuleMFRC522Screen::init()
 {
   M5Cardputer.Ex_I2C.begin();
-  Template::renderHead("RC522");
+  Template::renderHead("MFRC522");
   Template::renderStatus("Checking the module...");
   HelperUtility::delayMs(500);
   if (!M5Cardputer.Ex_I2C.scanID(I2C_ADDRESS))
   {
     Template::renderStatus("Module not found.");
     HelperUtility::delayMs(1500);
-    _global->setScreen(new NFCMenuScreen());
+    _global->setScreen(new ModuleMenuScreen());
     return;
   }
   _module.PCD_Init();
@@ -29,7 +29,7 @@ void NFCRC522Screen::init()
 }
 
 
-void NFCRC522Screen::goMainMenu()
+void ModuleMFRC522Screen::goMainMenu()
 {
   currentState = STATE_MAIN_MENU;
   Template::renderHead("RC522");
@@ -39,7 +39,7 @@ void NFCRC522Screen::goMainMenu()
   });
 }
 
-void NFCRC522Screen::goMifareClassic()
+void ModuleMFRC522Screen::goMifareClassic()
 {
   currentState = STATE_MIFARE_CLASSIC;
   Template::renderHead("Mifare Classic");
@@ -49,7 +49,7 @@ void NFCRC522Screen::goMifareClassic()
   });
 }
 
-bool NFCRC522Screen::resetCardState()
+bool ModuleMFRC522Screen::resetCardState()
 {
   byte req_buff_size=2;
   byte req_buff[req_buff_size];
@@ -62,7 +62,7 @@ bool NFCRC522Screen::resetCardState()
 }
 
 
-void NFCRC522Screen::goShowDiscoveredKeys()
+void ModuleMFRC522Screen::goShowDiscoveredKeys()
 {
   currentState = STATE_SHOW_KEY;
   Template::renderHead("Discovered Keys");
@@ -93,7 +93,7 @@ void NFCRC522Screen::goShowDiscoveredKeys()
   setEntries(temporaryKeys);
 }
 
-void NFCRC522Screen::callScanUid()
+void ModuleMFRC522Screen::callScanUid()
 {
   currentState = STATE_SCAN_UID;
 
@@ -132,7 +132,7 @@ void NFCRC522Screen::callScanUid()
   Template::renderBody(&_body);
 }
 
-void NFCRC522Screen::callAuthenticate()
+void ModuleMFRC522Screen::callAuthenticate()
 {
   currentState = STATE_AUTHENTICATE;
 
@@ -218,7 +218,7 @@ void NFCRC522Screen::callAuthenticate()
   goMifareClassic();
 }
 
-void NFCRC522Screen::callMemoryReader()
+void ModuleMFRC522Screen::callMemoryReader()
 {
   currentState = STATE_MEMORY_READER;
   Template::renderHead("Memory Reader");
@@ -341,7 +341,7 @@ void NFCRC522Screen::callMemoryReader()
   setEntries(memoryEntries);
 }
 
-void NFCRC522Screen::onEnter(ListEntryItem entry)
+void ModuleMFRC522Screen::onEnter(ListEntryItem entry)
 {
   if (currentState == STATE_MAIN_MENU)
   {
@@ -358,10 +358,10 @@ void NFCRC522Screen::onEnter(ListEntryItem entry)
   }
 }
 
-void NFCRC522Screen::onBack()
+void ModuleMFRC522Screen::onBack()
 {
   if (currentState == STATE_MAIN_MENU)
-    _global->setScreen(new NFCMenuScreen());
+    _global->setScreen(new ModuleMenuScreen());
   else if (currentState == STATE_MIFARE_CLASSIC)
   {
     _currentCard = {};
@@ -371,14 +371,14 @@ void NFCRC522Screen::onBack()
     goMifareClassic();
 }
 
-void NFCRC522Screen::onEscape()
+void ModuleMFRC522Screen::onEscape()
 {
   _currentCard = {};
   _mf1AuthKeys.fill({});
   _global->setScreen(new MainMenuScreen());
 }
 
-void NFCRC522Screen::update()
+void ModuleMFRC522Screen::update()
 {
   if (currentState == STATE_SCAN_UID)
   {
