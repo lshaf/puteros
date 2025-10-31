@@ -79,8 +79,6 @@ void InputFileScreen::onEscape()
   selectedFile = "";
 }
 
-
-
 std::string InputFileScreen::popup(const std::string& title, const std::string& initial)
 {
   const auto screen = new InputFileScreen(title, initial);

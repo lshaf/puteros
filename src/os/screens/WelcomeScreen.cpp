@@ -17,12 +17,6 @@ void WelcomeScreen::update()
     {
       _global->setScreen(new MainMenuScreen());
     }
-
-    if (_keyboard->isKeyPressed('`'))
-    {
-      const auto input = InputTextScreen::popup("Your Name");
-      Template::renderStatus("Hello, " + input + "!");
-    }
   }
 }
 
