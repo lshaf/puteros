@@ -6,7 +6,7 @@
 #include "os/component/Template.hpp"
 #include "os/screens/wifi/WifiNetworkScreen.h"
 
-#include "os/component/InputScreen.hpp"
+#include "os/component/InputTextScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 #include "os/screens/wifi/network/WiNetClockScreen.h"
 #include "os/screens/wifi/network/WiNetInformationScreen.h"
@@ -64,7 +64,7 @@ void WifiNetworkScreen::onEnter(const ListEntryItem entry)
     setEntries({});
 
     const std::string ssid = entry.label.substr(entry.label.find(']') + 2);
-    const auto password = InputScreen::popup(entry.label);
+    const auto password = InputTextScreen::popup(entry.label);
     WiFi.begin(ssid.c_str(), password.c_str());
     Template::renderHead("Connecting");
     Template::renderStatus("Connecting to " + ssid + "...");

@@ -4,9 +4,9 @@
 #include <string>
 #include "../core/ScreenState.hpp"
 
-class InputScreen final : public ScreenState {
+class InputTextScreen final : public ScreenState {
 public:
-  explicit InputScreen(const std::string& title, const std::string& initial = "");
+  explicit InputTextScreen(const std::string& title, const std::string& initial = "");
   void update() override;
   bool isDone() const { return done; }
   const std::string& getResult() const { return buffer; }

@@ -5,7 +5,7 @@
 #include "os/component/Template.hpp"
 #include "os/screens/WelcomeScreen.hpp"
 
-#include "os/component/InputScreen.hpp"
+#include "os/component/InputTextScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 
 void WelcomeScreen::update()
@@ -20,7 +20,7 @@ void WelcomeScreen::update()
 
     if (_keyboard->isKeyPressed('`'))
     {
-      const auto input = InputScreen::popup("Your Name");
+      const auto input = InputTextScreen::popup("Your Name");
       Template::renderStatus("Hello, " + input + "!");
     }
   }

@@ -2,7 +2,7 @@
 #include "os/screens/wifi/WifiESPNowChatScreen.h"
 #include "os/utility/SoundNotification.h"
 
-#include "os/component/InputScreen.hpp"
+#include "os/component/InputTextScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 #include "os/utility/AudioUtility.h"
 
@@ -79,7 +79,7 @@ void WifiESPNowChatScreen::update()
     if (_keyboard->isKeyPressed(KEY_ENTER))
     {
       currentState = STATE_COMPOSE;
-      const std::string message = InputScreen::popup("Message");
+      const std::string message = InputTextScreen::popup("Message");
       if (!message.empty()) sendMessage(message);
       else render();
     } else if (_keyboard->isKeyPressed('`'))

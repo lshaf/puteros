@@ -1,22 +1,22 @@
 // InputScreen.cpp
 
 #include "os/component/Template.hpp"
-#include "os/component/InputScreen.hpp"
+#include "os/component/InputTextScreen.hpp"
 #include "M5Cardputer.h"
 
-InputScreen::InputScreen(const std::string& title, const std::string& initial)
+InputTextScreen::InputTextScreen(const std::string& title, const std::string& initial)
     : title(title), buffer(initial)
 {
   init();
 }
 
-void InputScreen::init()
+void InputTextScreen::init()
 {
   Template::renderHead(title, true);
   Template::renderBody();
 }
 
-void InputScreen::render()
+void InputTextScreen::render()
 {
   auto body = Template::createBody();
   body.fillSprite(BLACK);
@@ -29,7 +29,7 @@ void InputScreen::render()
   Template::renderBody(&body);
 }
 
-void InputScreen::update() {
+void InputTextScreen::update() {
   const auto _keyboard = &M5Cardputer.Keyboard;
   const unsigned long now = millis();
   if (now - lastBlink >= 500) {
@@ -49,9 +49,9 @@ void InputScreen::update() {
   }
 }
 
-std::string InputScreen::popup(const std::string& title, const std::string& initial)
+std::string InputTextScreen::popup(const std::string& title, const std::string& initial)
 {
-  const auto input = new InputScreen(title, initial);
+  const auto input = new InputTextScreen(title, initial);
   while (!input->isDone())
   {
     M5Cardputer.update();
