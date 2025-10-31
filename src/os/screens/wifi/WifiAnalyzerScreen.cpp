@@ -10,7 +10,7 @@
 void WifiAnalyzerScreen::init()
 {
   Template::renderHead("WiFi Analyzer");
-  Template::drawStatusBody("Scanning...");
+  Template::renderStatus("Scanning...");
 
   grabWifiList();
 }

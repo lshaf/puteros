@@ -16,7 +16,7 @@ void FileNavigatorScreen::init()
     } else
     {
         Template::renderHead("File Navigator");
-        Template::drawStatusBody("SD Card not loaded", TFT_RED);
+        Template::renderStatus("SD Card not loaded", TFT_RED);
         HelperUtility::delayMs(1500);
         _global->setScreen(new MainMenuScreen());
     }

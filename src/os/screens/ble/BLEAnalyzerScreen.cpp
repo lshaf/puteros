@@ -20,7 +20,7 @@ void BLEAnalyzerScreen::startScan()
 {
   currentState = STATE_SCAN;
   setEntries({});
-  Template::drawStatusBody("Scanning...");
+  Template::renderStatus("Scanning...");
   bleScan->clearResults();
   scanResults = bleScan->getResults(5000, false);
 
@@ -45,7 +45,7 @@ void BLEAnalyzerScreen::showInfo()
 {
   if (selectedDevice == nullptr)
   {
-    Template::drawStatusBody("Try scan again");
+    Template::renderStatus("Try scan again");
     delayMicroseconds(1500);
     showResult();
     return;

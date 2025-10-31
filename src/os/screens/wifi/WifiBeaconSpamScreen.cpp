@@ -17,7 +17,7 @@ WifiBeaconSpamScreen::~WifiBeaconSpamScreen()
 void WifiBeaconSpamScreen::init()
 {
   Template::renderHead("WiFi Spam");
-  Template::drawStatusBody("Loading...");
+  Template::renderStatus("Loading...");
   attacker = new WifiAttackUtility();
   render();
 }

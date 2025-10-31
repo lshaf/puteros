@@ -21,7 +21,7 @@ void WelcomeScreen::update()
     if (_keyboard->isKeyPressed('`'))
     {
       const auto input = InputScreen::popup("Your Name");
-      Template::drawStatusBody("Hello, " + input + "!");
+      Template::renderStatus("Hello, " + input + "!");
     }
   }
 }
@@ -29,5 +29,5 @@ void WelcomeScreen::update()
 void WelcomeScreen::render()
 {
   Template::renderHead(_title, _withBattery);
-  Template::drawStatusBody("Press ENTER to Start");
+  Template::renderStatus("Press ENTER to Start");
 }

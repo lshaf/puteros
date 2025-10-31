@@ -19,12 +19,12 @@ void NFCPN532Screen::init()
 {
   Serial1.begin(115000, SERIAL_8N1, 2, 1);
   Template::renderHead("MToolsTec PN532");
-  Template::drawStatusBody("Check PN532 module...");
+  Template::renderStatus("Check PN532 module...");
   HelperUtility::delayMs(500);
   const bool _ok = _module.setNormalMode();
   if (!_ok)
   {
-    Template::drawStatusBody("Failed to communicate with PN532.");
+    Template::renderStatus("Failed to communicate with PN532.");
     HelperUtility::delayMs(1500);
     _global->setScreen(new NFCMenuScreen());
     return;
@@ -71,7 +71,7 @@ void NFCPN532Screen::callScanUid()
 
   setEntries({});
   Template::renderHead("Scan UID");
-  Template::drawStatusBody("Scanning ISO14443...");
+  Template::renderStatus("Scanning ISO14443...");
   auto _body = Template::createBody();
   bool isFound = false;
   _module.setNormalMode();
@@ -88,7 +88,7 @@ void NFCPN532Screen::callScanUid()
 
   if (!isFound && _isKiller)
   {
-    Template::drawStatusBody("Scanning ISO15693...");
+    Template::renderStatus("Scanning ISO15693...");
     const auto hf15result = _module.hf15Scan();
     if (!hf15result.uid.empty())
     {
@@ -155,13 +155,13 @@ void NFCPN532Screen::callAuthenticate()
 
   setEntries({});
   Template::renderHead("Authenticate");
-  Template::drawStatusBody("Scanning ISO14443...");
+  Template::renderStatus("Scanning ISO14443...");
   _module.setNormalMode();
 
   _currentCard = _module.hf14aScan();
   if (_currentCard.uid.empty())
   {
-    Template::drawStatusBody("No ISO14443 Tag Found.");
+    Template::renderStatus("No ISO14443 Tag Found.");
     HelperUtility::delayMs(1500);
     goActualMenu();
     return;
@@ -171,7 +171,7 @@ void NFCPN532Screen::callAuthenticate()
   const auto cardDetail = _mf1CardDetails.find(cardType);
   if (cardDetail == _mf1CardDetails.end())
   {
-    Template::drawStatusBody("No Supported Tag Found.");
+    Template::renderStatus("No Supported Tag Found.");
     HelperUtility::delayMs(1500);
     goActualMenu();
     return;
@@ -187,9 +187,9 @@ void NFCPN532Screen::callAuthenticate()
     {
       std::string sectorProgress = std::to_string(sector) + " / " + std::to_string(cardDetail->second.first - 1);
       if (keyType == _module.MFC_KEY_TYPE_A)
-        Template::drawStatusBody("Auth sector "+sectorProgress+" key A...");
+        Template::renderStatus("Auth sector "+sectorProgress+" key A...");
       else
-        Template::drawStatusBody("Auth sector "+sectorProgress+" key B...");
+        Template::renderStatus("Auth sector "+sectorProgress+" key B...");
       for (const auto& key : NFCUtility::getDefaultKeys())
       {
         const int blockIndex = (sector < 32) ? (sector * 4 + 3) : (128 + (sector - 32) * 16 + 15);
@@ -228,7 +228,7 @@ void NFCPN532Screen::callMemoryReader()
   {
     std::vector<uint8_t> blockData;
     std::string blockProgress = std::to_string(block) + " / " + std::to_string(cardDetail->second.second - 1);
-    Template::drawStatusBody("Reading block " + blockProgress + "...");
+    Template::renderStatus("Reading block " + blockProgress + "...");
     const int currentSector = (block < 128) ? (block / 4) : static_cast<uint8_t>(((block - 128) / 16) + 32);
     if (!_mf1AuthKeys[currentSector].first && !_mf1AuthKeys[currentSector].second)
     {

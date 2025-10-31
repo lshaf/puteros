@@ -19,7 +19,7 @@ void WifiConnectClockScreen::init()
   }
 
   Template::renderHead("World Clock");
-  Template::drawStatusBody("Connecting to Server");
+  Template::renderStatus("Connecting to Server");
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
 }
 
@@ -56,7 +56,7 @@ void WifiConnectClockScreen::render()
   struct tm timeInfo;
   if (!getLocalTime(&timeInfo))
   {
-    Template::drawStatusBody("Retrying...");
+    Template::renderStatus("Retrying...");
     return;
   }
 

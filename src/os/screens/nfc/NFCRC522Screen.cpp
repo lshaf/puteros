@@ -14,11 +14,11 @@ void NFCRC522Screen::init()
 {
   M5Cardputer.Ex_I2C.begin();
   Template::renderHead("RC522");
-  Template::drawStatusBody("Checking the module...");
+  Template::renderStatus("Checking the module...");
   HelperUtility::delayMs(500);
   if (!M5Cardputer.Ex_I2C.scanID(I2C_ADDRESS))
   {
-    Template::drawStatusBody("Module not found.");
+    Template::renderStatus("Module not found.");
     HelperUtility::delayMs(1500);
     _global->setScreen(new NFCMenuScreen());
     return;
@@ -99,7 +99,7 @@ void NFCRC522Screen::callScanUid()
 
   setEntries({});
   Template::renderHead("Scan UID");
-  Template::drawStatusBody("Scanning ISO14443...");
+  Template::renderStatus("Scanning ISO14443...");
 
   bool isFound = false;
   auto _body = Template::createBody();
@@ -138,13 +138,13 @@ void NFCRC522Screen::callAuthenticate()
 
   setEntries({});
   Template::renderHead("Authenticate");
-  Template::drawStatusBody("Scanning MIFARE Classic...");
+  Template::renderStatus("Scanning MIFARE Classic...");
   const auto start = millis();
   while (true)
   {
     if (millis() - start > 5000)
     {
-      Template::drawStatusBody("No card found");
+      Template::renderStatus("No card found");
       HelperUtility::delayMs(1500);
       goMainMenu();
       return;
@@ -161,7 +161,7 @@ void NFCRC522Screen::callAuthenticate()
   const auto cardDetail = _mf1CardDetails.find(static_cast<MFRC522_I2C::PICC_Type>(_module.PICC_GetType(_currentCard.sak)));
   if (cardDetail == _mf1CardDetails.end())
   {
-    Template::drawStatusBody("No supported tag found");
+    Template::renderStatus("No supported tag found");
     HelperUtility::delayMs(1500);
     goMainMenu();
   }
@@ -176,9 +176,9 @@ void NFCRC522Screen::callAuthenticate()
     {
       std::string sectorProgress = std::to_string(sector) + " / " + std::to_string(cardDetail->second.first - 1);
       if (keyType == _module.PICC_CMD_MF_AUTH_KEY_A)
-        Template::drawStatusBody("Auth sector "+sectorProgress+" key A...");
+        Template::renderStatus("Auth sector "+sectorProgress+" key A...");
       else
-        Template::drawStatusBody("Auth sector "+sectorProgress+" key B...");
+        Template::renderStatus("Auth sector "+sectorProgress+" key B...");
       for (const auto& key : NFCUtility::getDefaultKeys())
       {
         const auto kv = key.value();
@@ -206,7 +206,7 @@ void NFCRC522Screen::callAuthenticate()
           HelperUtility::delayMs(500);
           if (counter > 5) {
             goMainMenu();
-            Template::drawStatusBody("Fail to reset card.");
+            Template::renderStatus("Fail to reset card.");
             HelperUtility::delayMs(1500);
             return;
           }
@@ -240,7 +240,7 @@ void NFCRC522Screen::callMemoryReader()
     byte blockData[18];
     byte blockSize = sizeof(blockData);
     std::string blockProgress = std::to_string(block) + " / " + std::to_string(cardDetail->second.second - 1);
-    Template::drawStatusBody("Reading block " + blockProgress + "...");
+    Template::renderStatus("Reading block " + blockProgress + "...");
     const int currentSector = (block < 128) ? (block / 4) : static_cast<uint8_t>(((block - 128) / 16) + 32);
     if (!_mf1AuthKeys[currentSector].first && !_mf1AuthKeys[currentSector].second)
     {

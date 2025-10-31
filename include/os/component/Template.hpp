@@ -73,11 +73,21 @@ public:
     renderBody(&body);
   }
 
-  static void drawStatusBody(const std::string& status, const int color = TFT_WHITE)
+  static void renderStatus(const std::string& status, const int color = TFT_WHITE)
   {
     auto body = createBody();
     body.setTextColor(color);
     HelperUtility::drawWrappedCenterString(body, status);
+    renderBody(&body);
+  }
+
+  static void renderProgress(const uint8_t progress, const std::string& status, const int color = TFT_WHITE)
+  {
+    auto body = createBody();
+    body.setTextColor(color);
+    body.drawCenterString(status.c_str(), body.width() / 2, body.height() / 2 - body.fontHeight());
+    body.drawRect(6, body.height() / 2 + 4, body.width() - 12, 10, TFT_BLUE);
+    body.fillRect(6, body.height() / 2 + 4, static_cast<float>(body.width() - 12) * progress / 100.0f, 10, TFT_BLUE);
     renderBody(&body);
   }
 };

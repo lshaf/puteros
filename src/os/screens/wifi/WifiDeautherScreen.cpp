@@ -32,20 +32,20 @@ void WifiDeautherScreen::onEnter(ListEntryItem entry)
     {
       if (target.ssid == "-" && memcmp(target.bssid, blankMac, 6) == 0)
       {
-        Template::drawStatusBody("Select a target first!");
+        Template::renderStatus("Select a target first!");
         delay(2);
         init();
         return;
       }
 
-      Template::drawStatusBody("Deauthing " + target.ssid + "...");
+      Template::renderStatus("Deauthing " + target.ssid + "...");
       currentState = STATE_DEAUTHING;
       attacker = new WifiAttackUtility();
     } else if (entry.label == "Target Wifi")
     {
       currentState = STATE_SELECT_WIFI;
       Template::renderHead("Select WiFi", true);
-      Template::drawStatusBody("Scanning...");
+      Template::renderStatus("Scanning...");
       std::vector<ListEntryItem> wifiList = {};
       WiFi.mode(WIFI_STA);
       const int totalWifi = WiFi.scanNetworks();
@@ -103,7 +103,7 @@ void WifiDeautherScreen::update()
       {
         delete attacker;
         attacker = nullptr;
-        Template::drawStatusBody("Deauth stopped. Returning to menu...");
+        Template::renderStatus("Deauth stopped. Returning to menu...");
         delay(1000);
         init();
         return;
@@ -115,7 +115,7 @@ void WifiDeautherScreen::update()
       attacker->deauthenticate(target.bssid, target.channel);
       // Show a simple animation or status update for user feedback
       static int dotCount = 0;
-      Template::drawStatusBody("[" + std::string(1, loadingBar[dotCount]) + "] Deauthing " + target.ssid + "...");
+      Template::renderStatus("[" + std::string(1, loadingBar[dotCount]) + "] Deauthing " + target.ssid + "...");
       dotCount = (dotCount + 1) % 4;
       delay(100);
     }

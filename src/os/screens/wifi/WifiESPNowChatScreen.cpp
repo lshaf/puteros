@@ -23,12 +23,12 @@ WifiESPNowChatScreen::~WifiESPNowChatScreen()
 void WifiESPNowChatScreen::init()
 {
   Template::renderHead("ESPNOW Chat");
-  Template::drawStatusBody("Preparing the chat");
+  Template::renderStatus("Preparing the chat");
 
   WiFi.mode(WIFI_MODE_STA);
   if (esp_now_init() != ESP_OK)
   {
-    Template::drawStatusBody("Error initializing ESP-NOW", TFT_RED);
+    Template::renderStatus("Error initializing ESP-NOW", TFT_RED);
     HelperUtility::delayMs(1500);
     _global->setScreen(new WifiMenuScreen());
     return;
@@ -47,22 +47,22 @@ void WifiESPNowChatScreen::init()
       switch (addPeerResult)
       {
         case ESP_ERR_ESPNOW_NOT_INIT:
-          Template::drawStatusBody("ESP-NOW not initialized", TFT_RED);
+          Template::renderStatus("ESP-NOW not initialized", TFT_RED);
           break;
         case ESP_ERR_ESPNOW_ARG:
-          Template::drawStatusBody("Invalid argument", TFT_RED);
+          Template::renderStatus("Invalid argument", TFT_RED);
           break;
         case ESP_ERR_ESPNOW_FULL:
-          Template::drawStatusBody("Peer list full", TFT_RED);
+          Template::renderStatus("Peer list full", TFT_RED);
           break;
         case ESP_ERR_ESPNOW_NO_MEM:
-          Template::drawStatusBody("Out of memory", TFT_RED);
+          Template::renderStatus("Out of memory", TFT_RED);
           break;
         case ESP_ERR_ESPNOW_EXIST:
-          Template::drawStatusBody("Peer already exists", TFT_RED);
+          Template::renderStatus("Peer already exists", TFT_RED);
           break;
         default:
-          Template::drawStatusBody("Failed to add peer", TFT_RED);
+          Template::renderStatus("Failed to add peer", TFT_RED);
           break;
       }
       HelperUtility::delayMs(1500);
@@ -157,25 +157,25 @@ void WifiESPNowChatScreen::sendMessage(const std::string& message)
     switch (success)
     {
     case ESP_ERR_ESPNOW_NOT_INIT:
-      Template::drawStatusBody("ESP-NOW not initialized", TFT_RED);
+      Template::renderStatus("ESP-NOW not initialized", TFT_RED);
       break;
     case ESP_ERR_ESPNOW_ARG:
-      Template::drawStatusBody("Invalid argument", TFT_RED);
+      Template::renderStatus("Invalid argument", TFT_RED);
       break;
     case ESP_ERR_ESPNOW_INTERNAL:
-      Template::drawStatusBody("Internal error", TFT_RED);
+      Template::renderStatus("Internal error", TFT_RED);
       break;
     case ESP_ERR_ESPNOW_NO_MEM:
-      Template::drawStatusBody("Out of memory", TFT_RED);
+      Template::renderStatus("Out of memory", TFT_RED);
       break;
     case ESP_ERR_ESPNOW_NOT_FOUND:
-      Template::drawStatusBody("Peer not found", TFT_RED);
+      Template::renderStatus("Peer not found", TFT_RED);
       break;
     case ESP_ERR_ESPNOW_IF:
-      Template::drawStatusBody("Interface error", TFT_RED);
+      Template::renderStatus("Interface error", TFT_RED);
       break;
     default:
-      Template::drawStatusBody("Failed to send message", TFT_RED);
+      Template::renderStatus("Failed to send message", TFT_RED);
       break;
     }
     HelperUtility::delayMs(1500);

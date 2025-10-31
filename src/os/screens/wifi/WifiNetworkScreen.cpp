@@ -34,7 +34,7 @@ void WifiNetworkScreen::showMenu()
 void WifiNetworkScreen::showWifiList()
 {
   Template::renderHead("Scan WiFi", true);
-  Template::drawStatusBody("Scanning...");
+  Template::renderStatus("Scanning...");
 
   std::vector<ListEntryItem> wifiList = {};
   const int totalWifi = WiFi.scanNetworks();
@@ -67,7 +67,7 @@ void WifiNetworkScreen::onEnter(const ListEntryItem entry)
     const auto password = InputScreen::popup(entry.label);
     WiFi.begin(ssid.c_str(), password.c_str());
     Template::renderHead("Connecting");
-    Template::drawStatusBody("Connecting to " + ssid + "...");
+    Template::renderStatus("Connecting to " + ssid + "...");
 
     int attempts = 0;
     while (WiFi.status() != WL_CONNECTED && attempts < 6)

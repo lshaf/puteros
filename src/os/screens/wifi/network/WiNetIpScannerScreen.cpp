@@ -32,7 +32,7 @@ void WiNetIPScannerScreen::scanIP()
 {
   currentState = STATE_SCANNING_IP;
   Template::renderHead("IP Scanner");
-  Template::drawStatusBody("Scanning...");
+  Template::renderStatus("Scanning...");
 
   IPAddress currentIP = WiFi.localIP();
   if (currentIP[0] == 0 && currentIP[1] == 0 && currentIP[2] == 0 && currentIP[3] == 0)
@@ -44,8 +44,7 @@ void WiNetIPScannerScreen::scanIP()
   for (int i = startIp; i < endIp; i++)
   {
     const int percent = static_cast<int>((i - startIp) / static_cast<float>(endIp - startIp) * 100);
-    String progress = "[" + String(percent) + "%] Scanning...";
-    Template::drawStatusBody(progress.c_str());
+    Template::renderProgress(percent, "Scanning...");
 
     if (i == currentIP[3]) continue;
     IPAddress ip(currentIP[0], currentIP[1], currentIP[2], i);
@@ -69,7 +68,7 @@ void WiNetIPScannerScreen::scanPort(const std::string& ip)
 {
   currentState = STATE_SCANNING_PORT;
   Template::renderHead("Port Scan");
-  Template::drawStatusBody("Start Scanning...");
+  Template::renderStatus("Start Scanning...");
   const std::vector<std::pair<int, std::string>> commonPorts = {
     {20, "FTP Data"},      {21, "FTP"},            {22, "SSH"},             {23, "Telnet"},
     {25, "SMTP"},          {53, "DNS"},            {67, "DHCP"},            {68, "DHCP"},
@@ -100,8 +99,7 @@ void WiNetIPScannerScreen::scanPort(const std::string& ip)
   for (int i = 0; i < portCount; i++)
   {
     const int percent = static_cast<int>(i / static_cast<float>(portCount) * 100);
-    String progress = "[" + String(percent) + "%] Scanning...";
-    Template::drawStatusBody(progress.c_str());
+    Template::renderProgress(percent, "Scanning...");
 
     WiFiClient client;
     const int port = commonPorts[i].first;

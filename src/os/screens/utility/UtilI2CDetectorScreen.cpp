@@ -26,7 +26,7 @@ void UtilI2CDetectorScreen::init()
   bool started = M5Cardputer.Ex_I2C.begin();
   if (!started)
   {
-    Template::drawStatusBody("I2C Init Failed");
+    Template::renderStatus("I2C Init Failed");
     HelperUtility::delayMs(1500);
     _global->setScreen(new UtilityMenuScreen());
     return;

@@ -10,7 +10,7 @@
 void WiNetInformationScreen::init()
 {
   Template::renderHead("NET Info");
-  Template::drawStatusBody("Fetching Info...");
+  Template::renderStatus("Fetching Info...");
 }
 
 void WiNetInformationScreen::update()

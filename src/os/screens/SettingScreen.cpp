@@ -3,6 +3,8 @@
 //
 
 #include "os/screens/SettingScreen.h"
+
+#include "lgfx/utility/lgfx_qrcode.h"
 #include "os/component/InputNumberScreen.h"
 #include "os/component/InputScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
@@ -39,7 +41,6 @@ void SettingScreen::refreshMenu(const bool reset)
   }
 }
 
-
 void SettingScreen::renderAbout()
 {
   currentState = STATE_ABOUT;
@@ -67,7 +68,7 @@ void SettingScreen::onEnter(const ListEntryItem entry)
       if (saved) M5Cardputer.Lcd.setBrightness(static_cast<uint8_t>(newBrightness / 100.0 * 255));
       else
       {
-        Template::drawStatusBody("Failed to save brightness.", TFT_RED);
+        Template::renderStatus("Failed to save brightness.", TFT_RED);
         HelperUtility::delayMs(1500);
       }
     }
@@ -87,7 +88,7 @@ void SettingScreen::onEnter(const ListEntryItem entry)
         AudioUtility::playNotification();
       } else
       {
-        Template::drawStatusBody("Failed to save volume.", TFT_RED);
+        Template::renderStatus("Failed to save volume.", TFT_RED);
         HelperUtility::delayMs(1500);
       }
     }
@@ -103,13 +104,13 @@ void SettingScreen::onEnter(const ListEntryItem entry)
         _config->set(APP_CONFIG_DEVICE_NAME, newName.c_str());
         if (!_config->save())
         {
-          Template::drawStatusBody("Failed to save device name.", TFT_RED);
+          Template::renderStatus("Failed to save device name.", TFT_RED);
           HelperUtility::delayMs(1500);
         }
       }
     } else
     {
-      Template::drawStatusBody("Cannot have more than 15 characters.");
+      Template::renderStatus("Cannot have more than 15 characters.");
       HelperUtility::delayMs(1500);
     }
 
@@ -119,7 +120,7 @@ void SettingScreen::onEnter(const ListEntryItem entry)
     _config->set(APP_CONFIG_NAV_SOUND, entry.value == "Off" ? "1" : "0");
     if (!_config->save())
     {
-      Template::drawStatusBody("Failed to save navigation sound.", TFT_RED);
+      Template::renderStatus("Failed to save navigation sound.", TFT_RED);
       HelperUtility::delayMs(1500);
     }
 
