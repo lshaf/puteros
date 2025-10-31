@@ -6,10 +6,10 @@
 
 #include "os/core/ScreenState.hpp"
 
-class UtilI2CDetectorScreen final : public ScreenState
+class UtilityI2CDetectorScreen final : public ScreenState
 {
 public:
-  ~UtilI2CDetectorScreen() override;
+  ~UtilityI2CDetectorScreen() override;
   static constexpr size_t I2C_ADDR_COUNT = 0x78;
 
   void init() override;

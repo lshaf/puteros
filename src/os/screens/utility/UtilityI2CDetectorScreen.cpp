@@ -2,18 +2,18 @@
 // Created by l-sha on 23/10/2025.
 //
 
-#include "os/screens/utility/UtilI2CDetectorScreen.h"
+#include "os/screens/utility/UtilityI2CDetectorScreen.h"
 #include "os/component/Template.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/utility/UtilityMenuScreen.h"
 #include "os/utility/HelperUtility.h"
 
-UtilI2CDetectorScreen::~UtilI2CDetectorScreen()
+UtilityI2CDetectorScreen::~UtilityI2CDetectorScreen()
 {
   M5Cardputer.Ex_I2C.release();
 }
 
-int UtilI2CDetectorScreen::hextToDigit(const char c)
+int UtilityI2CDetectorScreen::hextToDigit(const char c)
 {
   if (c >= '0' && c <= '9') return c - '0';
   if (c >= 'A' && c <= 'F') return 10 + (c - 'A');
@@ -21,7 +21,7 @@ int UtilI2CDetectorScreen::hextToDigit(const char c)
 }
 
 
-void UtilI2CDetectorScreen::init()
+void UtilityI2CDetectorScreen::init()
 {
   bool started = M5Cardputer.Ex_I2C.begin();
   if (!started)
@@ -34,7 +34,7 @@ void UtilI2CDetectorScreen::init()
   render();
 }
 
-void UtilI2CDetectorScreen::update()
+void UtilityI2CDetectorScreen::update()
 {
   const auto _keyboard = &M5Cardputer.Keyboard;
   if (_keyboard->isChange() && _keyboard->isPressed())
@@ -52,7 +52,7 @@ void UtilI2CDetectorScreen::update()
   }
 }
 
-void UtilI2CDetectorScreen::render()
+void UtilityI2CDetectorScreen::render()
 {
   Template::renderHead("I2C Detector");
 
