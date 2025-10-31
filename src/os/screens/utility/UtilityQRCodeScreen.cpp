@@ -49,6 +49,7 @@ void UtilityQRCodeScreen::renderPathEntries(const std::string& path)
 {
   currentState = STATE_SELECT_FILE;
 
+  Template::renderHead("QR File");
   auto dir = SD.open(path.c_str());
   File currentFile;
   std::vector<ListEntryItem> fileEntries;
