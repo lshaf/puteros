@@ -6,7 +6,7 @@
 
 #include "lgfx/utility/lgfx_qrcode.h"
 #include "os/component/InputNumberScreen.h"
-#include "os/component/InputScreen.hpp"
+#include "os/component/InputTextScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/utility/AudioUtility.h"
 #include "os/utility/HelperUtility.h"
@@ -96,7 +96,7 @@ void SettingScreen::onEnter(const ListEntryItem entry)
     refreshMenu();
   } else if (entry.label == "Name")
   {
-    const auto newName = InputScreen::popup("Device Name", entry.value);
+    const auto newName = InputTextScreen::popup("Device Name", entry.value);
     if (!newName.empty() && newName.size() <= 15)
     {
       if (newName != entry.value)
