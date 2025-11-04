@@ -10,26 +10,24 @@
 
 #define HID_OFFSET 0x88
 
-typedef uint8_t HidFunction;
-
-const HidFunction HID_FUNCTION_DELETE = 0x4C + HID_OFFSET;
-const HidFunction HID_FUNCTION_BACKSPACE = 0x2A + HID_OFFSET;
-const HidFunction HID_FUNCTION_TAB = 0x2B + HID_OFFSET;
-const HidFunction HID_FUNCTION_ENTER = 0x28 + HID_OFFSET;
-const HidFunction HID_FUNCTION_ESC = 0x29 + HID_OFFSET;
-const HidFunction HID_FUNCTION_CAPS_LOCK = 0x39 + HID_OFFSET;
-const HidFunction HID_FUNCTION_LEFT_CTRL = 0xE0 + HID_OFFSET;
-const HidFunction HID_FUNCTION_LEFT_SHIFT = 0xE1 + HID_OFFSET;
-const HidFunction HID_FUNCTION_LEFT_ALT = 0xE2 + HID_OFFSET;
-const HidFunction HID_FUNCTION_LEFT_GUI = 0xE3 + HID_OFFSET;
-const HidFunction HID_FUNCTION_RIGHT_CTRL = 0xE4 + HID_OFFSET;
-const HidFunction HID_FUNCTION_RIGHT_SHIFT = 0xE5 + HID_OFFSET;
-const HidFunction HID_FUNCTION_RIGHT_ALT = 0xE6 + HID_OFFSET;
-const HidFunction HID_FUNCTION_RIGHT_GUI = 0xE7 + HID_OFFSET;
-const HidFunction HID_FUNCTION_ARROW_UP = 0x52 + HID_OFFSET;
-const HidFunction HID_FUNCTION_ARROW_DOWN = 0x51 + HID_OFFSET;
-const HidFunction HID_FUNCTION_ARROW_LEFT = 0x50 + HID_OFFSET;
-const HidFunction HID_FUNCTION_ARROW_RIGHT = 0x4F + HID_OFFSET;
+const uint8_t HID_FUNCTION_DELETE = 0xD4;
+const uint8_t HID_FUNCTION_BACKSPACE = 0xB2;
+const uint8_t HID_FUNCTION_TAB = 0xB3;
+const uint8_t HID_FUNCTION_ENTER = 0xB0;
+const uint8_t HID_FUNCTION_ESC = 0xB1;
+const uint8_t HID_FUNCTION_CAPS_LOCK = 0x02;
+const uint8_t HID_FUNCTION_LEFT_CTRL = 0xE0;
+const uint8_t HID_FUNCTION_LEFT_SHIFT = 0xE1;
+const uint8_t HID_FUNCTION_LEFT_ALT = 0xE2;
+const uint8_t HID_FUNCTION_LEFT_GUI = 0x83;
+const uint8_t HID_FUNCTION_RIGHT_CTRL = 0xE4;
+const uint8_t HID_FUNCTION_RIGHT_SHIFT = 0xE5;
+const uint8_t HID_FUNCTION_RIGHT_ALT = 0xE6;
+const uint8_t HID_FUNCTION_RIGHT_GUI = 0xE7;
+const uint8_t HID_FUNCTION_ARROW_UP = 0xDA;
+const uint8_t HID_FUNCTION_ARROW_DOWN = 0xD9;
+const uint8_t HID_FUNCTION_ARROW_LEFT = 0xD8;
+const uint8_t HID_FUNCTION_ARROW_RIGHT = 0xD7;
 
 typedef uint8_t MediaKeyReport[2];
 
