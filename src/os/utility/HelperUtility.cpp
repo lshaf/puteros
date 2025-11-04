@@ -2,8 +2,21 @@
 // Created by l-sha on 09/10/2025.
 //
 
+#include <SD.h>
 #include <Arduino.h>
 #include "os/utility/HelperUtility.h"
+
+void HelperUtility::makeDirectoryRecursive(const std::string& path)
+{
+  if (SD.exists(path.c_str())) return;
+  const auto pathStr = String(path.c_str());
+  const int lastSlash = pathStr.lastIndexOf('/');
+  if (lastSlash > 0) {
+    const String folder = pathStr.substring(0, lastSlash);
+    if (!SD.exists(folder)) SD.mkdir(folder);
+  }
+}
+
 
 std::string HelperUtility::stringToHex(const std::string& input)
 {

@@ -13,13 +13,7 @@
 
 void UtilityQRCodeScreen::generateFolder()
 {
-  const String path(qrPath.c_str());
-  if (SD.exists(path.c_str())) return;
-  const int lastSlash = path.lastIndexOf('/');
-  if (lastSlash > 0) {
-    const String folder = path.substring(0, lastSlash);
-    if (!SD.exists(folder)) SD.mkdir(folder);
-  }
+  HelperUtility::makeDirectoryRecursive(qrPath);
 }
 
 

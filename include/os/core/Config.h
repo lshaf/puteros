@@ -7,9 +7,13 @@
 #include <Arduino.h>
 #include <map>
 
+#include "os/utility/HelperUtility.h"
+
 class Config {
 private:
   const char* config_path;
+  std::map<String, String> config_;
+
 public:
   explicit Config(const char* filename): config_path(filename)
   {
@@ -47,7 +51,7 @@ public:
   }
 
   bool save() const {
-    ensureFolderExists();
+    HelperUtility::makeDirectoryRecursive(config_path);
     File file = SD.open(config_path, FILE_WRITE);
     if (!file) return false;
     for (const auto& kv : config_) {
@@ -57,18 +61,5 @@ public:
     }
     file.close();
     return true;
-  }
-
-private:
-  std::map<String, String> config_;
-  void ensureFolderExists() const {
-    String path(config_path);
-    const int lastSlash = path.lastIndexOf('/');
-    if (lastSlash > 0) {
-      String folder = path.substring(0, lastSlash);
-      if (!SD.exists(folder)) {
-        SD.mkdir(folder);
-      }
-    }
   }
 };
