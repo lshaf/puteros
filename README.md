@@ -54,6 +54,7 @@ Here is how to manually compile and upload to your M5Stack Cardputer.
 Thanks to some of the following projects, their code and community helped me a lot to get this far:
 - [Bruce Firmware](https://github.com/pr3y/Bruce)
 - [Evil M5](https://github.com/7h30th3r0n3/Evil-M5Project)
+- [ESP32 BLE Combo](https://github.com/blackketter/ESP32-BLE-Combo)
 
 ## License
 This project is open source. See LICENSE for details.
