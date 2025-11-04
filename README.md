@@ -2,16 +2,6 @@
 
 PuterOS is a compact, modular firmware for the M5Stack Cardputer (ESP32-S3). It provides a screen-driven UI and a set of tools that demonstrate and leverage the hardware capabilities of the device.
 
-## Features
-- Modular screen-based UI with many built-in utilities and attack/demo tools
-- WiFi tools: analyzers, packet monitor, deauther, ESP-NOW chat, network utilities
-- BLE tools: BLE analyzer and HID (keyboard) utilities
-- NFC/RFID module support (PN532, MFRC522)
-- File manager (view files on SD)
-- Utilities: QR code generator, I2C detector, audio playback helpers
-- Game/demo screens
-- Configurable settings (brightness, device info)
-
 ## High-level overview
 
 - **Purpose**: provide a small, extensible platform that exposes WiFi/BLE/NFC, hardware modules, and utilities through a simple menu-and-screen interface.
