@@ -1,32 +1,59 @@
 # PuterOS
 
-A modular, class-based operating system for the M5Stack Cardputer (ESP32-S3), built with PlatformIO, Arduino, and M5Stack libraries.
+PuterOS is a compact, modular firmware for the M5Stack Cardputer (ESP32-S3). It provides a screen-driven UI and a set of tools that demonstrate and leverage the hardware capabilities of the device.
 
 ## Features
-- WiFi Features
-  - World Clock
-  - WiFi Information
-  - IP + Port Scanner
-  - Packet Monitor
-  - WiFi Analyzer
-  - WiFi Deauther
-- File Manager
-  - View only for now
-- Setting
-  - Brightness
+- Modular screen-based UI with many built-in utilities and attack/demo tools
+- WiFi tools: analyzers, packet monitor, deauther, ESP-NOW chat, network utilities
+- BLE tools: BLE analyzer and HID (keyboard) utilities
+- NFC/RFID module support (PN532, MFRC522)
+- File manager (view files on SD)
+- Utilities: QR code generator, I2C detector, audio playback helpers
+- Game/demo screens
+- Configurable settings (brightness, device info)
+
+## High-level overview
+
+- **Purpose**: provide a small, extensible platform that exposes WiFi/BLE/NFC, hardware modules, and utilities through a simple menu-and-screen interface.
+- **Target**: M5Stack Cardputer (ESP32-S3) running under PlatformIO / Arduino environment.
+- **Design**: modular screens (one feature = one screen), lightweight utilities, and optional hardware module support.
+
+## Features
+
+- **WiFi**
+  - Scanning and analyzing nearby networks.
+  - Packet capture/monitoring and small demo attacks (deauth, beacon spam).
+  - Network utilities such as IP scanning and status info.
+  - ESP-NOW chat demo for device-to-device messaging.
+
+- **BLE**
+  - BLE scanning and advertisement analysis.
+  - BLE HID keyboard (duckyscript runner / shortcuts) to send keystrokes to a host.
+
+- **Modules**
+  - NFC MFRC522 (using I2C and and for now only able to read and check default keys)
+  - PN5322 Killer (using uart and for now only able to read and check default keys)
+
+- **File manager**
+  - Browse files on SD card.
+
+- **Utilities**
+  - QR code generator and renderer on the screen.
+  - I2C bus scanner to detect connected sensors/modules.
+
+- **Games**
+  - Decoding Number, small game to guess random generated number.
 
 ## Folder Structure
-- `src/` — Main source code
-- `include/` — Public headers and interfaces
-- `lib/` — External and shared libraries
-- `test/` — Test code
-- `platformio.ini` — PlatformIO project configuration
+- `src/` — implementation files (screens are under `src/os/screens/`).
+- `include/` — public headers and shared interfaces.
+- `lib/` — external libraries and helpers.
+- `platformio.ini` — build configuration.
 
-## Getting Started
+## Getting Started (quick)
 Here is how to manually compile and upload to your M5Stack Cardputer.
 
-### CLI
-1. Install [PlatformIO](https://platformio.org/)
+1. Install [PlatformIO](https://platformio.org/) (VSCode or CLI).
 2. Clone this repository
 3. Connect your M5Stack Cardputer
 4. Build and upload:
@@ -34,22 +61,6 @@ Here is how to manually compile and upload to your M5Stack Cardputer.
    pio run -t upload
    ```
    
-### VSCode
-1. Install [VSCode](https://code.visualstudio.com/)
-2. Install the [PlatformIO extension](https://platformio.org/install/ide?install=vscode)
-3. Clone this repository
-4. Open the project folder in VSCode
-5. Connect your M5Stack Cardputer
-6. Use the PlatformIO toolbar to build and upload the project
-
-### CLion
-1. Install [CLion](https://www.jetbrains.com/clion/)
-2. Install the [PlatformIO plugin](https://plugins.jetbrains.com/plugin/10052-platformio-ide)
-3. Clone this repository
-4. Open `platformio.ini` as project in CLion
-5. Connect your M5Stack Cardputer
-6. Use the PlatformIO toolbar to build and upload the project
-
 ## Credits
 Thanks to some of the following projects, their code and community helped me a lot to get this far:
 - [Bruce Firmware](https://github.com/pr3y/Bruce)
@@ -58,5 +69,3 @@ Thanks to some of the following projects, their code and community helped me a l
 
 ## License
 This project is open source. See LICENSE for details.
-
-
