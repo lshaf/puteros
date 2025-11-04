@@ -6,30 +6,78 @@
 
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/ble/BLEMenuScreen.h"
+#include "os/utility/DuckScriptUtility.h"
 
 void BLEKeyboardScreen::init()
 {
   const auto batLevel = M5Cardputer.Power.getBatteryLevel();
   bleKeyboard = new BLEKeyboardUtility("PuterOS", "M5Stack", batLevel);
+  bleKeyboard->begin();
+
   goMainMenu();
+
+  HelperUtility::makeDirectoryRecursive(duckyScriptPath);
+  HelperUtility::makeDirectoryRecursive(shortcutPath);
 }
 
 void BLEKeyboardScreen::refreshBatteryLevel()
 {
+  if (millis() - lastBatteryUpdate >= 60000) return;
+  lastBatteryUpdate = millis();
   const auto batLevel = M5Cardputer.Power.getBatteryLevel();
   bleKeyboard->setBatteryLevel(batLevel);
 }
-
 
 void BLEKeyboardScreen::goMainMenu()
 {
   currentState = STATE_MAIN;
   Template::renderHead("BLE Keyboard");
   setEntries({
-    {"Reset Pair"},
     {"Keyboard"},
+    {"Ducky Script"},
+    {"Reset Pair"},
   });
 }
+
+void BLEKeyboardScreen::goConnectedMenu()
+{
+  currentState = STATE_KEYBOARD;
+
+  auto body = Template::createBody();
+  body.setTextSize(2);
+  body.setTextColor(TFT_GREEN);
+  body.drawCenterString("Connected", body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+
+  body.setTextSize(1);
+  body.setTextColor(TFT_WHITE);
+  body.drawCenterString("Press fn+ok to quit", body.width() / 2, body.height() - body.fontHeight() - 2);
+  Template::renderBody(&body);
+}
+
+void BLEKeyboardScreen::waitingForConnection()
+{
+  if (!bleKeyboard->isConnected())
+  {
+    currentState = STATE_CONNECTING;
+    Template::renderStatus("Waiting for connection...", TFT_BLUE);
+    while (!bleKeyboard->isConnected())
+    {
+      const auto _keyboard = &M5Cardputer.Keyboard;
+      if (_keyboard->isChange() && _keyboard->isPressed())
+      {
+        const auto s = &_keyboard->keysState();
+        if (s->fn && s->enter)
+        {
+          goMainMenu();
+          return;
+        }
+      }
+
+      HelperUtility::delayMs(10);
+    }
+  }
+}
+
 
 void BLEKeyboardScreen::onEnter(ListEntryItem entry)
 {
@@ -43,10 +91,34 @@ void BLEKeyboardScreen::onEnter(ListEntryItem entry)
       goMainMenu();
     } else if (entry.label == "Keyboard")
     {
-      currentState = STATE_CONNECTING;
       Template::renderHead("BLE Keyboard");
-      Template::renderStatus("Waiting for connection...", TFT_BLUE);
-      bleKeyboard->begin();
+      waitingForConnection();
+      goConnectedMenu();
+    } else if (entry.label == "Ducky Script")
+    {
+      renderPathEntries(duckyScriptPath);
+    }
+  } else if (currentState == STATE_SELECT_FILE)
+  {
+    if (entry.value.empty()) return;
+    if (entry.value == "DIR")
+    {
+      if (currentPath.empty())
+        currentPath += entry.label;
+      else
+        currentPath += "/" + entry.label;
+
+      renderPathEntries(currentPath);
+    } else
+    {
+      std::string fileName;
+      if (currentPath.empty())
+        fileName = "/" + entry.label;
+      else
+        fileName = currentPath + "/" + entry.label;
+
+      waitingForConnection();
+      runDuckyScript(fileName);
     }
   }
 }
@@ -56,21 +128,40 @@ void BLEKeyboardScreen::onBack()
   if (currentState == STATE_KEYBOARD)
   {
     goMainMenu();
+  } else if (currentState == STATE_SELECT_FILE)
+  {
+    if (currentPath == duckyScriptPath)
+    {
+      goMainMenu();
+    } else
+    {
+      const size_t lastSlash = currentPath.rfind('/');
+      if (lastSlash > 0)
+        currentPath = currentPath.substr(0, lastSlash);
+      else
+        currentPath = "";
+
+      renderPathEntries(currentPath);
+    }
   } else
   {
-    _global->setScreen(new BLEMenuScreen());
+    esp_restart();
   }
 }
 
 void BLEKeyboardScreen::onEscape()
 {
-  _global->setScreen(new MainMenuScreen());
+  if (currentState == STATE_SELECT_FILE)
+    goMainMenu();
+  else
+    esp_restart();
 }
 
 void BLEKeyboardScreen::update()
 {
   if (currentState == STATE_KEYBOARD)
   {
+    refreshBatteryLevel();
     const auto _keyboard = &M5Cardputer.Keyboard;
     if (_keyboard->isChange() && _keyboard->isPressed())
     {
@@ -79,7 +170,6 @@ void BLEKeyboardScreen::update()
       {
         if (s->enter)
         {
-          bleKeyboard->end();
           goMainMenu();
           return;
         }
@@ -117,43 +207,106 @@ void BLEKeyboardScreen::update()
           else if (c == '.') bleKeyboard->write(HID_FUNCTION_ARROW_DOWN);
           else if (c == '/') bleKeyboard->write(HID_FUNCTION_ARROW_RIGHT);
           else if (c == '`') bleKeyboard->write(HID_FUNCTION_ESC);
+          else if (c == 'z') bleKeyboard->write(HID_FUNCTION_LEFT_GUI);
+          else
+          {
+            std::string filename = shortcutPath + "/" + c + ".ds";
+            if (SD.exists(filename.c_str()))
+            {
+              runDuckyScript(filename);
+              goConnectedMenu();
+            }
+          }
         } else
         {
           bleKeyboard->write(c);
         }
       }
     }
-  } else if (currentState == STATE_CONNECTING)
+  } else if (currentState == STATE_RUNNING_SCRIPT)
   {
-    HelperUtility::delayMs(100);
     const auto _keyboard = &M5Cardputer.Keyboard;
     if (_keyboard->isChange() && _keyboard->isPressed())
     {
-      const auto s = &_keyboard->keysState();
-      if (s->fn && s->enter)
+      if (_keyboard->isKeyPressed(KEY_ENTER) || _keyboard->isKeyPressed('`'))
       {
-        bleKeyboard->end();
+        printedLines.clear();
         goMainMenu();
-        return;
       }
-    }
-
-    if (bleKeyboard->isConnected())
-    {
-      currentState = STATE_KEYBOARD;
-
-      auto body = Template::createBody();
-      body.setTextSize(2);
-      body.setTextColor(TFT_GREEN);
-      body.drawCenterString("Connected", body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
-
-      body.setTextSize(1);
-      body.setTextColor(TFT_WHITE);
-      body.drawCenterString("Press fn+ok to quit", body.width() / 2, body.height() - body.fontHeight() - 2);
-      Template::renderBody(&body);
     }
   } else
   {
     ListScreen::update();
+  }
+}
+
+void BLEKeyboardScreen::runDuckyScript(const std::string& path)
+{
+  currentState = STATE_RUNNING_SCRIPT;
+  auto scriptFile = SD.open(path.c_str());
+  if (!scriptFile)
+  {
+    Template::renderStatus("Cannot open file");
+    HelperUtility::delayMs(1500);
+    renderPathEntries(currentPath);
+    return;
+  }
+  const auto ducky = new DuckScriptUtility(bleKeyboard);
+  while (scriptFile.available())
+  {
+    String line = scriptFile.readStringUntil('\n');
+    line.trim();
+    if (line.isEmpty()) continue;
+    const bool success = ducky->runCommand(line.c_str());
+    printedLines.emplace_back(line, success);
+
+    auto body = Template::createBody();
+    const size_t maxLines = 11;
+    const size_t start = printedLines.size() > maxLines ? printedLines.size() - maxLines : 0;
+    for (size_t i = start; i < printedLines.size(); ++i)
+    {
+      body.setTextColor(printedLines[i].second ? TFT_GREEN : TFT_RED);
+      body.drawString(printedLines[i].first, 0, (body.fontHeight() + 1) * (i - start));
+    }
+    Template::renderBody(&body);
+  }
+
+  scriptFile.close();
+}
+
+
+void BLEKeyboardScreen::renderPathEntries(const std::string& path)
+{
+  if (!_global->getIsSDCardLoaded())
+  {
+    Template::renderStatus("SD Card is not loaded", TFT_RED);
+    HelperUtility::delayMs(1500);
+    goMainMenu();
+    return;
+  }
+  currentState = STATE_SELECT_FILE;
+  currentPath = path;
+  Template::renderHead("Ducky Script");
+  auto dir = SD.open(path.c_str());
+  std::vector<ListEntryItem> fileEntries;
+  while (File currentFile = dir.openNextFile())
+  {
+    const std::string name = currentFile.name();
+    fileEntries.push_back({
+      name,
+      currentFile.isDirectory() ? "DIR" : "FIL"
+    });
+    currentFile.close();
+  }
+  dir.close();
+
+  if (fileEntries.empty())
+  {
+    Template::renderStatus("No file found");
+    HelperUtility::delayMs(1500);
+    goMainMenu();
+  } else
+  {
+    setEntries(fileEntries);
   }
 }

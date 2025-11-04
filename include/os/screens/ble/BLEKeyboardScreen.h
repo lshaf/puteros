@@ -10,11 +10,6 @@
 class BLEKeyboardScreen final : public ListScreen
 {
 public:
-  ~BLEKeyboardScreen() override
-  {
-    esp_restart();
-  }
-
   void init() override;
 
 protected:
@@ -25,13 +20,25 @@ protected:
 
   void refreshBatteryLevel();
   void goMainMenu();
+  void goConnectedMenu();
+  void waitingForConnection();
 
+  void renderPathEntries(const std::string& path);
+  void runDuckyScript(const std::string& path);
 private:
   BLEKeyboardUtility* bleKeyboard = nullptr;
+  std::string duckyScriptPath = "/puteros/keyboard/duckyscript";
+  std::string shortcutPath = "/puteros/keyboard/function";
+  std::string currentPath;
+  unsigned long lastBatteryUpdate = 0;
+  std::vector<std::pair<String, bool>> printedLines;
+
   enum State_e
   {
     STATE_MAIN,
     STATE_CONNECTING,
+    STATE_SELECT_FILE,
+    STATE_RUNNING_SCRIPT,
     STATE_KEYBOARD,
   } currentState = STATE_MAIN;
 };

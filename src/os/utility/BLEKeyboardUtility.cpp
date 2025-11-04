@@ -214,6 +214,8 @@ const uint8_t _asciimap[128] =
 	0				// DEL
 };
 
+uint8_t USBPutChar(uint8_t c);
+
 BLEKeyboardUtility::~BLEKeyboardUtility()
 {
 	BLEDevice::deinit(true);
@@ -223,8 +225,8 @@ BLEKeyboardUtility::~BLEKeyboardUtility()
 
 BLEKeyboardUtility::BLEKeyboardUtility(std::string deviceName, std::string deviceManufacturer, uint8_t batteryLevel)
     : hid(0)
-    , deviceName(std::string(deviceName).substr(0, 15))
-    , deviceManufacturer(std::string(deviceManufacturer).substr(0,15))
+    , deviceName(std::string(std::move(deviceName)).substr(0, 15))
+    , deviceManufacturer(std::string(std::move(deviceManufacturer)).substr(0,15))
     , batteryLevel(batteryLevel) {}
 
 void BLEKeyboardUtility::begin()
@@ -419,6 +421,7 @@ size_t BLEKeyboardUtility::write(const uint8_t *buffer, size_t size) {
 		if (*buffer != '\r') {
 			if (write(*buffer)) {
 				n++;
+				delay(20);
 			} else {
 				break;
 			}

@@ -14,19 +14,13 @@ uint8_t DuckScriptUtility::charToHex(const char* str)
   size_t strLen = strlen(str);
   if (strLen == 1)
   {
-    if (str[0] >= '0' && str[0] <= '9') {
-      value = (str[0] - '0') << 4;
-    } else if (str[0] >= 'A' && str[0] <= 'F') {
-      value = (str[0] - 'A' + 10) << 4;
-    } else if (str[0] >= 'a' && str[0] <= 'f') {
-      value = (str[0] - 'a' + 10) << 4;
-    }
+    value = static_cast<uint8_t>(str[0]);
   } else if (strLen == 2 && (str[0] == 'F' || str[0] == 'f'))
   {
     const int fnNumber = std::stoi(std::string(&str[1]));
     if (fnNumber >= 1 && fnNumber <= 12)
     {
-      value = static_cast<uint8_t>(0x3A + fnNumber - 1); // F1 starts at 0x3A
+      value = static_cast<uint8_t>(0xC1 + fnNumber); // F1 starts at 0x3A
     }
   }
 
@@ -40,6 +34,11 @@ bool DuckScriptUtility::runCommand(const std::string& command)
   {
     const std::string str = command.substr(7);
     keyboard->write(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
+  } else if (command.rfind("STRINGLN ", 0) == 0)
+  {
+    const std::string str = command.substr(9);
+    keyboard->write(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
+    keyboard->write(HID_FUNCTION_ENTER);
   } else if (command.rfind("DELAY ", 0) == 0)
   {
     const std::string delayStr = command.substr(6);
@@ -51,36 +50,40 @@ bool DuckScriptUtility::runCommand(const std::string& command)
     keyboard->write(charToHex(keyStr.c_str()));
   } else if (command.rfind("GUI ", 0) == 0)
   {
-    keyboard->press(HID_FUNCTION_LEFT_GUI);
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
+    Serial.printf("## DuckScriptUtility::runCommand: GUI %s -> 0x%02X\n", keyStr.c_str(), keyCode);
+    keyboard->press(HID_FUNCTION_LEFT_GUI);
     keyboard->press(keyCode);
-    keyboard->release(HID_FUNCTION_LEFT_GUI);
-    keyboard->release(keyCode);
+    keyboard->releaseAll();
   } else if (command.rfind("CTRL ", 0) == 0)
   {
-    keyboard->press(HID_FUNCTION_LEFT_CTRL);
     const std::string keyStr = command.substr(5);
     const auto keyCode = charToHex(keyStr.c_str());
+    Serial.printf("## DuckScriptUtility::runCommand: CTRL %s -> 0x%02X\n", keyStr.c_str(), keyCode);
+    keyboard->press(HID_FUNCTION_LEFT_CTRL);
     keyboard->press(keyCode);
-    keyboard->release(HID_FUNCTION_LEFT_CTRL);
-    keyboard->release(keyCode);
+    keyboard->releaseAll();
   } else if (command.rfind("ALT ", 0) == 0)
   {
-    keyboard->press(HID_FUNCTION_LEFT_ALT);
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
+    keyboard->press(HID_FUNCTION_LEFT_ALT);
     keyboard->press(keyCode);
-    keyboard->release(HID_FUNCTION_LEFT_ALT);
-    keyboard->release(keyCode);
+    keyboard->releaseAll();
   } else if (command.rfind("SHIFT ", 0) == 0)
   {
-    keyboard->press(HID_FUNCTION_LEFT_SHIFT);
     const std::string keyStr = command.substr(6);
     const auto keyCode = charToHex(keyStr.c_str());
+    keyboard->press(HID_FUNCTION_LEFT_SHIFT);
     keyboard->press(keyCode);
-    keyboard->release(HID_FUNCTION_LEFT_SHIFT);
-    keyboard->release(keyCode);
+    keyboard->releaseAll();
+  } else if (command.rfind("ENTER", 0) == 0)
+  {
+    keyboard->write(HID_FUNCTION_ENTER);
+  } else if (command.rfind("REM ", 0) == 0)
+  {
+    // nothing to do here
   } else
   {
     Serial.printf("DuckScriptUtility::runCommand: Unknown command: %s\n", command.c_str());
@@ -103,6 +106,7 @@ void DuckScriptUtility::runScript(const std::string& pathFile)
   {
     String line = scriptFile.readStringUntil('\n');
     line.trim();
+    if (line.isEmpty()) continue;
     runCommand(line.c_str());
   }
 
