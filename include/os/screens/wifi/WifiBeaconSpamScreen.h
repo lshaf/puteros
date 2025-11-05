@@ -22,7 +22,6 @@ protected:
 
 private:
   unsigned long lastRender = 0;
-  uint8_t currentChannel = 1;
   const char* loadingBar = "-\\|/";
   std::vector<std::string> ssidList = {
     "FreeWiFi",
@@ -54,7 +53,51 @@ private:
     "FreeSpot",
     "FreeWave_Hotspot",
     "FreeNet_Public",
-    "FreeWiFi_Lobby"
+    "FreeWiFi_Lobby",
+    "CoffeeShop_WiFi",
+    "Cafe_Free_WiFi",
+    "Library_Public",
+    "CampusWiFi",
+    "Student_WiFi",
+    "Faculty_Net",
+    "Guest_Access",
+    "Lobby_WiFi",
+    "IoT_Devices",
+    "SmartHome",
+    "Home_Network",
+    "Home_5G",
+    "Office_WiFi",
+    "WorkNetwork",
+    "CorpGuest",
+    "Conference_WiFi",
+    "Hotel_Guest",
+    "Hotel_Free",
+    "Airport_Free_WiFi",
+    "Train_WiFi",
+    "Bus_WiFi",
+    "Shop_WiFi",
+    "Mall_Guest",
+    "Library_WiFi",
+    "Studio_WiFi",
+    "Garage_Network",
+    "LivingRoom_WiFi",
+    "Bedroom_WiFi",
+    "Kitchen_AP",
+    "SECURE-NET",
+    "NETGEAR_Guest",
+    "Linksys_Public",
+    "TPLink_Hotspot",
+    "XfinityWiFi",
+    "SafeZone",
+    "Neighbor_WiFi",
+    "Free4All",
+    "PublicHotspot",
+    "FreeCityWiFi",
+    "CommunityNet",
+    "FreeTransitWiFi",
+    "BlueSky_WiFi",
+    "GreenCafe_WiFi",
+    "Sunset_Hotspot"
   };
 
   WifiAttackUtility* attacker = nullptr;

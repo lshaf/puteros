@@ -26,6 +26,8 @@ WifiAttackUtility::~WifiAttackUtility()
 
 esp_err_t WifiAttackUtility::change_channel(const uint8_t channel) noexcept
 {
+  if (currentChannel == channel) return ESP_OK;
+  currentChannel = channel;
   return esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
 }
 

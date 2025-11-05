@@ -24,8 +24,10 @@ void WifiBeaconSpamScreen::init()
 
 void WifiBeaconSpamScreen::broadcastWifiBeacon()
 {
-  currentChannel = (currentChannel % 14) + 1;
-  for (int i = 0; i < ssidList.size(); i++) {
+  const int ssidLength = static_cast<int>(ssidList.size());
+  if (ssidLength == 0) return;
+  for (int i = 0; i < ssidLength; i++) {
+    const auto currentChannel = static_cast<int>((i / static_cast<float>(ssidLength) * 13) + 1);
     attacker->beacon_spam(ssidList[i], currentChannel);
   }
 }
@@ -33,7 +35,7 @@ void WifiBeaconSpamScreen::broadcastWifiBeacon()
 
 void WifiBeaconSpamScreen::update()
 {
-  auto _keyboard = &M5Cardputer.Keyboard;
+  const auto _keyboard = &M5Cardputer.Keyboard;
   if (_keyboard->isChange() && _keyboard->isPressed()) {
     if (_keyboard->isKeyPressed('`') || _keyboard->isKeyPressed(KEY_BACKSPACE)) {
       _global->setScreen(new WifiMenuScreen());

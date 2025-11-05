@@ -18,6 +18,7 @@ public:
   esp_err_t beacon_spam(const std::string& ssid, uint8_t channel);
 
 private:
+  int currentChannel = 0;
   esp_err_t change_channel(uint8_t channel) noexcept;
   esp_err_t send_packet(const uint8_t* packet, size_t len) noexcept;
 
