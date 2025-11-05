@@ -33,7 +33,7 @@ void WifiDeautherScreen::onEnter(ListEntryItem entry)
       if (target.ssid == "-" && memcmp(target.bssid, blankMac, 6) == 0)
       {
         Template::renderStatus("Select a target first!");
-        delay(2);
+        HelperUtility::delayMs(1500);
         init();
         return;
       }
