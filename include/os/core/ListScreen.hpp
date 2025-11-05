@@ -18,10 +18,6 @@ class ListScreen : public ScreenState {
 protected:
   std::vector<ListEntryItem> entries;
   int selectedIndex = 0;
-  int previousIndex = -1;
-  const int perPage = 10;
-  int currentPage = 0;
-
   int scrollOffset = 0;
   int visibleCount = 0; // Set in constructor based on screen size
 
@@ -43,4 +39,7 @@ public:
   void setEntries(const std::vector<ListEntryItem>& newEntries);
   void update() override;
   void render() override;
+
+private:
+  void playSound();
 };

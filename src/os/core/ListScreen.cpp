@@ -8,9 +8,7 @@
 void ListScreen::setEntries(const std::vector<ListEntryItem>& newEntries)
 {
   entries = newEntries;
-  currentPage = 0;
   selectedIndex = 0;
-  previousIndex = -1;
   scrollOffset = 0;
   render();
 }
@@ -51,7 +49,6 @@ void ListScreen::navigate(const NavAction_t direction)
 {
   if (direction == NAV_UP && selectedIndex > 0)
   {
-    previousIndex = selectedIndex;
     selectedIndex--;
     if (selectedIndex < scrollOffset)
     {
@@ -60,7 +57,6 @@ void ListScreen::navigate(const NavAction_t direction)
   }
   if (direction == NAV_DOWN && selectedIndex < entries.size() - 1)
   {
-    previousIndex = selectedIndex;
     selectedIndex++;
     if (selectedIndex >= scrollOffset + visibleCount)
     {
@@ -70,7 +66,6 @@ void ListScreen::navigate(const NavAction_t direction)
   // Add to ListScreen::navigate
   if (direction == NAV_NEXT && selectedIndex < entries.size() - 1)
   {
-    previousIndex = selectedIndex;
     selectedIndex = std::min(selectedIndex + 10, static_cast<int>(entries.size()) - 1);
     if (selectedIndex >= scrollOffset + visibleCount)
     {
@@ -79,7 +74,6 @@ void ListScreen::navigate(const NavAction_t direction)
   }
   if (direction == NAV_PREV && selectedIndex > 0)
   {
-    previousIndex = selectedIndex;
     selectedIndex = std::max(selectedIndex - 10, 0);
     if (selectedIndex < scrollOffset)
     {
@@ -87,10 +81,16 @@ void ListScreen::navigate(const NavAction_t direction)
     }
   }
 
-  const bool navSound = _config->get(APP_CONFIG_NAV_SOUND, APP_CONFIG_NAV_SOUND_DEFAULT).toInt();
-  if (navSound) AudioUtility::playRandomTone();
+  this->playSound();
   this->render();
 }
+
+void ListScreen::playSound()
+{
+  const bool navSound = _config->get(APP_CONFIG_NAV_SOUND, APP_CONFIG_NAV_SOUND_DEFAULT).toInt();
+  if (navSound) AudioUtility::playRandomTone();
+}
+
 
 void ListScreen::update()
 {
@@ -101,8 +101,20 @@ void ListScreen::update()
     if (_keyboard->isKeyPressed('.')) navigate(NAV_DOWN);
     if (_keyboard->isKeyPressed(',')) navigate(NAV_PREV);
     if (_keyboard->isKeyPressed('/')) navigate(NAV_NEXT);
-    if (_keyboard->isKeyPressed(KEY_ENTER) && !entries.empty()) onEnter(entries[selectedIndex]);
-    if (_keyboard->isKeyPressed(KEY_BACKSPACE)) onBack();
-    if (_keyboard->isKeyPressed('`')) onEscape();
+    if (_keyboard->isKeyPressed(KEY_ENTER) && !entries.empty())
+    {
+      this->playSound();
+      onEnter(entries[selectedIndex]);
+    }
+    if (_keyboard->isKeyPressed(KEY_BACKSPACE))
+    {
+      this->playSound();
+      onBack();
+    }
+    if (_keyboard->isKeyPressed('`'))
+    {
+      this->playSound();
+      onEscape();
+    }
   }
 }
