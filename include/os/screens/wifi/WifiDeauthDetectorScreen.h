@@ -57,6 +57,11 @@ protected:
   void onBack() override;
 
 private:
+  enum State_e
+  {
+    STATE_LISTED,
+    STATE_NO_LIST
+  } currentState = STATE_LISTED;
   int currentChannel = 1;
   unsigned long lastRender = 0;
   static constexpr unsigned long windowMs = 30000UL; // 10 seconds

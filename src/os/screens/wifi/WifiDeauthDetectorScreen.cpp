@@ -9,8 +9,6 @@ void WifiDeauthDetectorScreen::init()
   WiFi.mode(WIFI_MODE_STA);
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_rx_cb(&WifiDeauthDetectorScreen::deauthDetectedCallback);
-
-  Template::renderStatus("Waiting for deauth packets...");
 }
 
 void WifiDeauthDetectorScreen::onBack()
@@ -67,20 +65,34 @@ void WifiDeauthDetectorScreen::update()
 
     if (!entries.empty())
     {
+      currentState = STATE_LISTED;
       if (entries.size() < selectedIndex)
       {
         selectedIndex = static_cast<uint8_t>(entries.size());
         scrollOffset = std::max(0, selectedIndex - visibleCount);
       }
       render();
-    } else
+    } else if (currentState == STATE_LISTED)
     {
-      setEntries({});
+      currentState = STATE_NO_LIST;
       Template::renderStatus("Waiting for deauth packets...");
     }
   }
 
-  ListScreen::update();
+  if (currentState == STATE_LISTED)
+    ListScreen::update();
+  else
+  {
+    const auto _keyboard = &M5Cardputer.Keyboard;
+    if (_keyboard->isChange() && _keyboard->isPressed())
+    {
+      if (_keyboard->isKeyPressed(KEY_BACKSPACE) || _keyboard->isKeyPressed('`'))
+      {
+        playSound();
+        onBack();
+      }
+    }
+  }
 }
 
 std::unordered_map<
@@ -112,7 +124,6 @@ void WifiDeauthDetectorScreen::deauthDetectedCallback(void* buf, const wifi_prom
   const uint8_t fc_subtype = (fc0 >> 4) & 0x0F;
   if (fc_type != 0) return;
 
-  Serial.printf("%02X %d len %d\n", fc_subtype, fc_subtype, len);
   if (fc_subtype == 0xC)
   {
     const uint8_t* addr2 = payload + 10; // transmitter addr

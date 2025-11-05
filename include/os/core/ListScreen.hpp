@@ -32,6 +32,7 @@ protected:
   virtual void onEscape() { onBack(); };
   virtual void onBack() = 0;
 
+  void playSound();
   void navigate(NavAction_t direction);
 public:
   ListScreen() = default;
@@ -39,7 +40,4 @@ public:
   void setEntries(const std::vector<ListEntryItem>& newEntries);
   void update() override;
   void render() override;
-
-private:
-  void playSound();
 };
