@@ -5,7 +5,6 @@
 #include "os/screens/ble/BLEKeyboardScreen.h"
 
 #include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/ble/BLEMenuScreen.h"
 #include "os/utility/DuckScriptUtility.h"
 
 void BLEKeyboardScreen::init()

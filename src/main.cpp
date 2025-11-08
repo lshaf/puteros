@@ -17,6 +17,7 @@ void setup()
     M5Cardputer.Lcd.height() / 2 - M5Cardputer.Lcd.fontHeight() / 2
   );
 
+  M5Cardputer.Speaker.begin();
   const auto _global = &GlobalState::getInstance();
   _global->loadSDCard();
   _global->setScreen(new WelcomeScreen());
