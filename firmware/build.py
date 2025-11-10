@@ -76,5 +76,5 @@ def _merge_action(source, target, env):
         traceback.print_exc()
 
 # register to run after ELF is produced
-env.AddPostAction("$BUILD_DIR/${PROGNAME}.elf", _merge_action)
+env.AddPostAction(FILES["app"], _merge_action)
 print("[post-build] Registered merge action for $BUILD_DIR/${PROGNAME}.elf")

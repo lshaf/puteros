@@ -39,7 +39,7 @@ jobs:
           name: firmware-bin
           path: puteros-latest.bin
 
-  build-and-upload-website:
+  build-website:
     runs-on: ubuntu-latest
     needs: build-firmware
     steps:
@@ -78,7 +78,7 @@ jobs:
 
   deploy-pages:
     runs-on: ubuntu-latest
-    needs: build-and-upload-website
+    needs: build-website
     steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
