@@ -1,9 +1,3 @@
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    Import: Any = None
-    env: Any = {}
-
 from os import remove, rename
 from os.path import isfile, join
 
@@ -13,9 +7,11 @@ FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-arduinoespressif32"
 board_mcu = env.BoardConfig()
 mcu = board_mcu.get("build.mcu", "esp32s3")
 patchflag_path = join(FRAMEWORK_DIR, "tools", "sdk", mcu, "lib", ".patched")
+print("[pre-build] Applying libnet80211.a patch for %s..." % mcu)
 
 # patch file only if we didn't do it befored
 if not isfile(patchflag_path):
+    print("[pre-build] Patching libnet80211.a to weaken symbol 's'...")
     original_file = join(FRAMEWORK_DIR, "tools", "sdk", mcu, "lib", "libnet80211.a")
     patched_file = join(FRAMEWORK_DIR, "tools", "sdk", mcu, "lib", "libnet80211.a.patched")
 
@@ -36,4 +32,7 @@ if not isfile(patchflag_path):
             fp.write("")
 
     env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
+    print("[pre-build] Patch applied.")
+else:
+    print("[pre-build] Patch already applied, skipping.")
 
