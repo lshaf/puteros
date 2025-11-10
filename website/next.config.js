@@ -7,6 +7,6 @@ const nextConfig = {
 
   // Optional: Prevent automatic `/me` -> `/me/`, instead preserve `href`
   // skipTrailingSlashRedirect: true,
-  distDir: '../docs',
+  distDir: 'build',
 }
 module.exports = nextConfig
