@@ -6,7 +6,7 @@ import traceback
 
 BUILD_DIR = env.subst("$BUILD_DIR")
 PROJECT_DIR = env.get("PROJECT_DIR")
-OUTPUT_PATH = os.path.join(PROJECT_DIR, "website", "public", "puteros-latest.bin")
+OUTPUT_PATH = os.path.join(PROJECT_DIR, "puteros-latest.bin")
 
 DEFAULT_OFFSETS = {
     "boot": 0x1000,

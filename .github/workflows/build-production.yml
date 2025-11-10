@@ -1,0 +1,84 @@
+name: build-production
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-firmware:
+    runs-on: ubuntu-latest
+    outputs:
+      firmware-artifact: firmware-bin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+
+      - name: Build firmware
+        run: |
+          pio run -e m5stack-cardputer
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-bin
+          path: puteros-latest.bin
+
+  build-and-upload-website:
+    runs-on: ubuntu-latest
+    needs: build-firmware
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download firmware artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware-bin
+          path: .
+
+      - name: Place firmware into website static folder
+        run: |
+          mkdir -p website/public
+          if [ -f ./puteros-latest.bin ]; then
+            cp ./puteros-latest.bin website/public/puteros-latest.bin
+          fi
+          ls -la website/public || true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install and build website
+        working-directory: website
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: website/build
+
+  deploy-pages:
+    runs-on: ubuntu-latest
+    needs: build-and-upload-website
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
