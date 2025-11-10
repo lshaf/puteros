@@ -2404,3 +2404,18 @@ a.btn,
     width: 100%;
   }
 }
+
+/* Detail feature */
+.section.detail-feature {
+  .content {
+    margin-bottom: 80px;
+
+    .title {
+      margin-bottom: 10px;
+    }
+
+    .desc {
+      margin-bottom: 10px;
+    }
+  }
+}
