@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "esptool-js": "^0.5.7",
     "fslightbox-react": "^1.7.6",
     "isotope-layout": "^3.0.6",
     "next": "14.0.1",

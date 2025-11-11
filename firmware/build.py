@@ -4,12 +4,13 @@ import os
 import sys
 import traceback
 
+pioenv    = env.subst("${PIOENV}")
 BUILD_DIR = env.subst("$BUILD_DIR")
 PROJECT_DIR = env.get("PROJECT_DIR")
 OUTPUT_PATH = os.path.join(PROJECT_DIR, "puteros-latest.bin")
 
 DEFAULT_OFFSETS = {
-    "boot": 0x1000,
+    "boot": 0,
     "part": 0x8000,
     "app": 0x10000,
 }
@@ -63,7 +64,7 @@ def _merge_action(source, target, env):
                     return
 
         final_size = max(o + s for _,o,s,_,_ in items)
-        buf = bytearray(b'\xFF') * final_size
+        buf = bytearray(b'\x00') * final_size
         for name, offset, size, data, path in items:
             buf[offset:offset+size] = data
             print("[post-build] placed", name, "at", hex(offset), "size", hex(size))
@@ -77,4 +78,4 @@ def _merge_action(source, target, env):
 
 # register to run after ELF is produced
 env.AddPostAction(FILES["app"], _merge_action)
-print("[post-build] Registered merge action for $BUILD_DIR/${PROGNAME}.elf")
+print(f"[post-build] Registered merge action for {FILES['app']}")
