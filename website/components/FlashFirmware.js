@@ -103,6 +103,7 @@ const FlashFirmware = () => {
         </div>
         <p>This firmware only support Cardputer / Cardputer ADV for now</p>
         <div className="action">
+          <a className="btn" href="/puteros-latest.bin">Download</a>
           {
             deviceLoader ? (
                 <Fragment>
