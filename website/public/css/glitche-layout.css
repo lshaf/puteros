@@ -2425,13 +2425,33 @@ a.btn,
     display: flex;
     justify-content: center;
     gap: 10px;
+
+    .progressBox {
+      display: inline-block;
+      vertical-align: middle;
+      height: 42px;
+      line-height: 40px;
+      text-align: center;
+      color: #dddddd;
+      font-size: 13px;
+      background: none;
+      border: 1px solid #dddddd;
+      position: relative;
+      overflow: hidden;
+      padding: 0 30px;
+      transition: all 0.3s ease 0s;
+      -moz-transition: all 0.3s ease 0s;
+      -webkit-transition: all 0.3s ease 0s;
+      -o-transition: all 0.3s ease 0s;
+      margin-bottom: 30px;
+    }
   }
 
   .device-info {
     display: block;
     margin: 0;
     background: transparent;
-    color: inherit;
+    color: #dddddd;
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
@@ -2440,7 +2460,7 @@ a.btn,
     height: 400px;
     overflow-y: scroll;
     overflow-x: auto;
-    border: 1px solid #565c65;
-    padding: 2px 4px;
+    border: 1px solid #dddddd;
+    padding: 8px 12px;
   }
 }
