@@ -20,6 +20,7 @@ const FlashFirmware = () => {
   const [logText, setLogText] = useState("");
   const [espTransport, setEspTransport] = useState(null);
   const [deviceLoader, setDeviceLoader] = useState(null);
+  const [progress, setProgress] = useState(null);
 
   const serialLib = !navigator.serial && navigator.usb ? serial : navigator.serial;
 
@@ -90,6 +91,7 @@ const FlashFirmware = () => {
     espLoaderTerminal.writeLine(`Downloaded file size: ${firmwareString.length} bytes`);
 
     try {
+      setProgress(0);
       await deviceLoader.writeFlash({
         fileArray : [{
           address: 0,
@@ -100,7 +102,12 @@ const FlashFirmware = () => {
         flashFreq: undefined,
         eraseAll: false,
         compress: true,
+        reportProgress: (fileIndex, written, total) => {
+          setProgress(Math.floor((written / total) * 100));
+        }
       });
+
+      setProgress(null);
     } catch (e) {
       console.error(e);
     }
@@ -116,10 +123,16 @@ const FlashFirmware = () => {
         <div className="action">
           {
             deviceLoader ? (
-              <Fragment>
-                <button className="btn" onClick={doInstall}>Install</button>
-                <button className="btn" onClick={doDisconnect}>Disconnect</button>
-              </Fragment>
+              progress === null ? (
+                <Fragment>
+                  <button className="btn" onClick={doInstall}>Install</button>
+                  <button className="btn" onClick={doDisconnect}>Disconnect</button>
+                </Fragment>
+              ) : (
+                <div className="progressBox">
+                  Installing firmware... {progress}%
+                </div>
+              )
             ) : (
               <Fragment>
                 <button className="btn" onClick={doConnect}>Connect</button>
