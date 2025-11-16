@@ -127,6 +127,26 @@ public:
   {
     this->version = version;
   }
+  void printKeyReport(KeyReport* keys)
+  {
+    Serial.printf("Modifiers: 0x%02X, Keys: [", keys->modifiers);
+    for (int i = 0; i < 6; i++)
+    {
+      Serial.printf("0x%02X", keys->keys[i]);
+      if (i < 5) Serial.print(", ");
+    }
+    Serial.println("]");
+  }
+  void printKeyReport(MediaKeyReport* keys)
+  {
+    Serial.printf("Keys: [");
+    for (int i = 0; i < 2; i++)
+    {
+      Serial.printf("0x%02X", (*keys)[i]);
+      if (i < 1) Serial.print(", ");
+    }
+    Serial.println("]");
+  }
 
 
   void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override;

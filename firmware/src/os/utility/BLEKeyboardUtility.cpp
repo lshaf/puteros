@@ -7,12 +7,14 @@
 #include "HIDTypes.h"
 
 #include "os/utility/BLEKeyboardUtility.h"
+
+#include "nimble/porting/nimble/include/nimble/nimble_port.h"
 #include "os/utility/HelperUtility.h"
 
 #define KEYBOARD_ID 0x01
 #define MEDIA_KEYS_ID 0x02
 
-static const uint8_t _hidReportDescriptor[] = {
+static const uint8_t _hidReportDescriptor[] PROGMEM = {
   USAGE_PAGE(1),      0x01,          // USAGE_PAGE (Generic Desktop Ctrls)
   USAGE(1),           0x06,          // USAGE (Keyboard)
   COLLECTION(1),      0x01,          // COLLECTION (Application)
@@ -77,11 +79,8 @@ static const uint8_t _hidReportDescriptor[] = {
   END_COLLECTION(0)                  // END_COLLECTION
 };
 
-extern
-const uint8_t _asciimap[128] PROGMEM;
-
 #define SHIFT 0x80
-const uint8_t _asciimap[128] =
+const uint8_t _asciimap[128] PROGMEM =
 {
 	0x00,             // NUL
 	0x00,             // SOH
@@ -265,16 +264,20 @@ void BLEKeyboardUtility::begin()
 
 void BLEKeyboardUtility::end()
 {
-	advertising->stop();
+	const int ret = nimble_port_stop();
+	if (ret == 0) {
+		nimble_port_deinit();
+	}
 }
 
 void BLEKeyboardUtility::sendReport(KeyReport* keys)
 {
 	if (this->connected)
 	{
+		this->printKeyReport(keys);
 		this->inputKeyboard->setValue(reinterpret_cast<uint8_t*>(keys), sizeof(KeyReport));
-		if (this->inputKeyboard->notify())
-			HelperUtility::delayMs(this->_delay_ms);
+		this->inputKeyboard->notify();
+		// HelperUtility::delayMs(this->_delay_ms);
 	}
 }
 
@@ -282,15 +285,17 @@ void BLEKeyboardUtility::sendReport(MediaKeyReport* keys)
 {
 	if (this->connected)
 	{
+		this->printKeyReport(keys);
 		this->inputMedia->setValue(reinterpret_cast<uint8_t*>(keys), sizeof(MediaKeyReport));
-		if (this->inputMedia->notify())
-			HelperUtility::delayMs(this->_delay_ms);
+		this->inputMedia->notify();
+		// HelperUtility::delayMs(this->_delay_ms);
 	}
 }
 
 size_t BLEKeyboardUtility::press(uint8_t k)
 {
 	uint8_t i;
+	Serial.printf("press %c = 0x%02x\n", k, k);
 	if (k >= HID_OFFSET) {			// it's a non-printing key (not a modifier)
 		k = k - HID_OFFSET;
 	} else if (k >= 128) {	// it's a modifier key
@@ -404,14 +409,18 @@ void BLEKeyboardUtility::releaseAll()
 size_t BLEKeyboardUtility::write(uint8_t c)
 {
 	uint8_t p = press(c);  // Keydown
+	delay(5);
 	release(c);            // Keyup
+	delay(5);
 	return p;              // just return the result of press() since release() almost always returns 1
 }
 
 size_t BLEKeyboardUtility::write(const MediaKeyReport c)
 {
 	uint16_t p = press(c);  // Keydown
+	delay(5);
 	release(c);            // Keyup
+	delay(5);
 	return p;              // just return the result of press() since release() almost always returns 1
 }
 
