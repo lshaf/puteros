@@ -5,7 +5,6 @@
 #include <SD.h>
 
 #include "DuckScriptUtility.h"
-#include "HelperUtility.h"
 
 uint8_t DuckScriptUtility::charToHex(const char* str)
 {
@@ -33,61 +32,48 @@ bool DuckScriptUtility::runCommand(const std::string& command)
   if (command.rfind("STRING ", 0) == 0)
   {
     const std::string str = command.substr(7);
-    keyboard->write(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
+    kWrite(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
   } else if (command.rfind("STRINGLN ", 0) == 0)
   {
     const std::string str = command.substr(9);
-    keyboard->write(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
-    keyboard->write(KEY_RETURN);
+    kWrite(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
+    kWrite(KEY_RETURN);
   } else if (command.rfind("DELAY ", 0) == 0)
   {
     const std::string delayStr = command.substr(6);
     const int delayMs = std::stoi(delayStr);
-    HelperUtility::delayMs(delayMs);
-  } else if (command.rfind("KEYCODE ", 0) == 0)
-  {
-    int32_t keyCode = 0;
-    const std::string keyStr = command.substr(8);
-    if (!HelperUtility::parseInt32(keyStr, keyCode) && keyCode >= 0 && keyCode <= 0xFF)
-    {
-      KeyReport report = {};
-      report.keys[0] = keyCode;
-      keyboard->sendReport(&report);
-    } else
-    {
-      return false;
-    }
+    delay(delayMs);
   } else if (command.rfind("GUI ", 0) == 0)
   {
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
-    keyboard->press(KEY_LEFT_GUI);
-    keyboard->press(keyCode);
-    keyboard->releaseAll();
+    kPress(KEY_LEFT_GUI);
+    kPress(keyCode);
+    kReleaseAll();
   } else if (command.rfind("CTRL ", 0) == 0)
   {
     const std::string keyStr = command.substr(5);
     const auto keyCode = charToHex(keyStr.c_str());
-    keyboard->press(KEY_LEFT_CTRL);
-    keyboard->press(keyCode);
-    keyboard->releaseAll();
+    kPress(KEY_LEFT_CTRL);
+    kPress(keyCode);
+    kReleaseAll();
   } else if (command.rfind("ALT ", 0) == 0)
   {
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
-    keyboard->press(KEY_LEFT_ALT);
-    keyboard->press(keyCode);
-    keyboard->releaseAll();
+    kPress(KEY_LEFT_ALT);
+    kPress(keyCode);
+    kReleaseAll();
   } else if (command.rfind("SHIFT ", 0) == 0)
   {
     const std::string keyStr = command.substr(6);
     const auto keyCode = charToHex(keyStr.c_str());
-    keyboard->press(KEY_LEFT_SHIFT);
-    keyboard->press(keyCode);
-    keyboard->releaseAll();
+    kPress(KEY_LEFT_SHIFT);
+    kPress(keyCode);
+    kReleaseAll();
   } else if (command.rfind("ENTER", 0) == 0)
   {
-    keyboard->write(KEY_RETURN);
+    kWrite(KEY_RETURN);
   } else if (command.rfind("REM ", 0) == 0)
   {
     // nothing to do here
