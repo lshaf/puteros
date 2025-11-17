@@ -4,8 +4,8 @@
 
 #include <SD.h>
 
-#include "os/utility/DuckScriptUtility.h"
-#include "os/utility/HelperUtility.h"
+#include "DuckScriptUtility.h"
+#include "HelperUtility.h"
 
 uint8_t DuckScriptUtility::charToHex(const char* str)
 {
@@ -38,7 +38,7 @@ bool DuckScriptUtility::runCommand(const std::string& command)
   {
     const std::string str = command.substr(9);
     keyboard->write(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
-    keyboard->write(HID_FUNCTION_ENTER);
+    keyboard->write(KEY_RETURN);
   } else if (command.rfind("DELAY ", 0) == 0)
   {
     const std::string delayStr = command.substr(6);
@@ -61,35 +61,33 @@ bool DuckScriptUtility::runCommand(const std::string& command)
   {
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
-    Serial.printf("## DuckScriptUtility::runCommand: GUI %s -> 0x%02X\n", keyStr.c_str(), keyCode);
-    keyboard->press(HID_FUNCTION_LEFT_GUI);
+    keyboard->press(KEY_LEFT_GUI);
     keyboard->press(keyCode);
     keyboard->releaseAll();
   } else if (command.rfind("CTRL ", 0) == 0)
   {
     const std::string keyStr = command.substr(5);
     const auto keyCode = charToHex(keyStr.c_str());
-    Serial.printf("## DuckScriptUtility::runCommand: CTRL %s -> 0x%02X\n", keyStr.c_str(), keyCode);
-    keyboard->press(HID_FUNCTION_LEFT_CTRL);
+    keyboard->press(KEY_LEFT_CTRL);
     keyboard->press(keyCode);
     keyboard->releaseAll();
   } else if (command.rfind("ALT ", 0) == 0)
   {
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
-    keyboard->press(HID_FUNCTION_LEFT_ALT);
+    keyboard->press(KEY_LEFT_ALT);
     keyboard->press(keyCode);
     keyboard->releaseAll();
   } else if (command.rfind("SHIFT ", 0) == 0)
   {
     const std::string keyStr = command.substr(6);
     const auto keyCode = charToHex(keyStr.c_str());
-    keyboard->press(HID_FUNCTION_LEFT_SHIFT);
+    keyboard->press(KEY_LEFT_SHIFT);
     keyboard->press(keyCode);
     keyboard->releaseAll();
   } else if (command.rfind("ENTER", 0) == 0)
   {
-    keyboard->write(HID_FUNCTION_ENTER);
+    keyboard->write(KEY_RETURN);
   } else if (command.rfind("REM ", 0) == 0)
   {
     // nothing to do here
