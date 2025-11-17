@@ -46,8 +46,17 @@ bool DuckScriptUtility::runCommand(const std::string& command)
     HelperUtility::delayMs(delayMs);
   } else if (command.rfind("KEYCODE ", 0) == 0)
   {
+    int32_t keyCode = 0;
     const std::string keyStr = command.substr(8);
-    keyboard->write(charToHex(keyStr.c_str()));
+    if (!HelperUtility::parseInt32(keyStr, keyCode) && keyCode >= 0 && keyCode <= 0xFF)
+    {
+      KeyReport report = {};
+      report.keys[0] = keyCode;
+      keyboard->sendReport(&report);
+    } else
+    {
+      return false;
+    }
   } else if (command.rfind("GUI ", 0) == 0)
   {
     const std::string keyStr = command.substr(4);

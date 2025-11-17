@@ -223,7 +223,7 @@ BLEKeyboardUtility::~BLEKeyboardUtility()
 }
 
 BLEKeyboardUtility::BLEKeyboardUtility(std::string deviceName, std::string deviceManufacturer, uint8_t batteryLevel)
-    : hid(0)
+    : hid(nullptr)
     , deviceName(std::string(std::move(deviceName)).substr(0, 15))
     , deviceManufacturer(std::string(std::move(deviceManufacturer)).substr(0,15))
     , batteryLevel(batteryLevel) {}
@@ -289,6 +289,7 @@ void BLEKeyboardUtility::sendReport(MediaKeyReport* keys)
 		this->inputMedia->setValue(reinterpret_cast<uint8_t*>(keys), sizeof(MediaKeyReport));
 		this->inputMedia->notify();
 		// HelperUtility::delayMs(this->_delay_ms);
+
 	}
 }
 
@@ -409,18 +410,18 @@ void BLEKeyboardUtility::releaseAll()
 size_t BLEKeyboardUtility::write(uint8_t c)
 {
 	uint8_t p = press(c);  // Keydown
-	delay(5);
+	delay(this->_delay_ms);
 	release(c);            // Keyup
-	delay(5);
+	delay(this->_delay_ms);
 	return p;              // just return the result of press() since release() almost always returns 1
 }
 
 size_t BLEKeyboardUtility::write(const MediaKeyReport c)
 {
 	uint16_t p = press(c);  // Keydown
-	delay(5);
+	delay(this->_delay_ms);
 	release(c);            // Keyup
-	delay(5);
+	delay(this->_delay_ms);
 	return p;              // just return the result of press() since release() almost always returns 1
 }
 

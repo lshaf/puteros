@@ -31,6 +31,7 @@ private:
   std::string shortcutPath = "/puteros/keyboard/function";
   std::string currentPath;
   unsigned long lastBatteryUpdate = 0;
+  bool wasPressed = false;
   std::vector<std::pair<String, bool>> printedLines;
 
   enum State_e

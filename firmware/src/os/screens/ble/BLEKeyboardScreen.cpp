@@ -158,54 +158,35 @@ void BLEKeyboardScreen::update()
   {
     refreshBatteryLevel();
     const auto _keyboard = &M5Cardputer.Keyboard;
-    if (_keyboard->isChange() && _keyboard->isPressed())
+    if (_keyboard->isPressed())
     {
+      wasPressed = true;
       const auto s = &_keyboard->keysState();
-      if (s->fn)
-      {
-        if (s->enter)
-        {
-          goMainMenu();
-          return;
-        }
+      KeyReport report = {};
 
-        if (s->del)
-        {
-          bleKeyboard->write(HID_FUNCTION_DELETE);
-          return;
-        }
-      }
-
-      if (s->tab)
-      {
-        bleKeyboard->write(HID_FUNCTION_TAB);
-        return;
-      }
-      if (s->del)
-      {
-        bleKeyboard->write(HID_FUNCTION_BACKSPACE);
-        return;
-      }
-      if (s->enter)
-      {
-        bleKeyboard->write(HID_FUNCTION_ENTER);
-        return;
-      }
-
-      for (const auto c: s->word)
+      int count = 0;
+      report.modifiers = s->modifiers;
+      for (const auto c: s->hid_keys)
       {
         if (s->fn)
         {
-          Serial.printf("BLEKeyboardScreen::update DEBUG Pressed media key: 0x%04x or %c\n", c, c);
-          if (c == ';') bleKeyboard->write(HID_FUNCTION_ARROW_UP);
-          else if (c == ',') bleKeyboard->write(HID_FUNCTION_ARROW_LEFT);
-          else if (c == '.') bleKeyboard->write(HID_FUNCTION_ARROW_DOWN);
-          else if (c == '/') bleKeyboard->write(HID_FUNCTION_ARROW_RIGHT);
-          else if (c == '`') bleKeyboard->write(HID_FUNCTION_ESC);
-          else if (c == 'z') bleKeyboard->write(HID_FUNCTION_LEFT_GUI);
+          const char hid_char = s->word[count];
+          Serial.printf("BLEKeyboardScreen::update DEBUG Pressed media key: 0x%04x or %c\n", hid_char, hid_char);
+          if (hid_char == ';') report.keys[count] = HID_FUNCTION_ARROW_UP - HID_OFFSET;
+          else if (hid_char == ',') report.keys[count] = HID_FUNCTION_ARROW_LEFT - HID_OFFSET;
+          else if (hid_char == '.') report.keys[count] = HID_FUNCTION_ARROW_DOWN - HID_OFFSET;
+          else if (hid_char == '/') report.keys[count] = HID_FUNCTION_ARROW_RIGHT - HID_OFFSET;
+          else if (hid_char == '`') report.keys[count] = HID_FUNCTION_ESC - HID_OFFSET;
+          else if (hid_char == 'z') report.keys[count] = HID_FUNCTION_LEFT_GUI - HID_OFFSET;
+          else if (c == KEY_BACKSPACE) report.keys[count] = HID_FUNCTION_BACKSPACE - HID_OFFSET;
+          else if (c == KEY_ENTER)
+          {
+            goMainMenu();
+            return;
+          }
           else
           {
-            std::string filename = shortcutPath + "/" + c + ".ds";
+            std::string filename = shortcutPath + "/" + hid_char + ".ds";
             if (SD.exists(filename.c_str()))
             {
               runDuckyScript(filename);
@@ -214,10 +195,19 @@ void BLEKeyboardScreen::update()
           }
         } else
         {
-          bleKeyboard->write(c);
+          report.keys[count] = c;
         }
+
+        count++;
       }
+
+      bleKeyboard->sendReport(&report);
+    } else if (wasPressed)
+    {
+      wasPressed = false;
+      bleKeyboard->releaseAll();
     }
+    delay(50);
   } else if (currentState == STATE_RUNNING_SCRIPT)
   {
     const auto _keyboard = &M5Cardputer.Keyboard;

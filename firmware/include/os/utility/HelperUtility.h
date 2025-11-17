@@ -14,4 +14,5 @@ public:
   static void delayMs(unsigned long us);
   static void drawWrappedCenterString(M5Canvas &canvas, const std::string &text);
   static void makeDirectoryRecursive(const std::string& path);
+  static bool parseInt32(const std::string& input, int32_t& value);
 };

@@ -112,3 +112,21 @@ void HelperUtility::drawWrappedCenterString(M5Canvas &canvas, const std::string 
     canvas.drawString(l.c_str(), x, startY + static_cast<int>(idx) * fh);
   }
 }
+
+bool HelperUtility::parseInt32(const std::string& input, int32_t &value) {
+  const char *str = input.c_str();
+  while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n') ++str;
+
+  errno = 0;
+  char *end = nullptr;
+  long v = std::strtol(str, &end, 10);
+
+  if (str == end) return false; // no digits
+  if (errno == ERANGE || v < INT32_MIN || v > INT32_MAX) return false;
+
+  while (*end == ' ' || *end == '\t' || *end == '\r' || *end == '\n') ++end;
+  if (*end != '\0') return false; // trailing non-space characters
+
+  value = static_cast<int32_t>(v);
+  return true;
+}
