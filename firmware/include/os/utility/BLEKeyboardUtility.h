@@ -10,25 +10,6 @@
 
 #define HID_OFFSET 0x88
 
-const uint8_t HID_FUNCTION_DELETE = 0xD4;
-const uint8_t HID_FUNCTION_BACKSPACE = 0xB2;
-const uint8_t HID_FUNCTION_TAB = 0xB3;
-const uint8_t HID_FUNCTION_ENTER = 0xB0;
-const uint8_t HID_FUNCTION_ESC = 0xB1;
-const uint8_t HID_FUNCTION_CAPS_LOCK = 0x02;
-const uint8_t HID_FUNCTION_LEFT_CTRL = 0xE0;
-const uint8_t HID_FUNCTION_LEFT_SHIFT = 0xE1;
-const uint8_t HID_FUNCTION_LEFT_ALT = 0xE2;
-const uint8_t HID_FUNCTION_LEFT_GUI = 0x83;
-const uint8_t HID_FUNCTION_RIGHT_CTRL = 0xE4;
-const uint8_t HID_FUNCTION_RIGHT_SHIFT = 0xE5;
-const uint8_t HID_FUNCTION_RIGHT_ALT = 0xE6;
-const uint8_t HID_FUNCTION_RIGHT_GUI = 0xE7;
-const uint8_t HID_FUNCTION_ARROW_UP = 0xDA;
-const uint8_t HID_FUNCTION_ARROW_DOWN = 0xD9;
-const uint8_t HID_FUNCTION_ARROW_LEFT = 0xD8;
-const uint8_t HID_FUNCTION_ARROW_RIGHT = 0xD7;
-
 typedef uint8_t MediaKeyReport[2];
 
 const MediaKeyReport KEY_MEDIA_NEXT_TRACK = {1, 0};
@@ -126,26 +107,6 @@ public:
   void setVersion(const uint16_t version)
   {
     this->version = version;
-  }
-  void printKeyReport(KeyReport* keys)
-  {
-    Serial.printf("Modifiers: 0x%02X, Keys: [", keys->modifiers);
-    for (int i = 0; i < 6; i++)
-    {
-      Serial.printf("0x%02X", keys->keys[i]);
-      if (i < 5) Serial.print(", ");
-    }
-    Serial.println("]");
-  }
-  void printKeyReport(MediaKeyReport* keys)
-  {
-    Serial.printf("Keys: [");
-    for (int i = 0; i < 2; i++)
-    {
-      Serial.printf("0x%02X", (*keys)[i]);
-      if (i < 1) Serial.print(", ");
-    }
-    Serial.println("]");
   }
 
 

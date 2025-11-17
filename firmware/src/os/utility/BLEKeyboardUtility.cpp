@@ -274,7 +274,6 @@ void BLEKeyboardUtility::sendReport(KeyReport* keys)
 {
 	if (this->connected)
 	{
-		this->printKeyReport(keys);
 		this->inputKeyboard->setValue(reinterpret_cast<uint8_t*>(keys), sizeof(KeyReport));
 		this->inputKeyboard->notify();
 		// HelperUtility::delayMs(this->_delay_ms);
@@ -285,7 +284,6 @@ void BLEKeyboardUtility::sendReport(MediaKeyReport* keys)
 {
 	if (this->connected)
 	{
-		this->printKeyReport(keys);
 		this->inputMedia->setValue(reinterpret_cast<uint8_t*>(keys), sizeof(MediaKeyReport));
 		this->inputMedia->notify();
 		// HelperUtility::delayMs(this->_delay_ms);

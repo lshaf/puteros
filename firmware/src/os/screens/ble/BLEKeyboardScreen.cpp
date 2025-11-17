@@ -5,8 +5,9 @@
 #include "os/screens/ble/BLEKeyboardScreen.h"
 
 #include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/ble/BLEMenuScreen.h"
 #include "os/utility/DuckScriptUtility.h"
+
+#include "USBHIDKeyboard.h"
 
 void BLEKeyboardScreen::init()
 {
@@ -172,13 +173,13 @@ void BLEKeyboardScreen::update()
         {
           const char hid_char = s->word[count];
           Serial.printf("BLEKeyboardScreen::update DEBUG Pressed media key: 0x%04x or %c\n", hid_char, hid_char);
-          if (hid_char == ';') report.keys[count] = HID_FUNCTION_ARROW_UP - HID_OFFSET;
-          else if (hid_char == ',') report.keys[count] = HID_FUNCTION_ARROW_LEFT - HID_OFFSET;
-          else if (hid_char == '.') report.keys[count] = HID_FUNCTION_ARROW_DOWN - HID_OFFSET;
-          else if (hid_char == '/') report.keys[count] = HID_FUNCTION_ARROW_RIGHT - HID_OFFSET;
-          else if (hid_char == '`') report.keys[count] = HID_FUNCTION_ESC - HID_OFFSET;
-          else if (hid_char == 'z') report.keys[count] = HID_FUNCTION_LEFT_GUI - HID_OFFSET;
-          else if (c == KEY_BACKSPACE) report.keys[count] = HID_FUNCTION_BACKSPACE - HID_OFFSET;
+          if (hid_char == ';') report.keys[count] = KEY_UP_ARROW - HID_OFFSET;
+          else if (hid_char == ',') report.keys[count] = KEY_LEFT_ARROW - HID_OFFSET;
+          else if (hid_char == '.') report.keys[count] = KEY_DOWN_ARROW - HID_OFFSET;
+          else if (hid_char == '/') report.keys[count] = KEY_RIGHT_ARROW - HID_OFFSET;
+          else if (hid_char == '`') report.keys[count] = KEY_ESC - HID_OFFSET;
+          else if (hid_char == 'z') report.keys[count] = KEY_LEFT_GUI - HID_OFFSET;
+          else if (c == KEY_BACKSPACE) report.keys[count] = KEY_DELETE - HID_OFFSET;
           else if (c == KEY_ENTER)
           {
             goMainMenu();
