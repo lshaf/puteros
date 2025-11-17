@@ -7,8 +7,6 @@
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/utility/DuckScriptUtility.h"
 
-#include "USBHIDKeyboard.h"
-
 void BLEKeyboardScreen::init()
 {
   const auto batLevel = M5Cardputer.Power.getBatteryLevel();

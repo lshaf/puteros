@@ -8,6 +8,8 @@
 #include "NimBLEHIDDevice.h"
 #include "Print.h"
 
+#include "USBHIDKeyboard.h"
+
 #define HID_OFFSET 0x88
 
 typedef uint8_t MediaKeyReport[2];
@@ -28,13 +30,6 @@ const MediaKeyReport KEY_MEDIA_WWW_STOP = {0, 16};
 const MediaKeyReport KEY_MEDIA_WWW_BACK = {0, 32};
 const MediaKeyReport KEY_MEDIA_CONSUMER_CONTROL_CONFIGURATION = {0, 64}; // Media Selection
 const MediaKeyReport KEY_MEDIA_EMAIL_READER = {0, 128};
-
-typedef struct
-{
-  uint8_t modifiers;
-  uint8_t reserved;
-  uint8_t keys[6];
-} KeyReport;
 
 class BLEKeyboardUtility final : public Print, public NimBLEServerCallbacks, public NimBLECharacteristicCallbacks
 {
@@ -61,7 +56,7 @@ private:
   uint16_t version = 0x0210;
 
 public:
-  ~BLEKeyboardUtility();
+  ~BLEKeyboardUtility() override;
   explicit BLEKeyboardUtility(std::string deviceName = "ESP32 Keyboard", std::string deviceManufacturer = "Espressif", uint8_t batteryLevel = 100);
   void begin();
   void end();
