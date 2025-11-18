@@ -13,4 +13,9 @@ public:
 protected:
   void onEnter(ListEntryItem entry) override;
   void onBack() override;
+
+private:
+  bool isUSBMode = true;
+
+  void refreshMenu(bool reset = true);
 };

@@ -89,6 +89,13 @@ public:
   virtual void end() {};
   virtual void sendReport(KeyReport* keys) {};
 
+  virtual void setBatteryLevel(uint8_t level) {};
+  virtual void resetPair() {};
+  virtual bool isConnected()
+  {
+    return true;
+  };
+
   void setDelayMs(uint32_t ms)
   {
     this->_delayMs = ms;

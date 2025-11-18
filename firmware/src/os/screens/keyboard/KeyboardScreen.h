@@ -4,11 +4,14 @@
 
 #pragma once
 #include "os/core/ListScreen.hpp"
-#include "USBHIDKeyboard.h"
+#include "os/utility/HIDKeyboardUtility.h"
 
-class KeyboardUSBScreen final : public ListScreen
+class KeyboardScreen final : public ListScreen
 {
 public:
+  static constexpr int MODE_USB = 0;
+  static constexpr int MODE_BLE = 1;
+  explicit KeyboardScreen(int mode);
   void init() override;
 
 protected:
@@ -19,6 +22,8 @@ protected:
 
   void goMainMenu();
   void goConnectedMenu();
+  void waitingForConnection();
+  void refreshBatteryLevel();
 
   void renderPathEntries(const std::string& path);
   void runDuckyScript(const std::string& path);
@@ -26,10 +31,12 @@ private:
   std::string duckyScriptPath = "/puteros/keyboard/duckyscript";
   std::string shortcutPath = "/puteros/keyboard/function";
   std::string currentPath;
+  int mode = MODE_USB;
 
   bool wasPressed = false;
   std::vector<std::pair<String, bool>> printedLines;
-  USBHIDKeyboard* keyboard = nullptr;
+  HIDKeyboardUtility* keyboard = nullptr;
+  unsigned long lastBatteryUpdate = 0;
 
   enum State_e
   {

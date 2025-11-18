@@ -5,24 +5,41 @@
 #include "os/screens/keyboard/KeyboardMenuScreen.h"
 
 #include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/keyboard/KeyboardUSBScreen.h"
+#include "os/screens/keyboard/KeyboardScreen.h"
 
 void KeyboardMenuScreen::init()
 {
   Template::renderHead("Keyboard Menu");
-  setEntries({
-    {"Mode", "USB"},
-    {"Start"},
-  });
+  refreshMenu();
 }
 
 void KeyboardMenuScreen::onEnter(ListEntryItem entry)
 {
   if (entry.label == "Start")
   {
-    _global->setScreen(new KeyboardUSBScreen());
+    _global->setScreen(new KeyboardScreen(isUSBMode ? KeyboardScreen::MODE_USB : KeyboardScreen::MODE_BLE));
+  } else if (entry.label == "Mode")
+  {
+    isUSBMode = !isUSBMode;
+    refreshMenu(false);
   }
 }
+
+void KeyboardMenuScreen::refreshMenu(const bool reset)
+{
+  std::vector<ListEntryItem> f = {
+    {"Mode", isUSBMode ? "USB" : "BLE"},
+    {"Start"},
+  };
+
+  if (reset) setEntries(f);
+  else
+  {
+    entries = f;
+    render();
+  }
+}
+
 
 void KeyboardMenuScreen::onBack()
 {

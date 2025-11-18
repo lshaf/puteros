@@ -19,3 +19,4 @@ private:
 
   void holdPress(uint8_t modifier, uint8_t key);
 };
+
