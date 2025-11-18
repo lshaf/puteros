@@ -85,9 +85,9 @@ protected:
 public:
   ~HIDKeyboardUtility() override;
   HIDKeyboardUtility() = default;
-  virtual void begin() {};
-  virtual void end() {};
-  virtual void sendReport(KeyReport* keys) {};
+  virtual void begin() = 0;
+  virtual void end() = 0;
+  virtual void sendReport(KeyReport* keys) = 0;
 
   virtual void setBatteryLevel(uint8_t level) {};
   virtual void resetPair() {};

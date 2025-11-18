@@ -6,6 +6,31 @@
 #include <Arduino.h>
 #include "os/utility/HelperUtility.h"
 
+std::string HelperUtility::generateRandomString(size_t length)
+{
+  if (length == 0) return {};
+
+  const std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  constexpr size_t MAX_LEN = 4096;
+  if (length > MAX_LEN) length = MAX_LEN;
+
+  const uint32_t charsetSize = charset.size();
+  const uint32_t randMax = std::numeric_limits<uint32_t>::max();
+  const uint32_t limit = randMax - (randMax % charsetSize);
+
+  std::string out;
+  out.reserve(length);
+
+  while (out.size() < length) {
+    const uint32_t r = esp_random();
+    if (r >= limit) continue; // rejection sampling to avoid modulo bias
+    out.push_back(charset[r % charsetSize]);
+  }
+
+  return out;
+}
+
+
 void HelperUtility::makeDirectoryRecursive(const std::string& path)
 {
   if (SD.exists(path.c_str())) return;

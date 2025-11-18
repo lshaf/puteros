@@ -10,6 +10,7 @@
 class HelperUtility
 {
 public:
+  static std::string generateRandomString(size_t length);
   static std::string stringToHex(const std::string& input);
   static void delayMs(unsigned long us);
   static void drawWrappedCenterString(M5Canvas &canvas, const std::string &text);
