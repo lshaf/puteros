@@ -256,6 +256,7 @@ void BLEKeyboardScreen::runDuckyScript(const std::string& path)
   }
 
   scriptFile.close();
+  printedLines.clear();
 }
 
 

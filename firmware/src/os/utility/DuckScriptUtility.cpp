@@ -31,7 +31,7 @@ void DuckScriptUtility::holdPress(const uint8_t modifier, const uint8_t key)
   keyboard->reportModifier(&r, modifier);
   keyboard->reportModifier(&r, key);
   keyboard->sendReport(&r);
-  delay(100);
+  delay(50);
   keyboard->releaseAll();
 }
 
