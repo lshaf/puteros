@@ -3,7 +3,6 @@
 //
 
 #include <SD.h>
-
 #include "DuckScriptUtility.h"
 
 uint8_t DuckScriptUtility::charToHex(const char* str)
@@ -26,18 +25,28 @@ uint8_t DuckScriptUtility::charToHex(const char* str)
   return value;
 }
 
+void DuckScriptUtility::holdPress(const uint8_t modifier, const uint8_t key)
+{
+  KeyReport r = {};
+  keyboard->reportModifier(&r, modifier);
+  keyboard->reportModifier(&r, key);
+  keyboard->sendReport(&r);
+  delay(100);
+  keyboard->releaseAll();
+}
+
 
 bool DuckScriptUtility::runCommand(const std::string& command)
 {
   if (command.rfind("STRING ", 0) == 0)
   {
     const std::string str = command.substr(7);
-    kWrite(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
+    keyboard->write(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
   } else if (command.rfind("STRINGLN ", 0) == 0)
   {
     const std::string str = command.substr(9);
-    kWrite(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
-    kWrite(KEY_RETURN);
+    keyboard->write(reinterpret_cast<const uint8_t*>(str.c_str()), str.length());
+    keyboard->write(KEY_RETURN);
   } else if (command.rfind("DELAY ", 0) == 0)
   {
     const std::string delayStr = command.substr(6);
@@ -47,33 +56,25 @@ bool DuckScriptUtility::runCommand(const std::string& command)
   {
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
-    kPress(KEY_LEFT_GUI);
-    kPress(keyCode);
-    kReleaseAll();
+    holdPress(KEY_LEFT_GUI, keyCode);
   } else if (command.rfind("CTRL ", 0) == 0)
   {
     const std::string keyStr = command.substr(5);
     const auto keyCode = charToHex(keyStr.c_str());
-    kPress(KEY_LEFT_CTRL);
-    kPress(keyCode);
-    kReleaseAll();
+    holdPress(KEY_LEFT_CTRL, keyCode);
   } else if (command.rfind("ALT ", 0) == 0)
   {
     const std::string keyStr = command.substr(4);
     const auto keyCode = charToHex(keyStr.c_str());
-    kPress(KEY_LEFT_ALT);
-    kPress(keyCode);
-    kReleaseAll();
+    holdPress(KEY_LEFT_ALT, keyCode);
   } else if (command.rfind("SHIFT ", 0) == 0)
   {
     const std::string keyStr = command.substr(6);
     const auto keyCode = charToHex(keyStr.c_str());
-    kPress(KEY_LEFT_SHIFT);
-    kPress(keyCode);
-    kReleaseAll();
+    holdPress(KEY_LEFT_SHIFT, keyCode);
   } else if (command.rfind("ENTER", 0) == 0)
   {
-    kWrite(KEY_RETURN);
+    keyboard->write(KEY_RETURN);
   } else if (command.rfind("REM ", 0) == 0)
   {
     // nothing to do here
@@ -106,7 +107,7 @@ void DuckScriptUtility::runScript(const std::string& pathFile)
   scriptFile.close();
 }
 
-void DuckScriptUtility::runFile(BLEKeyboardUtility* keyboard, const std::string& path)
+void DuckScriptUtility::runFile(HIDKeyboardUtility* keyboard, const std::string& path)
 {
   DuckScriptUtility duckScript(keyboard);
   duckScript.runScript(path);

@@ -3,7 +3,6 @@
 //
 
 #include "os/screens/ble/BLEKeyboardScreen.h"
-
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/utility/DuckScriptUtility.h"
 
@@ -170,14 +169,14 @@ void BLEKeyboardScreen::update()
         if (s->fn)
         {
           const char hid_char = s->word[count];
-          Serial.printf("BLEKeyboardScreen::update DEBUG Pressed media key: 0x%04x or %c\n", hid_char, hid_char);
+          Serial.printf("BLEKeyboardScreen::update DEBUG Pressed media key: 0x%02X or %c or 0x%02X\n", hid_char, hid_char, c);
           if (hid_char == ';') report.keys[count] = KEY_UP_ARROW - HID_OFFSET;
           else if (hid_char == ',') report.keys[count] = KEY_LEFT_ARROW - HID_OFFSET;
           else if (hid_char == '.') report.keys[count] = KEY_DOWN_ARROW - HID_OFFSET;
           else if (hid_char == '/') report.keys[count] = KEY_RIGHT_ARROW - HID_OFFSET;
           else if (hid_char == '`') report.keys[count] = KEY_ESC - HID_OFFSET;
-          else if (hid_char == 'z') report.keys[count] = KEY_LEFT_GUI - HID_OFFSET;
-          else if (c == KEY_BACKSPACE) report.keys[count] = KEY_DELETE - HID_OFFSET;
+          else if (hid_char == 'z') report.modifiers = 0x08;
+          else if (c == (KEY_BACKSPACE - HID_OFFSET)) report.keys[count] = KEY_DELETE - HID_OFFSET;
           else if (c == KEY_ENTER)
           {
             goMainMenu();
@@ -189,6 +188,7 @@ void BLEKeyboardScreen::update()
             if (SD.exists(filename.c_str()))
             {
               runDuckyScript(filename);
+              delay(1000);
               goConnectedMenu();
             }
           }
