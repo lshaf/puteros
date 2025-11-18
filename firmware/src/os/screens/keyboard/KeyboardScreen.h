@@ -1,44 +1,48 @@
 //
-// Created by l-sha on 03/11/2025.
+// Created by l-sha on 17/11/2025.
 //
+
 #pragma once
-
-#include <esp_system.h>
 #include "os/core/ListScreen.hpp"
-#include "os/utility/BLEKeyboardUtility.h"
+#include "os/utility/HIDKeyboardUtility.h"
 
-class BLEKeyboardScreen final : public ListScreen
+class KeyboardScreen final : public ListScreen
 {
 public:
+  static constexpr int MODE_USB = 0;
+  static constexpr int MODE_BLE = 1;
+  explicit KeyboardScreen(int mode);
   void init() override;
 
 protected:
-  void update() override;
   void onEnter(ListEntryItem entry) override;
   void onBack() override;
   void onEscape() override;
+  void update() override;
 
-  void refreshBatteryLevel();
   void goMainMenu();
   void goConnectedMenu();
   void waitingForConnection();
+  void refreshBatteryLevel();
 
   void renderPathEntries(const std::string& path);
   void runDuckyScript(const std::string& path);
 private:
-  BLEKeyboardUtility* bleKeyboard = nullptr;
   std::string duckyScriptPath = "/puteros/keyboard/duckyscript";
   std::string shortcutPath = "/puteros/keyboard/function";
   std::string currentPath;
-  unsigned long lastBatteryUpdate = 0;
+  int mode = MODE_USB;
+
+  bool wasPressed = false;
   std::vector<std::pair<String, bool>> printedLines;
+  HIDKeyboardUtility* keyboard = nullptr;
+  unsigned long lastBatteryUpdate = 0;
 
   enum State_e
   {
-    STATE_MAIN,
-    STATE_CONNECTING,
-    STATE_SELECT_FILE,
-    STATE_RUNNING_SCRIPT,
     STATE_KEYBOARD,
-  } currentState = STATE_MAIN;
+    STATE_MENU,
+    STATE_RUNNING_SCRIPT,
+    STATE_SELECT_FILE,
+  } currentState = STATE_MENU;
 };

@@ -1,44 +1,50 @@
 //
-// Created by l-sha on 03/11/2025.
+// Created by l-sha on 17/11/2025.
 //
 
-#include "os/screens/ble/BLEKeyboardScreen.h"
-
-#include "os/screens/MainMenuScreen.hpp"
+#include "USB.h"
+#include "KeyboardScreen.h"
+#include "KeyboardMenuScreen.h"
+#include "os/utility/BLEKeyboardUtility.h"
 #include "os/utility/DuckScriptUtility.h"
+#include "os/utility/USBKeyboardUtility.h"
 
-void BLEKeyboardScreen::init()
+KeyboardScreen::KeyboardScreen(const int mode) : mode(mode)
 {
-  const auto batLevel = M5Cardputer.Power.getBatteryLevel();
-  bleKeyboard = new BLEKeyboardUtility("PuterOS", "M5Stack", batLevel);
-  bleKeyboard->begin();
+  if (mode == MODE_USB)
+  {
+    keyboard = new USBKeyboardUtility();
+  } else
+  {
+    const auto batLevel = M5Cardputer.Power.getBatteryLevel();
+    keyboard = new BLEKeyboardUtility("PuterOS", "M5Stack", batLevel);
+  }
+}
 
+void KeyboardScreen::init()
+{
+  keyboard->begin();
   goMainMenu();
-
-  HelperUtility::makeDirectoryRecursive(duckyScriptPath);
-  HelperUtility::makeDirectoryRecursive(shortcutPath);
 }
 
-void BLEKeyboardScreen::refreshBatteryLevel()
+void KeyboardScreen::goMainMenu()
 {
-  if (millis() - lastBatteryUpdate >= 60000) return;
-  lastBatteryUpdate = millis();
-  const auto batLevel = M5Cardputer.Power.getBatteryLevel();
-  bleKeyboard->setBatteryLevel(batLevel);
-}
-
-void BLEKeyboardScreen::goMainMenu()
-{
-  currentState = STATE_MAIN;
-  Template::renderHead("BLE Keyboard");
-  setEntries({
+  currentState = STATE_MENU;
+  const std::string strMode = (this->mode == MODE_USB) ? "USB" : "BLE";
+  Template::renderHead(strMode + " Keyboard");
+  entries = {
     {"Keyboard"},
     {"Ducky Script"},
-    {"Reset Pair"},
-  });
+  };
+  if (this->mode == MODE_BLE)
+  {
+    entries.push_back({"Reset Pair"});
+  }
+
+  setEntries(entries);
 }
 
-void BLEKeyboardScreen::goConnectedMenu()
+void KeyboardScreen::goConnectedMenu()
 {
   currentState = STATE_KEYBOARD;
 
@@ -53,46 +59,43 @@ void BLEKeyboardScreen::goConnectedMenu()
   Template::renderBody(&body);
 }
 
-void BLEKeyboardScreen::waitingForConnection()
+void KeyboardScreen::waitingForConnection()
 {
-  if (!bleKeyboard->isConnected())
-  {
-    currentState = STATE_CONNECTING;
-    Template::renderStatus("Waiting for connection...", TFT_BLUE);
-    while (!bleKeyboard->isConnected())
-    {
-      const auto _keyboard = &M5Cardputer.Keyboard;
-      if (_keyboard->isChange() && _keyboard->isPressed())
-      {
-        const auto s = &_keyboard->keysState();
-        if (s->fn && s->enter)
-        {
-          goMainMenu();
-          return;
-        }
-      }
-
-      HelperUtility::delayMs(10);
-    }
-  }
+  Template::renderStatus("Bluetooth is not connected...", TFT_RED);
+  HelperUtility::delayMs(1500);
 }
 
-
-void BLEKeyboardScreen::onEnter(ListEntryItem entry)
+void KeyboardScreen::refreshBatteryLevel()
 {
-  if (currentState == STATE_MAIN)
+  if (this->mode != MODE_BLE) return;
+  if (millis() - lastBatteryUpdate >= 60000) return;
+  lastBatteryUpdate = millis();
+  const auto batLevel = M5Cardputer.Power.getBatteryLevel();
+  keyboard->setBatteryLevel(batLevel);
+}
+
+void KeyboardScreen::onEnter(ListEntryItem entry)
+{
+  if (currentState == STATE_MENU)
   {
-    if (entry.label == "Reset Pair")
+    if (mode == MODE_BLE && entry.label == "Reset Pair")
     {
-      bleKeyboard->resetPair();
+      keyboard->resetPair();
       Template::renderStatus("Pairing information reset");
       HelperUtility::delayMs(1500);
       goMainMenu();
     } else if (entry.label == "Keyboard")
     {
-      Template::renderHead("BLE Keyboard");
-      waitingForConnection();
-      goConnectedMenu();
+      keyboard->releaseAll();
+      delay(500);
+      if (!keyboard->isConnected())
+      {
+        waitingForConnection();
+        goMainMenu();
+      } else
+      {
+        goConnectedMenu();
+      }
     } else if (entry.label == "Ducky Script")
     {
       renderPathEntries(duckyScriptPath);
@@ -116,13 +119,19 @@ void BLEKeyboardScreen::onEnter(ListEntryItem entry)
       else
         fileName = currentPath + "/" + entry.label;
 
-      waitingForConnection();
-      runDuckyScript(fileName);
+      if (!keyboard->isConnected())
+      {
+        waitingForConnection();
+        renderPathEntries(currentPath);
+      } else
+      {
+        runDuckyScript(fileName);
+      }
     }
   }
 }
 
-void BLEKeyboardScreen::onBack()
+void KeyboardScreen::onBack()
 {
   if (currentState == STATE_KEYBOARD)
   {
@@ -148,80 +157,75 @@ void BLEKeyboardScreen::onBack()
   }
 }
 
-void BLEKeyboardScreen::onEscape()
+void KeyboardScreen::onEscape()
 {
   if (currentState == STATE_SELECT_FILE)
     goMainMenu();
   else
+  {
     esp_restart();
+  }
 }
 
-void BLEKeyboardScreen::update()
+void KeyboardScreen::update()
 {
   if (currentState == STATE_KEYBOARD)
   {
     refreshBatteryLevel();
     const auto _keyboard = &M5Cardputer.Keyboard;
-    if (_keyboard->isChange() && _keyboard->isPressed())
+    if (_keyboard->isPressed())
     {
+      wasPressed = true;
       const auto s = &_keyboard->keysState();
-      if (s->fn)
-      {
-        if (s->enter)
-        {
-          goMainMenu();
-          return;
-        }
+      KeyReport report = {};
 
-        if (s->del)
-        {
-          bleKeyboard->write(HID_FUNCTION_DELETE);
-          return;
-        }
-      }
-
-      if (s->tab)
-      {
-        bleKeyboard->write(HID_FUNCTION_TAB);
-        return;
-      }
-      if (s->del)
-      {
-        bleKeyboard->write(HID_FUNCTION_BACKSPACE);
-        return;
-      }
-      if (s->enter)
-      {
-        bleKeyboard->write(HID_FUNCTION_ENTER);
-        return;
-      }
-
-      for (const auto c: s->word)
+      int count = 0;
+      report.modifiers = s->modifiers;
+      for (const auto c: s->hid_keys)
       {
         if (s->fn)
         {
-          Serial.printf("BLEKeyboardScreen::update DEBUG Pressed media key: 0x%04x or %c\n", c, c);
-          if (c == ';') bleKeyboard->write(HID_FUNCTION_ARROW_UP);
-          else if (c == ',') bleKeyboard->write(HID_FUNCTION_ARROW_LEFT);
-          else if (c == '.') bleKeyboard->write(HID_FUNCTION_ARROW_DOWN);
-          else if (c == '/') bleKeyboard->write(HID_FUNCTION_ARROW_RIGHT);
-          else if (c == '`') bleKeyboard->write(HID_FUNCTION_ESC);
-          else if (c == 'z') bleKeyboard->write(HID_FUNCTION_LEFT_GUI);
+          const char hid_char = s->word[count];
+          Serial.printf("KeyboardScreen::update DEBUG Pressed media key: 0x%02X or %c or 0x%02X\n", hid_char, hid_char, c);
+          if (hid_char == ';') report.keys[count] = KEY_UP_ARROW - HID_OFFSET;
+          else if (hid_char == ',') report.keys[count] = KEY_LEFT_ARROW - HID_OFFSET;
+          else if (hid_char == '.') report.keys[count] = KEY_DOWN_ARROW - HID_OFFSET;
+          else if (hid_char == '/') report.keys[count] = KEY_RIGHT_ARROW - HID_OFFSET;
+          else if (hid_char == '`') report.keys[count] = KEY_ESC - HID_OFFSET;
+          else if (hid_char == 'z') report.modifiers = 0x08;
+          else if (c == (KEY_BACKSPACE - HID_OFFSET)) report.keys[count] = KEY_DELETE - HID_OFFSET;
+          else if (c == KEY_ENTER)
+          {
+            goMainMenu();
+            delay(500);
+            
+            return;
+          }
           else
           {
-            std::string filename = shortcutPath + "/" + c + ".ds";
+            std::string filename = shortcutPath + "/" + hid_char + ".ds";
             if (SD.exists(filename.c_str()))
             {
               runDuckyScript(filename);
+              delay(1000);
               goConnectedMenu();
             }
           }
         } else
         {
-          bleKeyboard->write(c);
+          report.keys[count] = c;
         }
+
+        count++;
       }
+
+      keyboard->sendReport(&report);
+    } else if (wasPressed)
+    {
+      wasPressed = false;
+      keyboard->releaseAll();
     }
+    delay(50);
   } else if (currentState == STATE_RUNNING_SCRIPT)
   {
     const auto _keyboard = &M5Cardputer.Keyboard;
@@ -239,7 +243,7 @@ void BLEKeyboardScreen::update()
   }
 }
 
-void BLEKeyboardScreen::runDuckyScript(const std::string& path)
+void KeyboardScreen::runDuckyScript(const std::string& path)
 {
   currentState = STATE_RUNNING_SCRIPT;
   auto scriptFile = SD.open(path.c_str());
@@ -250,7 +254,7 @@ void BLEKeyboardScreen::runDuckyScript(const std::string& path)
     renderPathEntries(currentPath);
     return;
   }
-  const auto ducky = new DuckScriptUtility(bleKeyboard);
+  const auto ducky = new DuckScriptUtility(keyboard);
   while (scriptFile.available())
   {
     String line = scriptFile.readStringUntil('\n');
@@ -271,10 +275,10 @@ void BLEKeyboardScreen::runDuckyScript(const std::string& path)
   }
 
   scriptFile.close();
+  printedLines.clear();
 }
 
-
-void BLEKeyboardScreen::renderPathEntries(const std::string& path)
+void KeyboardScreen::renderPathEntries(const std::string& path)
 {
   if (!_global->getIsSDCardLoaded())
   {

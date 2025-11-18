@@ -9,7 +9,7 @@ const Hero = ({ mouse }) => {
       // Perform action after the delay
       new Typed(".typed-subtitle", {
         strings: [
-          "ESP32 S3 Based Pentesting Firmware.",
+          "Cardputer Based Pentesting Firmware.",
           "Easy Navigation and Easy to Use."
         ],
         loop: true,

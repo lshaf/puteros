@@ -6,6 +6,31 @@
 #include <Arduino.h>
 #include "os/utility/HelperUtility.h"
 
+std::string HelperUtility::generateRandomString(size_t length)
+{
+  if (length == 0) return {};
+
+  const std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  constexpr size_t MAX_LEN = 4096;
+  if (length > MAX_LEN) length = MAX_LEN;
+
+  const uint32_t charsetSize = charset.size();
+  const uint32_t randMax = std::numeric_limits<uint32_t>::max();
+  const uint32_t limit = randMax - (randMax % charsetSize);
+
+  std::string out;
+  out.reserve(length);
+
+  while (out.size() < length) {
+    const uint32_t r = esp_random();
+    if (r >= limit) continue; // rejection sampling to avoid modulo bias
+    out.push_back(charset[r % charsetSize]);
+  }
+
+  return out;
+}
+
+
 void HelperUtility::makeDirectoryRecursive(const std::string& path)
 {
   if (SD.exists(path.c_str())) return;
@@ -111,4 +136,22 @@ void HelperUtility::drawWrappedCenterString(M5Canvas &canvas, const std::string 
     const int x = canvas.width() / 2 - tw / 2;
     canvas.drawString(l.c_str(), x, startY + static_cast<int>(idx) * fh);
   }
+}
+
+bool HelperUtility::parseInt32(const std::string& input, int32_t &value) {
+  const char *str = input.c_str();
+  while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n') ++str;
+
+  errno = 0;
+  char *end = nullptr;
+  long v = std::strtol(str, &end, 10);
+
+  if (str == end) return false; // no digits
+  if (errno == ERANGE || v < INT32_MIN || v > INT32_MAX) return false;
+
+  while (*end == ' ' || *end == '\t' || *end == '\r' || *end == '\n') ++end;
+  if (*end != '\0') return false; // trailing non-space characters
+
+  value = static_cast<int32_t>(v);
+  return true;
 }

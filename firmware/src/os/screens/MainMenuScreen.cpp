@@ -1,15 +1,17 @@
 //
 // Created by l-sha on 9/20/2025.
 //
-#include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/FileNavigatorScreen.hpp"
-#include "os/screens/SettingScreen.h"
-#include "os/screens/WelcomeScreen.hpp"
-#include "os/screens/ble/BLEMenuScreen.h"
-#include "os/screens/game/GameMenuScreen.h"
-#include "os/screens/module/ModuleMenuScreen.h"
-#include "os/screens/utility/UtilityMenuScreen.h"
-#include "os/screens/wifi/WifiMenuScreen.h"
+#include "MainMenuScreen.hpp"
+
+#include "keyboard/KeyboardMenuScreen.h"
+#include "FileNavigatorScreen.hpp"
+#include "SettingScreen.h"
+#include "WelcomeScreen.hpp"
+#include "ble/BLEMenuScreen.h"
+#include "game/GameMenuScreen.h"
+#include "module/ModuleMenuScreen.h"
+#include "utility/UtilityMenuScreen.h"
+#include "wifi/WifiMenuScreen.h"
 
 void MainMenuScreen::init()
 {
@@ -17,6 +19,7 @@ void MainMenuScreen::init()
   setEntries({
     {"Wifi"},
     {"Bluetooth"},
+    {"Keyboard"},
     {"Files"},
     {"Modules"},
     {"Utility"},
@@ -38,6 +41,9 @@ void MainMenuScreen::onEnter(ListEntryItem entry)
   } else if (entry.label == "Bluetooth")
   {
     _global->setScreen(new BLEMenuScreen());
+  } else if (entry.label == "Keyboard")
+  {
+    _global->setScreen(new KeyboardMenuScreen());
   } else if (entry.label == "Modules")
   {
     _global->setScreen(new ModuleMenuScreen());
