@@ -19,9 +19,17 @@ const features = [
     name: 'Bluetooth',
     desc: 'Classic Bluetooth tools and utilities.',
     children: [
-      { name: 'BLE Keyboard', desc: 'Act as a wireless keyboard via BLE.' },
+      { name: 'Beacon SPAM', desc: 'Spamming bluetooth beacon with random string' },
       { name: 'Scanner', desc: 'Scan barcodes and QR codes.' },
-      { name: 'RubberDuck', desc: 'Automated HID scripts for automation.' },
+    ],
+  },
+  {
+    name: 'Keyboard',
+    desc: 'Emulate your ESP32 as keyboard to PC.',
+    children: [
+      { name: 'DuckyScript', desc: 'Script to run chain of keyboard command in an instance' },
+      { name: 'BLE Keyboard', desc: 'Emulate via bluetooth.' },
+      { name: 'USB Keyboard', desc: 'Emulate via USB HID.' },
     ],
   },
   {
