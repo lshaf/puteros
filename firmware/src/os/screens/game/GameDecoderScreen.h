@@ -6,7 +6,7 @@
 #include <M5Cardputer.h>
 #include "os/core/ScreenState.hpp"
 
-class DecodeGameScreen final : public ScreenState
+class GameDecoderScreen final : public ScreenState
 {
   static constexpr size_t maxAttempt = 6;
   enum State_e
@@ -18,7 +18,7 @@ class DecodeGameScreen final : public ScreenState
   };
 
 public:
-  ~DecodeGameScreen() override;
+  ~GameDecoderScreen() override;
   void init() override;
   void update() override;
   void render() override;

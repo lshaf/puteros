@@ -1,19 +1,18 @@
-#include "os/screens/game/DecodeGameScreen.h"
+#include "os/screens/game/GameDecoderScreen.h"
 #include "os/component/Template.hpp"
 #include "os/screens/game/GameMenuScreen.h"
-#include "os/utility/HelperUtility.h"
 
-DecodeGameScreen::~DecodeGameScreen()
+GameDecoderScreen::~GameDecoderScreen()
 {
   playerInput->fill({});
 }
 
-void DecodeGameScreen::init()
+void GameDecoderScreen::init()
 {
   Template::renderHead("Number Decoder");
 }
 
-void DecodeGameScreen::update()
+void GameDecoderScreen::update()
 {
   if (currentState == STATE_PLAY && millis() - lastRender >= 500)
   {
@@ -61,7 +60,7 @@ void DecodeGameScreen::update()
 
       for (const auto c : _keyState.word)
       {
-        if (c >= '0' && c <= '9')
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
         {
           if (currentInputCursor < 4)
           {
@@ -110,7 +109,7 @@ void DecodeGameScreen::update()
   }
 }
 
-void DecodeGameScreen::render()
+void GameDecoderScreen::render()
 {
   lastRender = millis();
   if (currentState == STATE_MAIN_MENU)
@@ -128,7 +127,7 @@ void DecodeGameScreen::render()
   }
 }
 
-void DecodeGameScreen::renderMainMenu()
+void GameDecoderScreen::renderMainMenu()
 {
   auto body = Template::createBody();
   const std::vector<std::string> menuItems = {
@@ -152,7 +151,7 @@ void DecodeGameScreen::renderMainMenu()
   Template::renderBody(&body);
 }
 
-void DecodeGameScreen::initGame()
+void GameDecoderScreen::initGame()
 {
   resetState();
   endTime = millis() + getTimer() * 1000;
@@ -164,7 +163,7 @@ void DecodeGameScreen::initGame()
   navigate(STATE_PLAY);
 }
 
-void DecodeGameScreen::renderGamePlay()
+void GameDecoderScreen::renderGamePlay()
 {
   auto body = Template::createBody();
 
@@ -244,7 +243,7 @@ void DecodeGameScreen::renderGamePlay()
   Template::renderBody(&body);
 }
 
-void DecodeGameScreen::renderGameOver()
+void GameDecoderScreen::renderGameOver()
 {
   auto body = Template::createBody();
   body.setTextSize(2);
@@ -253,7 +252,7 @@ void DecodeGameScreen::renderGameOver()
   Template::renderBody(&body);
 }
 
-void DecodeGameScreen::renderWin()
+void GameDecoderScreen::renderWin()
 {
   auto body = Template::createBody();
   body.setTextSize(2);
@@ -262,7 +261,7 @@ void DecodeGameScreen::renderWin()
   Template::renderBody(&body);
 }
 
-void DecodeGameScreen::resetState()
+void GameDecoderScreen::resetState()
 {
   playerInput->fill({});
   currentInputCursor = 0;
