@@ -179,7 +179,7 @@ void GameWordleScreen::initGame()
   // Select a random word from the word list based on the current language
   const auto& wordList = (currentLanguage == Language::ID) ? WORDLE_DB_ID : WORDLE_DB_EN;
   const size_t wordCount = (currentLanguage == Language::ID) ? WORDLE_DB_ID_COUNT : WORDLE_DB_EN_COUNT;
-  const size_t randomIndex = random(wordCount);
+  const size_t randomIndex = HelperUtility::true_random(static_cast<long>(wordCount));
   const std::string& selectedWord = wordList[randomIndex];
 
   // Copy the selected word into chosenWord array
@@ -213,10 +213,10 @@ void GameWordleScreen::renderGamePlay()
   for (uint8_t ci = 0; ci < 5; ci++)
   {
     auto color = (ci == currentCursor) ? TFT_DARKCYAN : TFT_DARKGREY;
-    body.fillRoundRect(17 * ci, 2, 15, 15, 2, color);
+    body.fillRoundRect(17 * ci, 0, 15, 15, 2, color);
     if (currentInput[ci] != '\0')
     {
-      body.drawCentreString(std::string(1, currentInput[ci]).c_str(), 17 * ci + 7, 4);
+      body.drawCentreString(std::string(1, currentInput[ci]).c_str(), 17 * ci + 7, 2);
     }
   }
 
@@ -230,10 +230,10 @@ void GameWordleScreen::renderGamePlay()
       auto color = TFT_DARKGREY;
       if (topIndex >= 0) color = getColorGuess(ci, character);
 
-      body.fillRoundRect(17 * ci, (t + 1) * 17 + 2, 15, 15, 2, color);
+      body.fillRoundRect(17 * ci, (t + 1) * 17, 15, 15, 2, color);
       if (topIndex >= 0 && character != '\0')
       {
-        body.drawCentreString(std::string(1, character).c_str(), 17 * ci + 7, (t + 1) * 17 + 4);
+        body.drawCentreString(std::string(1, character).c_str(), 17 * ci + 7, (t + 1) * 17 + 2);
       }
     }
   }

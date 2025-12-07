@@ -157,7 +157,7 @@ void GameDecoderScreen::initGame()
   endTime = millis() + getTimer() * 1000;
   for (int i = 0; i < 4; i++)
   {
-    targetNumber[i] = static_cast<uint8_t>(random(10));
+    targetNumber[i] = static_cast<uint8_t>(HelperUtility::true_random(10));
   }
 
   navigate(STATE_PLAY);
