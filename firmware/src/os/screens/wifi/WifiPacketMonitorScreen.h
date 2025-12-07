@@ -15,7 +15,7 @@ private:
   int historySize = 60;
   std::vector<uint16_t> packetHistory;
   unsigned long lastRender = 0;
-  int8_t currentChannel = 1;
+  int8_t currentChannel = 0;
   void moveChannel(const int8_t direction)
   {
     currentChannel += direction;

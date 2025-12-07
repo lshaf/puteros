@@ -70,12 +70,6 @@ void WifiPacketMonitorScreen::quiting()
 
   // Now disable promiscuous mode.
   esp_wifi_set_promiscuous(false);
-
-  // Reset local state and release vector memory.
-  lastRender = 0;
-  currentChannel = 1;
-  packetHistory.clear();
-  packetHistory.shrink_to_fit();
   HelperUtility::delayMs(500);
 
   _global->setScreen(new WifiMenuScreen());
