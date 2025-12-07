@@ -1,0 +1,4 @@
+GUI r
+DELAY 500
+STRINGLN notepad
+ENTER
