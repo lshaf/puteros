@@ -13,6 +13,7 @@ const features = [
       { name: 'Deauth Detector', desc: 'Detect nearby deauthentication events.' },
       { name: 'ESPNOW Chat', desc: 'Peer‑to‑peer chat over ESPNOW.' },
       { name: 'Packet Monitor', desc: 'Live capture and monitor wireless packets.' },
+      { name: 'Web File Manager', desc: 'Manage sd card content using web view that connected to network' }
     ],
   },
   {
@@ -52,7 +53,8 @@ const features = [
     name: 'Game',
     desc: 'Small built‑in entertainment games.',
     children: [
-      { name: 'Number Guesser', desc: 'Try to guess the secret number.' },
+      { name: 'HEX Decoder', desc: 'Guessing randomized hex number under 2 minutes.' },
+      { name: 'Wordle', desc: 'Wordle game and available in 2 language ID and EN' },
     ],
   },
   { name: 'Setting', desc: 'Adjust device options and preferences.' },

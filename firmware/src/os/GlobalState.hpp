@@ -7,6 +7,8 @@
 #include "core/Screen.hpp"
 #include <SD.h>
 
+#define APP_CONFIG_WIFI_WEB_PASSWORD "wifi_web_password"
+#define APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT "puteros123"
 #define APP_CONFIG_BRIGHTNESS "brightness"
 #define APP_CONFIG_BRIGHTNESS_DEFAULT "70"
 #define APP_CONFIG_DEVICE_NAME "device_name"

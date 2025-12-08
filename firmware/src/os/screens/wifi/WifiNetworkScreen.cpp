@@ -6,6 +6,7 @@
 #include "os/component/Template.hpp"
 #include "os/screens/wifi/WifiNetworkScreen.h"
 
+#include "network/WiNetFileManager.h"
 #include "os/component/InputTextScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 #include "os/screens/wifi/network/WiNetClockScreen.h"
@@ -28,7 +29,12 @@ void WifiNetworkScreen::showMenu()
 {
   currentState = STATE_MENU;
   Template::renderHead("Network");
-  setEntries({ {"Information"}, {"World Clock"}, {"IP Scanner"} });
+  setEntries({
+    {"Information"},
+    {"World Clock"},
+    {"IP Scanner"},
+    {"Web File Manager"}
+  });
 }
 
 void WifiNetworkScreen::showWifiList()
@@ -54,6 +60,8 @@ void WifiNetworkScreen::showWifiList()
 void WifiNetworkScreen::onBack()
 {
   WiFi.disconnect(true);
+  Template::renderStatus("Disconnecting...");
+  HelperUtility::delayMs(1000);
   _global->setScreen(new WifiMenuScreen());
 }
 
@@ -92,6 +100,9 @@ void WifiNetworkScreen::onEnter(const ListEntryItem entry)
     } else if (entry.label == "IP Scanner")
     {
       _global->setScreen(new WiNetIPScannerScreen());
+    } else if (entry.label == "Web File Manager")
+    {
+      _global->setScreen(new WiNetFileManager());
     }
   }
 }
