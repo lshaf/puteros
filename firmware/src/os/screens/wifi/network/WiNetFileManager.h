@@ -13,6 +13,7 @@ public:
 
 protected:
   WebServer server{80};
+  String currentPassword;
 
   enum State_e
   {
@@ -22,4 +23,8 @@ protected:
 
   void onEnter(ListEntryItem entry) override;
   void onBack() override;
+  void update() override;
+
+  void prepareServer();
+  void renderMainMenu();
 };
