@@ -45,6 +45,7 @@ void WiNetFileManager::onEnter(ListEntryItem entry)
       } else
       {
         _global->getConfig()->set(APP_CONFIG_WIFI_WEB_PASSWORD, newPassword.c_str());
+        _global->getConfig()->save();
         currentPassword = newPassword.c_str();
       }
 
@@ -119,6 +120,7 @@ void WiNetFileManager::update()
 {
   if (currentState == STATE_WEB_MANAGER)
   {
+    server.handleClient();
     const auto _keeb = &M5Cardputer.Keyboard;
     if (_keeb->isChange() && _keeb->isPressed())
     {
