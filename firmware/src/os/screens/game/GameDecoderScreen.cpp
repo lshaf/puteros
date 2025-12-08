@@ -2,11 +2,6 @@
 #include "os/component/Template.hpp"
 #include "os/screens/game/GameMenuScreen.h"
 
-GameDecoderScreen::~GameDecoderScreen()
-{
-  playerInput->fill({});
-}
-
 void GameDecoderScreen::init()
 {
   Template::renderHead("HEX Decoder");
@@ -165,7 +160,6 @@ void GameDecoderScreen::renderMainMenu()
 
 void GameDecoderScreen::initGame()
 {
-  resetState();
   endTime = millis() + getTimer() * 1000;
   for (int i = 0; i < 4; i++)
   {
@@ -267,7 +261,7 @@ void GameDecoderScreen::renderResult(const bool isWin)
 
 void GameDecoderScreen::resetState()
 {
-  playerInput->fill({});
+  for (auto &i : playerInput) i.fill('\0');
   currentInputCursor = 0;
   currentInput = {0, 0, 0, 0};
   totalUserInput = 0;

@@ -193,7 +193,7 @@ void KeyboardScreen::update()
           else if (hid_char == '/') report.keys[count] = KEY_RIGHT_ARROW - HID_OFFSET;
           else if (hid_char == '`') report.keys[count] = KEY_ESC - HID_OFFSET;
           else if (hid_char == 'z') report.modifiers = 0x08;
-          else if (c == (KEY_BACKSPACE - HID_OFFSET)) report.keys[count] = KEY_DELETE - HID_OFFSET;
+          else if (c == KEY_BACKSPACE) report.keys[count] = KEY_DELETE - HID_OFFSET;
           else if (c == KEY_ENTER)
           {
             goMainMenu();

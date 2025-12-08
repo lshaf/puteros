@@ -16,7 +16,6 @@ class GameDecoderScreen final : public ScreenState
   };
 
 public:
-  ~GameDecoderScreen() override;
   void init() override;
   void update() override;
   void render() override;
@@ -28,6 +27,9 @@ public:
   void navigate(const State_e newState)
   {
     currentState = newState;
+    if (newState == STATE_MAIN_MENU)
+      resetState();
+
     render();
   }
 
