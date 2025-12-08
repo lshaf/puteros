@@ -113,8 +113,8 @@ void GameWordleScreen::update()
       } else if (_keyboard->isKeyPressed(KEY_BACKSPACE))
       {
         currentCursor--;
-        currentInput[currentCursor] = '\0';
         if (currentCursor < 0) currentCursor = 0;
+        currentInput[currentCursor] = '\0';
         render();
       } else if (_keyboard->isKeyPressed('`'))
       {

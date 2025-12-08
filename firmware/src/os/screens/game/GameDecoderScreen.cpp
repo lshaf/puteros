@@ -103,8 +103,8 @@ void GameDecoderScreen::update()
       } else if (_keyboard->isKeyPressed(KEY_BACKSPACE))
       {
         currentInputCursor--;
-        currentInput[currentInputCursor] = '\0';
         if (currentInputCursor < 0) currentInputCursor = 0;
+        currentInput[currentInputCursor] = '\0';
         render();
       } else if (_keyboard->isKeyPressed('`'))
       {
