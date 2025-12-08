@@ -12,7 +12,7 @@ void GameMenuScreen::init()
 {
   Template::renderHead("Games");
   setEntries({
-    {"Number Decoder"},
+    {"HEX Decoder"},
     {"Wordle Indonesia"},
     {"Wordle English"},
   });
@@ -20,7 +20,7 @@ void GameMenuScreen::init()
 
 void GameMenuScreen::onEnter(ListEntryItem entry)
 {
-  if (entry.label == "Number Decoder")
+  if (entry.label == "HEX Decoder")
   {
     _global->setScreen(new GameDecoderScreen());
   } else if (entry.label == "Wordle Indonesia")

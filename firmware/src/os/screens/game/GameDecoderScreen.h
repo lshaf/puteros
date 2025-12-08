@@ -8,13 +8,11 @@
 
 class GameDecoderScreen final : public ScreenState
 {
-  static constexpr size_t maxAttempt = 6;
   enum State_e
   {
     STATE_MAIN_MENU,
     STATE_PLAY,
-    STATE_GAME_OVER,
-    STATE_WIN
+    STATE_RESULT,
   };
 
 public:
@@ -25,8 +23,7 @@ public:
 
   void renderMainMenu();
   void renderGamePlay();
-  void renderGameOver();
-  void renderWin();
+  void renderResult(bool isWin);
   void resetState();
   void navigate(const State_e newState)
   {
@@ -43,6 +40,7 @@ public:
       case 0: return "Easy";
       case 1: return "Medium";
       case 2: return "Hard";
+      case 3: return "Extreme";
       default: return "Unknown";
     }
   }
@@ -51,33 +49,47 @@ public:
   {
     switch (currentDifficulty)
     {
-      case 0: return 120;
-      case 1: return 75;
-      case 2: return 90;
-      default: return 120;
+      case 0: return 180;
+      case 1: return 90;
+      case 2: return 180;
+      case 3: return 90;
+      default: return 180;
     }
   }
 
-  int getColorGuess(const uint8_t index, const uint8_t guessedNumber) const
+  int getMaxAttempt() const
   {
-    if (guessedNumber == targetNumber[index]) return TFT_GREEN;
-    for (int l = 0;l < 4;l++)
+    switch (currentDifficulty)
     {
-      if (guessedNumber == targetNumber[l]) return TFT_ORANGE;
+      case 0: return 14;
+      case 1: return 7;
+      case 2: return 14;
+      case 3: return 7;
+      default: return 14;
     }
+  }
+
+  int getColorGuess(const uint8_t index, const char guessedNumber) const
+  {
+    if (guessedNumber == targetNumber[index]) return TFT_DARKGREEN;
+    for (int l = 0;l < 4;l++)
+      if (guessedNumber == targetNumber[l])
+        return TFT_ORANGE;
+
     return TFT_RED;
   }
 
 private:
+  char charDatabase[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
   State_e currentState = STATE_MAIN_MENU;
   unsigned long lastRender = 0;
   unsigned long endTime = 0;
 
-  std::array<uint8_t, 4> playerInput[maxAttempt] = {};
+  std::array<char, 4> playerInput[14] = {};
   int currentInputCursor = 0;
   uint8_t totalUserInput = 0;
-  std::array<uint8_t, 4> currentInput = {};
-  std::array<uint8_t, 4> targetNumber = {};
+  std::array<char, 4> currentInput = {};
+  std::array<char, 4> targetNumber = {};
   uint8_t currentDifficulty = 0;
   uint8_t currentMenu = 0;
 };
