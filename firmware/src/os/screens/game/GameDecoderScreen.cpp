@@ -253,7 +253,7 @@ void GameDecoderScreen::renderResult(const bool isWin)
     body.drawCenterString("Game Over!", body.width() / 2, body.height() / 2 - body.fontHeight());
   }
 
-  body.setTextSize(TFT_WHITE);
+  body.setTextColor(TFT_WHITE);
   body.setTextSize(1);
   body.drawCenterString(("Answer: " + std::string(targetNumber.data(), 5)).c_str(), body.width() / 2, body.height() / 2 + 2);
 
