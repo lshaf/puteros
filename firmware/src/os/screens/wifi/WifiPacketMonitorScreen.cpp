@@ -7,12 +7,14 @@
 #include "os/screens/wifi/WifiPacketMonitorScreen.h"
 #include "os/screens/wifi/WifiMenuScreen.h"
 
-volatile uint32_t packetCounter = 0;
+static std::atomic<uint32_t> packetCounter{0};
+static std::atomic<uint32_t> callbackActive{0};
 void WifiPacketMonitorSnifferCallback(void* buf, const wifi_promiscuous_pkt_type_t type)
 {
   if (type == WIFI_PKT_MGMT || type == WIFI_PKT_DATA) {
-    packetCounter++;
+    packetCounter.fetch_add(1, std::memory_order_relaxed);
   }
+  callbackActive.fetch_sub(1, std::memory_order_release);
 }
 
 void WifiPacketMonitorScreen::init()
@@ -27,34 +29,60 @@ void WifiPacketMonitorScreen::init()
 
 void WifiPacketMonitorScreen::update()
 {
-  const auto _k = &M5Cardputer.Keyboard;
-  if (_k->isChange() && _k->isPressed())
+  if (currentState == STATE_GRAPH)
   {
-    if (_k->isKeyPressed(';'))
+    const auto _k = &M5Cardputer.Keyboard;
+    if (_k->isChange() && _k->isPressed())
     {
-      moveChannel(1);
-    } else if (_k->isKeyPressed('.'))
+      if (_k->isKeyPressed(';'))
+      {
+        moveChannel(1);
+      } else if (_k->isKeyPressed('.'))
+      {
+        moveChannel(-1);
+      } else if (_k->isKeyPressed('`'))
+      {
+        quiting();
+      }
+    }
+
+    if (millis() - lastRender > 1000)
     {
-      moveChannel(-1);
-    } else if (_k->isKeyPressed('`'))
-    {
-      _global->setScreen(new WifiMenuScreen());
+      render();
     }
   }
+}
 
-  if (millis() - lastRender > 1000)
-  {
-    render();
+void WifiPacketMonitorScreen::quiting()
+{
+  currentState = STATE_QUIT;
+  Template::renderStatus("Quit...");
+
+  // Unregister callback first to stop new callbacks from being scheduled.
+  esp_wifi_set_promiscuous_rx_cb(nullptr);
+
+  // Wait for any in-flight callbacks to finish with a bounded timeout.
+  uint32_t waited = 0;
+  while (callbackActive.load(std::memory_order_acquire) != 0 && waited < 200) {
+    delay(5);
+    waited += 5;
   }
+
+  // Now disable promiscuous mode.
+  esp_wifi_set_promiscuous(false);
+  HelperUtility::delayMs(500);
+
+  _global->setScreen(new WifiMenuScreen());
 }
 
 void WifiPacketMonitorScreen::render()
 {
+  if (currentState != STATE_GRAPH) return;
+
   lastRender = millis();
-  const auto realCounter = packetCounter;
-  auto counter = realCounter / 2.0;
+  const uint32_t realCounter = packetCounter.exchange(0, std::memory_order_relaxed);
+  auto counter = static_cast<uint16_t>(ceil(realCounter / 2.0));
   if (counter > 90) counter = 90;
-  packetCounter = 0;
 
   auto body = Template::createBody();
   for (int i = historySize - 1; i >= 0; --i) {

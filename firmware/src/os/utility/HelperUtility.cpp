@@ -4,6 +4,8 @@
 
 #include <SD.h>
 #include <Arduino.h>
+#include <Preferences.h>
+#include "esp_system.h"
 #include "os/utility/HelperUtility.h"
 
 std::string HelperUtility::generateRandomString(size_t length)
@@ -154,4 +156,23 @@ bool HelperUtility::parseInt32(const std::string& input, int32_t &value) {
 
   value = static_cast<int32_t>(v);
   return true;
+}
+
+long HelperUtility::true_random(const long max) {
+  Preferences prefs;
+  prefs.begin("game_decoder", false);
+  const uint32_t last = prefs.getUInt("seed", 0);
+  const uint32_t hw = esp_random();
+  const auto t = static_cast<uint32_t>(millis());
+
+  const uint32_t mix = t * 1664525u + 1013904223u;
+  uint32_t newSeed = last ^ hw ^ mix;
+  if (newSeed == 0) newSeed = hw ? hw : 0xA5A5A5A5u;
+
+  prefs.putUInt("seed", newSeed);
+  prefs.end();
+
+  randomSeed(newSeed);
+
+  return random(max);
 }

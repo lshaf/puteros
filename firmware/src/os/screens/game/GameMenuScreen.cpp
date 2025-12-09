@@ -4,22 +4,31 @@
 
 #include "os/screens/game/GameMenuScreen.h"
 
+#include "GameWordleScreen.h"
 #include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/game/DecodeGameScreen.h"
+#include "os/screens/game/GameDecoderScreen.h"
 
 void GameMenuScreen::init()
 {
   Template::renderHead("Games");
   setEntries({
-    {"Number Decoder"},
+    {"HEX Decoder"},
+    {"Wordle Indonesia"},
+    {"Wordle English"},
   });
 }
 
 void GameMenuScreen::onEnter(ListEntryItem entry)
 {
-  if (entry.label == "Number Decoder")
+  if (entry.label == "HEX Decoder")
   {
-    _global->setScreen(new DecodeGameScreen());
+    _global->setScreen(new GameDecoderScreen());
+  } else if (entry.label == "Wordle Indonesia")
+  {
+    _global->setScreen(new GameWordleScreen(GameWordleScreen::Language::ID));
+  } else if (entry.label == "Wordle English")
+  {
+    _global->setScreen(new GameWordleScreen(GameWordleScreen::Language::EN));
   }
 }
 
