@@ -66,15 +66,23 @@ void WiNetFileManager::prepareServer()
   }
 
   Template::renderStatus("Starting Server...");
+  server.on("/upload", HTTP_POST, [this]
+  {
+    server.send(200, "text/plain", "File Uploaded.");
+  }, [this](void)
+  {
+    // upload function
+  });
+
   server.on("/", HTTP_POST, [this]
   {
-    if (server.hasArg("ssid"))
+    if (!server.hasArg("plain"))
     {
-      server.send(200, "text/plain", "ssid " + server.arg("ssid") + " uploaded.");
-    } else
-    {
-      server.send(200, "text/plain", "no param");
+      server.send(404, "text/plain", "404");
+      return;
     }
+
+    server.send(200, "text/plain", "ssid " + server.arg("plain") + " uploaded.");
   });
 
   server.on("/", HTTP_GET, [this]
@@ -100,7 +108,7 @@ void WiNetFileManager::prepareServer()
 
   server.onNotFound([this]
   {
-    server.send(200, "text/plain", "What are you doing here?");
+    server.send(404, "text/plain", "404");
   });
 
   server.begin();
