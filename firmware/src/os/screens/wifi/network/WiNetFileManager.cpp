@@ -54,6 +54,23 @@ void WiNetFileManager::onEnter(ListEntryItem entry)
   }
 }
 
+String WiNetFileManager::getContentType(const String& filename){
+  if(server.hasArg("download")) return "application/octet-stream";
+  if(filename.endsWith(".htm")) return "text/html";
+  if(filename.endsWith(".html")) return "text/html";
+  if(filename.endsWith(".css")) return "text/css";
+  if(filename.endsWith(".js")) return "application/javascript";
+  if(filename.endsWith(".png")) return "image/png";
+  if(filename.endsWith(".gif")) return "image/gif";
+  if(filename.endsWith(".jpg")) return "image/jpeg";
+  if(filename.endsWith(".ico")) return "image/x-icon";
+  if(filename.endsWith(".xml")) return "text/xml";
+  if(filename.endsWith(".pdf")) return "application/x-pdf";
+  if(filename.endsWith(".zip")) return "application/x-zip";
+  if(filename.endsWith(".gz")) return "application/x-gzip";
+  return "text/plain";
+}
+
 void WiNetFileManager::prepareServer()
 {
   currentState = STATE_WEB_MANAGER;
@@ -68,10 +85,24 @@ void WiNetFileManager::prepareServer()
   Template::renderStatus("Starting Server...");
   server.on("/upload", HTTP_POST, [this]
   {
-    server.send(200, "text/plain", "File Uploaded.");
-  }, [this](void)
+    server.send(200, "text/plain", "ok.");
+  }, [this]
   {
-    // upload function
+    if (!_global->getIsSDCardLoaded())
+    {
+      server.send(403, "text/plain", "SD Card not loaded.");
+      return;
+    }
+
+    const auto upload = server.upload();
+    if (upload.status == UPLOAD_FILE_START)
+    {
+      fsUpload = SD.open("/" + upload.filename, FILE_WRITE);
+    } else if(upload.status == UPLOAD_FILE_WRITE){
+      if(fsUpload) fsUpload.write(upload.buf, upload.currentSize);
+    } else if(upload.status == UPLOAD_FILE_END){
+      if(fsUpload) fsUpload.close();
+    }
   });
 
   server.on("/", HTTP_POST, [this]
@@ -85,31 +116,12 @@ void WiNetFileManager::prepareServer()
     server.send(200, "text/plain", "ssid " + server.arg("plain") + " uploaded.");
   });
 
-  server.on("/", HTTP_GET, [this]
-  {
-    const String html = R"rawliteral(
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>WiNet File Manager</title>
-      </head>
-      <body>
-        <h1>WiNet File Manager</h1>
-        <p>Upload and manage your files here.</p>
-        <form method="POST" action="/upload" enctype="multipart/form-data">
-          <input type="file" name="file">
-          <input type="submit" value="Upload">
-        </form>
-      </body>
-      </html>
-    )rawliteral";
-    server.send(200, "text/html", html);
-  });
-
   server.onNotFound([this]
   {
     server.send(404, "text/plain", "404");
   });
+  
+  server.serveStatic("/", SD, "/puteros/web/file_manager");
 
   server.begin();
   Template::renderStatus(("http://" + WiFi.localIP().toString() + "/").c_str(), TFT_GREEN);

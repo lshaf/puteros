@@ -14,6 +14,7 @@ public:
 protected:
   WebServer server{80};
   String currentPassword;
+  File fsUpload;
 
   enum State_e
   {
@@ -27,4 +28,6 @@ protected:
 
   void prepareServer();
   void renderMainMenu();
+
+  String getContentType(const String& filename);
 };
