@@ -3,7 +3,8 @@
 //
 #pragma once
 
-#include <WebServer.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #include "os/core/ListScreen.hpp"
 
 class WiNetFileManager final : public ListScreen
@@ -15,7 +16,7 @@ protected:
   int SESSION_COUNTER = 0;
   static constexpr int MAX_SESSIONS = 10;
   String activeSessions[MAX_SESSIONS];
-  WebServer server{80};
+  AsyncWebServer server{80};
   String currentPassword;
   File fsUpload;
 
@@ -34,5 +35,6 @@ protected:
 
   String getContentType(const String& filename);
   std::vector<String> getBodyCommands(const String& body);
-  bool isAuthenticated();
+  bool isAuthenticated(const AsyncWebServerRequest* request, bool logout = false);
+  bool removeDirectory(const String& path);
 };

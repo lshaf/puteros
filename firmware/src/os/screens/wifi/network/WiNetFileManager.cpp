@@ -44,7 +44,9 @@ void WiNetFileManager::onEnter(ListEntryItem entry)
         HelperUtility::delayMs(2000);
       } else
       {
-        _global->getConfig()->set(APP_CONFIG_WIFI_WEB_PASSWORD, newPassword.c_str());
+        auto cleanPassword = String(newPassword.c_str());
+        cleanPassword.trim();
+        _global->getConfig()->set(APP_CONFIG_WIFI_WEB_PASSWORD, cleanPassword);
         _global->getConfig()->save();
         currentPassword = newPassword.c_str();
       }
@@ -54,8 +56,7 @@ void WiNetFileManager::onEnter(ListEntryItem entry)
   }
 }
 
-String WiNetFileManager::getContentType(const String& filename){
-  if(server.hasArg("download")) return "application/octet-stream";
+String WiNetFileManager::getContentType(const String& filename) {
   if(filename.endsWith(".htm")) return "text/html";
   if(filename.endsWith(".html")) return "text/html";
   if(filename.endsWith(".css")) return "text/css";
@@ -91,13 +92,13 @@ std::vector<String> WiNetFileManager::getBodyCommands(const String& body){
   return lines;
 }
 
-bool WiNetFileManager::isAuthenticated()
+bool WiNetFileManager::isAuthenticated(const AsyncWebServerRequest* request, bool logout)
 {
-  if (!server.hasHeader("Cookie")) {
+  if (!request->hasHeader("Cookie")) {
     return false;
   }
 
-  const String cookies = server.header("Cookie");
+  const String cookies = request->header("cookie");
   int sessionStart = cookies.indexOf("session=");
   if (sessionStart == -1) {
     return false;
@@ -111,10 +112,33 @@ bool WiNetFileManager::isAuthenticated()
 
   for (int i = 0; i < MAX_SESSIONS; i++) {
     if (activeSessions[i] == sessionToken) {
+      if (logout) activeSessions[i] = "";
       return true;
     }
   }
   return false;
+}
+
+bool WiNetFileManager::removeDirectory(const String& path)
+{
+  File dir = SD.open(path);
+  if (!dir || !dir.isDirectory()) {
+    return false;
+  }
+
+  File file = dir.openNextFile();
+  while (file) {
+    String filePath = String(file.path());
+    if (file.isDirectory()) {
+      removeDirectory(filePath);
+    } else {
+      SD.remove(filePath);
+    }
+    file = dir.openNextFile();
+  }
+  dir.close();
+
+  return SD.rmdir(path);
 }
 
 void WiNetFileManager::prepareServer()
@@ -146,101 +170,101 @@ void WiNetFileManager::prepareServer()
   }
 
   Template::renderStatus("Starting Server...");
-  server.on("/download", HTTP_GET, [this]
+  server.on("/download", HTTP_GET, [this](AsyncWebServerRequest *request)
   {
-    if (!isAuthenticated())
+    if (!isAuthenticated(request))
     {
-      server.send(401, "text/plain", "not authenticated.");
+      request->send(401, "text/plain", "not authenticated.");
       return;
     }
 
-    if (!server.hasArg("file"))
+    if (!request->hasArg("file"))
     {
-      server.send(400, "text/plain", "No file specified.");
+      request->send(400, "text/plain", "No file specified.");
       return;
     }
 
-    const auto filePath = server.arg("file");
+    const auto filePath = request->arg("file");
     if (SD.exists(filePath) == false)
     {
-      server.send(404, "text/plain", "File not found.");
+      request->send(404, "text/plain", "File not found.");
       return;
     }
 
-    File file = SD.open(filePath, FILE_READ);
-    server.streamFile(file, getContentType(filePath));
-    file.close();
+    request->send(SD, filePath, getContentType(filePath), true);
   });
-  server.on("/upload", HTTP_POST, [this]
+  server.on("/upload", HTTP_POST, [this](AsyncWebServerRequest *request)
   {
-    if (!isAuthenticated())
+    if (!isAuthenticated(request))
     {
-      server.send(401, "text/plain", "not authenticated.");
+      request->send(401, "text/plain", "not authenticated.");
       return;
     }
 
-    server.send(200, "text/plain", "ok.");
-  }, [this]
+    request->send(200, "text/plain", "ok.");
+  }, [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
   {
-    if (!isAuthenticated())
+    if (!isAuthenticated(request))
     {
-      server.send(401, "text/plain", "not authenticated.");
+      request->send(401, "text/plain", "not authenticated.");
       return;
     }
 
-    const auto upload = server.upload();
-    if (upload.status == UPLOAD_FILE_START)
-    {
+    if (!index) {
+      // first pass
       String path = "/";
-      if (server.hasArg("folder"))
+      if (request->hasArg("folder"))
       {
-        path = server.arg("folder");
+        path = request->arg("folder");
         if (!path.startsWith("/")) path = "/" + path;
         if (!path.endsWith("/")) path += "/";
       }
-      fsUpload = SD.open(path + upload.filename, FILE_WRITE);
-    } else if(upload.status == UPLOAD_FILE_WRITE){
-      if(fsUpload) fsUpload.write(upload.buf, upload.currentSize);
-    } else if(upload.status == UPLOAD_FILE_END){
-      if(fsUpload) fsUpload.close();
+
+      const String fullPath = path + filename;
+      const int lastSlash = fullPath.lastIndexOf('/');
+      if (lastSlash > 0) {
+        const String dirPath = fullPath.substring(0, lastSlash);
+        HelperUtility::makeDirectoryRecursive(dirPath.c_str());
+      }
+
+      fsUpload = SD.open(fullPath, FILE_WRITE);
+    }
+
+    if (len) {
+      if (fsUpload) fsUpload.write(data, len);
+    }
+
+    if (final)
+    {
+      if (fsUpload) fsUpload.close();
     }
   });
 
-  server.on("/", HTTP_POST, [this]
+  server.on("/", HTTP_POST, [this](AsyncWebServerRequest* request)
   {
-    if (!server.hasArg("plain"))
+    if (!request->hasParam("command", true))
     {
-      server.send(404, "text/plain", "404");
+      request->send(404, "text/plain", "404");
       return;
     }
 
-    const auto rawBody = server.arg("plain");
-    const auto commands = getBodyCommands(rawBody);
-    if (commands[0].isEmpty())
+    const auto command = request->getParam("command", true)->value();
+    if (command != "sudo" && !isAuthenticated(request))
     {
-      server.send(200, "text/plain", "No command.");
+      request->send(401, "text/plain", "not authenticated.");
       return;
     }
 
-    if (commands[0] != "sudo" && !isAuthenticated())
+    if (command == "ls")
     {
-      server.send(401, "text/plain", "not authenticated.");
-      return;
-    }
-
-    if (commands[0] == "ls")
-    {
-      String currentPath = "/";
-      if (commands.size() >= 2)
-      {
-        currentPath = commands[1];
-      }
+      String currentPath = request->getParam("path", true)->value();
+      if (currentPath == "") currentPath = "/";
 
       String resp = "";
       File dir = SD.open(currentPath);
       if (!dir || !dir.isDirectory())
       {
-        server.send(403, "text/plain", "Not a directory.");
+        request->send(403, "text/plain", "Not a directory.");
         return;
       }
 
@@ -251,98 +275,141 @@ void WiNetFileManager::prepareServer()
         file = dir.openNextFile();
       }
 
-      server.send(200, "text/plain", resp);
-    } else if (commands[0] == "rm")
+      request->send(200, "text/plain", resp);
+    } else if (command == "sysinfo")
     {
-      if (commands.size() < 2)
+      String resp = "PuterOS File Manager\n";
+      resp += "FS:" + String(SD.totalBytes() - SD.usedBytes()) + "\n";
+      resp += "US:" + String(SD.usedBytes()) + "\n";
+      resp += "TS:" + String(SD.totalBytes()) + "\n";
+      request->send(200, "text/plain", resp);
+    } else if (command == "sudo")
+    {
+      const auto password = request->getParam("param", true)->value();
+      if (password.compareTo(currentPassword) == 0)
       {
-        server.send(400, "text/plain", "No file specified.");
-        return;
-      }
+        const auto sessionToken = String(random(0x7FFFFFFF), HEX);
+        SESSION_COUNTER = (SESSION_COUNTER + 1) % MAX_SESSIONS;
+        activeSessions[SESSION_COUNTER] = sessionToken;
 
-      const auto filePath = commands[1];
-      if (SD.exists(filePath) == false)
-      {
-        server.send(404, "text/plain", "File not found.");
-        return;
-      }
-
-      if (SD.remove(filePath))
-      {
-        server.send(200, "text/plain", "File deleted.");
+        // Set HTTPOnly cookie (Max-Age in seconds)
+        AsyncWebServerResponse *resp = request->beginResponse(200, "text/plain", "Login successful");
+        resp->addHeader(AsyncWebHeader::parse("Set-Cookie: session=" + sessionToken + "; HttpOnly; Max-Age=3600"));
+        request->send(resp);
       } else
       {
-        server.send(500, "text/plain", "Failed to delete file.");
+        request->send(403, "text/plain", "forbidden");
       }
-    } else if (commands[0] == "mv")
+    } else if (command == "exit")
     {
-      if (commands.size() < 3)
+      isAuthenticated(request, true);
+      AsyncWebServerResponse *resp = request->beginResponse(200, "text/plain", "Logged out");
+      resp->addHeader("Set-Cookie", "session=; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/");
+      request->send(resp);
+    } else if (command == "rm")
+    {
+      String currentPath = request->getParam("path", true)->value();
+      if (currentPath == "")
       {
-        server.send(400, "text/plain", "Source or destination not specified.");
+        request->send(400, "text/plain", "No file specified.");
         return;
       }
 
-      const auto sourcePath = commands[1];
-      const auto destPath = commands[2];
+      if (SD.exists(currentPath) == false)
+      {
+        request->send(404, "text/plain", "File not found.");
+        return;
+      }
+
+      File dir = SD.open(currentPath);
+      if (!dir.isDirectory()) {
+        dir.close();
+        if (SD.remove(currentPath))
+        {
+          request->send(200, "text/plain", "File deleted.");
+        } else
+        {
+          request->send(500, "text/plain", "Failed to delete file.");
+        }
+      } else
+      {
+        dir.close();
+        if (removeDirectory(currentPath))
+        {
+          request->send(200, "text/plain", "Directory deleted.");
+        } else
+        {
+          request->send(500, "text/plain", "Failed to delete directory.");
+        }
+      }
+    } else if (command == "mv")
+    {
+      const auto sourcePath = request->getParam("src", true)->value();
+      const auto destPath = request->getParam("dst", true)->value();
+      if (sourcePath == "" || destPath == "")
+      {
+        request->send(400, "text/plain", "Source or destination path not specified.");
+        return;
+      }
+
       if (SD.exists(sourcePath) == false)
       {
-        server.send(404, "text/plain", "Source file not found.");
+        request->send(404, "text/plain", "Source file not found.");
         return;
       }
 
       if (SD.rename(sourcePath, destPath))
       {
-        server.send(200, "text/plain", "File moved/renamed.");
+        request->send(200, "text/plain", "File moved/renamed.");
       } else
       {
-        server.send(500, "text/plain", "Failed to move/rename file.");
+        request->send(500, "text/plain", "Failed to move/rename file.");
       }
-    } else if (commands[0] == "mkdir")
+    } else if (command == "mkdir")
     {
-      if (commands.size() < 2)
+      const auto dirPath = request->getParam("path", true)->value();
+      if (dirPath == "")
       {
-        server.send(400, "text/plain", "No directory name specified.");
+        request->send(400, "text/plain", "No directory name specified.");
         return;
       }
 
-      const auto dirPath = commands[1];
       if (SD.mkdir(dirPath))
       {
-        server.send(200, "text/plain", "Directory created.");
+        request->send(200, "text/plain", "Directory created.");
       } else
       {
-        server.send(500, "text/plain", "Failed to create directory.");
+        request->send(500, "text/plain", "Failed to create directory.");
       }
-    } else if (commands[0] == "touch")
+    } else if (command == "touch")
     {
-      if (commands.size() < 2)
+      const auto filePath = request->getParam("path", true)->value();
+      if (filePath == "")
       {
-        server.send(400, "text/plain", "No file name specified.");
+        request->send(400, "text/plain", "No file name specified.");
         return;
       }
 
-      const auto filePath = commands[1];
       File file = SD.open(filePath, FILE_WRITE);
       if (file)
       {
         file.close();
-        server.send(200, "text/plain", "File created.");
+        request->send(200, "text/plain", "File created.");
       } else
       {
-        server.send(500, "text/plain", "Failed to create file.");
+        request->send(500, "text/plain", "Failed to create file.");
       }
-    } else if (commands[0] == "cat")
+    } else if (command == "cat")
     {
-      if (commands.size() < 2)
+      const auto filePath = request->getParam("path", true)->value();
+      if (filePath == "")
       {
-        server.send(400, "text/plain", "No file specified.");
+        request->send(400, "text/plain", "No file name specified.");
         return;
       }
-
-      const auto filePath = commands[1];
       if (SD.exists(filePath) == false)
       {
-        server.send(404, "text/plain", "File not found.");
+        request->send(404, "text/plain", "File not found.");
         return;
       }
 
@@ -353,79 +420,39 @@ void WiNetFileManager::prepareServer()
         resp += char(file.read());
       }
       file.close();
-      server.send(200, "text/plain", resp);
-    } else if (commands[0] == "echo")
+      request->send(200, "text/plain", resp);
+    } else if (command == "echo")
     {
-      if (commands.size() < 3)
+      const auto filePath = request->getParam("path", true)->value();
+      const auto content = request->getParam("content", true)->value();
+      if (filePath == "" || content == "")
       {
-        server.send(400, "text/plain", "No file or content specified.");
+        request->send(400, "text/plain", "File name or content not specified.");
         return;
       }
-
-      const auto filePath = commands[1];
       File file = SD.open(filePath, FILE_WRITE);
       if (!file)
       {
-        server.send(500, "text/plain", "Failed to open file.");
+        request->send(500, "text/plain", "Failed to open file.");
         return;
       }
 
-      // Write all lines after the filepath (index 2 onwards)
-      for (size_t i = 2; i < commands.size(); ++i)
-      {
-        if (i > 2) file.print('\n');
-        file.print(commands[i]);
-      }
-
+      file.print(content);
       file.close();
-      server.send(200, "text/plain", "Content written to file.");
-    }else if (commands[0] == "sysinfo")
+      request->send(200, "text/plain", "Content written to file.");
+    }
+    else
     {
-      String resp = "PuterOS File Manager\n";
-      resp += "FS:" + String(SD.totalBytes() - SD.usedBytes()) + "\n";
-      resp += "US:" + String(SD.usedBytes()) + "\n";
-      resp += "TS:" + String(SD.totalBytes()) + "\n";
-      server.send(200, "text/plain", resp);
-    } else if (commands[0] == "sudo")
-    {
-      if (commands.size() < 2)
-      {
-        server.send(400, "text/plain", "No password specified.");
-        return;
-      }
-
-      const auto password = commands[1];
-      if (password == currentPassword)
-      {
-        const auto sessionToken = String(random(0x7FFFFFFF), HEX);
-
-        // Set HTTPOnly cookie (Max-Age in seconds)
-        server.sendHeader("Set-Cookie", "session=" + sessionToken + "; HttpOnly; Max-Age=3600; Path=/");
-        server.send(200, "text/plain", "Login successful");
-
-        // Store session token for validation
-        SESSION_COUNTER = (SESSION_COUNTER + 1) % MAX_SESSIONS;
-        activeSessions[SESSION_COUNTER] = sessionToken;
-        server.send(200, "text/plain", "ok");
-      } else
-      {
-        server.send(403, "text/plain", "forbidden");
-      }
-    } else
-    {
-      server.send(404, "text/plain", "command not found");
+      request->send(404, "text/plain", "command not found");
     }
   });
 
-  server.onNotFound([this]
+  server.onNotFound([](AsyncWebServerRequest* request)
   {
-    server.send(404, "text/plain", "404");
+    request->send(404, "text/plain", "404");
   });
 
-  server.on("/", [this]
-  {
-    server.serveStatic("/", SD, "/puteros/web/file_manager/");
-  });
+  server.serveStatic("/", SD, "/puteros/web/file_manager/");
 
   server.begin();
   Template::renderStatus(("http://" + WiFi.localIP().toString() + "/").c_str(), TFT_GREEN);
@@ -444,7 +471,6 @@ void WiNetFileManager::update()
 {
   if (currentState == STATE_WEB_MANAGER)
   {
-    server.handleClient();
     const auto _keeb = &M5Cardputer.Keyboard;
     if (_keeb->isChange() && _keeb->isPressed())
     {
@@ -452,7 +478,6 @@ void WiNetFileManager::update()
       {
         currentState = STATE_MENU;
         Template::renderStatus("Quit...");
-        server.stop();
         HelperUtility::delayMs(1000);
         renderMainMenu();
       }
