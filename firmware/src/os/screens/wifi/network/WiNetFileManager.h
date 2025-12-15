@@ -12,6 +12,9 @@ public:
   void init() override;
 
 protected:
+  int SESSION_COUNTER = 0;
+  static constexpr int MAX_SESSIONS = 10;
+  String activeSessions[MAX_SESSIONS];
   WebServer server{80};
   String currentPassword;
   File fsUpload;
@@ -30,4 +33,6 @@ protected:
   void renderMainMenu();
 
   String getContentType(const String& filename);
+  std::vector<String> getBodyCommands(const String& body);
+  bool isAuthenticated();
 };
