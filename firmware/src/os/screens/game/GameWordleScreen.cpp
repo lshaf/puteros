@@ -99,7 +99,7 @@ void GameWordleScreen::update()
 
         if (hasBlank) return;
 
-        playerInput[totalAttempt] = currentInput;
+        playerInput.push(currentInput);
         totalAttempt++;
         currentInput.fill('\0');
         currentCursor = 0;
@@ -198,7 +198,7 @@ void GameWordleScreen::initGame()
 void GameWordleScreen::resetGame()
 {
   totalAttempt = 0;
-  for (auto &row : playerInput) row.fill({});
+  playerInput.clear();
   chosenWord.fill('\0');
   currentInput.fill('\0');
   currentCursor = 0;
@@ -222,10 +222,10 @@ void GameWordleScreen::renderGamePlay()
 
   for (int8_t t = 0;t < 6;t++)
   {
-    const int8_t topIndex = totalAttempt - (t + 1);
+    const int topIndex = std::min(7, static_cast<int>(totalAttempt)) - (t + 1);
     for (uint8_t ci = 0; ci < 5; ci++)
     {
-      const auto character = playerInput[topIndex][ci];
+      const auto character = playerInput.get(topIndex)[ci];
 
       auto color = TFT_DARKGREY;
       if (topIndex >= 0) color = getColorGuess(ci, character);
@@ -266,11 +266,12 @@ void GameWordleScreen::renderResult(const bool isWin)
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1);
   body.drawCenterString(("Answer: " + std::string(chosenWord.data(), 5)).c_str(), body.width() / 2, body.height() / 2 + 2);
+  body.drawCenterString(("Turn: " + std::to_string(totalAttempt)).c_str(), body.width() / 2, body.height() / 2 + body.fontHeight() + 4);
 
   const unsigned long elapsedTime = (millis() - startTime) / 1000;
-  const uint16_t elapsedMinute = static_cast<uint16_t>(elapsedTime / 60);
-  const uint8_t elapsedSecond = static_cast<uint8_t>(elapsedTime % 60);
+  const auto elapsedMinute = static_cast<uint16_t>(elapsedTime / 60);
+  const auto elapsedSecond = static_cast<uint8_t>(elapsedTime % 60);
   const std::string timeStr = "Time: " + std::to_string(elapsedMinute) + "m " + std::to_string(elapsedSecond) + "s";
-  body.drawCenterString(timeStr.c_str(), body.width() / 2, body.height() / 2 + body.fontHeight() + 4);
+  body.drawCenterString(timeStr.c_str(), body.width() / 2, body.height() / 2 + (body.fontHeight() * 2) + 6);
   Template::renderBody(&body);
 }

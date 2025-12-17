@@ -4,6 +4,7 @@
 
 #pragma once
 #include "os/core/ScreenState.hpp"
+#include "os/utility/CircularArray.h"
 
 
 class GameWordleScreen final : public ScreenState
@@ -54,7 +55,7 @@ private:
   std::array<char, 5> chosenWord = {};
 
   uint8_t totalAttempt = 0;
-  std::array<char, 5> playerInput[10] = {};
+  CircularBuffer<std::array<char, 5>> playerInput{7};
 
   uint8_t selectedMenu = 0;
   Language currentLanguage;
