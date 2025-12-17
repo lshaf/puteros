@@ -7,8 +7,17 @@
 #include "core/Screen.hpp"
 #include <SD.h>
 
+// Wifi File Manager Password
 #define APP_CONFIG_WIFI_WEB_PASSWORD "wifi_web_password"
 #define APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT "puteros123"
+
+// Wifi Access Point
+#define APP_CONFIG_WIFI_AP_SSID "wifi_ap_ssid"
+#define APP_CONFIG_WIFI_AP_SSID_DEFAULT "PuterOS"
+#define APP_CONFIG_WIFI_AP_PASSWORD "wifi_ap_password"
+#define APP_CONFIG_WIFI_AP_PASSWORD_DEFAULT "puteros123"
+
+// Device Settings
 #define APP_CONFIG_BRIGHTNESS "brightness"
 #define APP_CONFIG_BRIGHTNESS_DEFAULT "70"
 #define APP_CONFIG_DEVICE_NAME "device_name"

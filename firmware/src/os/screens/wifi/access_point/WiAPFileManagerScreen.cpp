@@ -1,15 +1,15 @@
 //
-// Created by l-sha on 08/12/2025.
+// Created by L Shaf on 17/12/25.
 //
 
-#include "WiNetFileManager.h"
+#include "WiAPFileManagerScreen.h"
 
+#include "WifiAccessPointScreen.h"
 #include "os/component/InputTextScreen.hpp"
-#include "WifiNetworkScreen.h"
 
 #include <WiFi.h>
 
-void WiNetFileManager::init()
+void WiAPFileManagerScreen::init()
 {
   Template::renderHead("Web File Manager");
   if (!_global->getIsSDCardLoaded())
@@ -24,12 +24,12 @@ void WiNetFileManager::init()
   renderMainMenu();
 }
 
-void WiNetFileManager::onBack()
+void WiAPFileManagerScreen::onBack()
 {
-  _global->setScreen(new WifiNetworkScreen());
+  _global->setScreen(new WifiAccessPointScreen());
 }
 
-void WiNetFileManager::onEnter(ListEntryItem entry)
+void WiAPFileManagerScreen::onEnter(ListEntryItem entry)
 {
   if (currentState == STATE_MENU)
   {
@@ -46,7 +46,7 @@ void WiNetFileManager::onEnter(ListEntryItem entry)
         return;
       }
 
-      const auto ipHost = "http://" + WiFi.localIP().toString() + "/";
+      const auto ipHost = "http://" + WiFi.softAPIP().toString() + "/";
       const auto mdnsHost = "http://puteros.local/";
       Template::renderStatus((ipHost + " or " + mdnsHost).c_str(), TFT_GREEN);
     } else if (entry.label == "Password")
@@ -70,7 +70,7 @@ void WiNetFileManager::onEnter(ListEntryItem entry)
   }
 }
 
-void WiNetFileManager::renderMainMenu()
+void WiAPFileManagerScreen::renderMainMenu()
 {
   setEntries({
   {"Password", currentPassword.c_str()},
@@ -78,7 +78,7 @@ void WiNetFileManager::renderMainMenu()
   });
 }
 
-void WiNetFileManager::update()
+void WiAPFileManagerScreen::update()
 {
   if (currentState == STATE_WEB_MANAGER)
   {

@@ -8,8 +8,8 @@
 #include <thread>
 
 #include "os/component/InputNumberScreen.h"
-#include "os/screens/wifi/network/WiNetIPScannerScreen.h"
-#include "os/screens/wifi/WifiNetworkScreen.h"
+#include "WiNetIPScannerScreen.h"
+#include "WifiNetworkScreen.h"
 
 void WiNetIPScannerScreen::init()
 {

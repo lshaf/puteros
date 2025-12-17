@@ -7,7 +7,7 @@
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
           box-sizing: border-box;
-    font-family: "DejaVu Sans Mono", "Consolas", "Menlo";
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Ubuntu Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
     color: var(--color);
 }
 html {

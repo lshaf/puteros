@@ -4,8 +4,8 @@
 
 #include <WiFi.h>
 
-#include "os/screens/wifi/WifiNetworkScreen.h"
-#include "os/screens/wifi/network/WiNetInformationScreen.h"
+#include "WifiNetworkScreen.h"
+#include "WiNetInformationScreen.h"
 
 void WiNetInformationScreen::init()
 {

@@ -3,20 +3,24 @@
 //
 
 #include "os/screens/MainMenuScreen.hpp"
-#include "os/screens/wifi/WifiMenuScreen.h"
-#include "os/screens/wifi/WifiAnalyzerScreen.h"
-#include "os/screens/wifi/WifiBeaconSpamScreen.h"
-#include "os/screens/wifi/WifiDeauthDetectorScreen.h"
-#include "os/screens/wifi/WifiDeautherScreen.h"
-#include "os/screens/wifi/WifiESPNowChatScreen.h"
-#include "os/screens/wifi/WifiNetworkScreen.h"
-#include "os/screens/wifi/WifiPacketMonitorScreen.h"
+#include "WifiMenuScreen.h"
+
+#include "WifiAnalyzerScreen.h"
+#include "WifiBeaconSpamScreen.h"
+#include "WifiDeauthDetectorScreen.h"
+#include "WifiDeautherScreen.h"
+#include "WifiESPNowChatScreen.h"
+#include "WifiPacketMonitorScreen.h"
+
+#include "network/WifiNetworkScreen.h"
+#include "access_point/WifiAccessPointScreen.h"
 
 void WifiMenuScreen::init()
 {
   Template::renderHead("WiFi");
   setEntries({
     {"Network"},
+    {"Access Point"},
     {"WiFi Analyzer"},
     {"Packet Monitor"},
     {"WiFi Deauther"},
@@ -31,6 +35,9 @@ void WifiMenuScreen::onEnter(const ListEntryItem entry)
   if (entry.label == "Network")
   {
     _global->setScreen(new WifiNetworkScreen());
+  } else if (entry.label == "Access Point")
+  {
+    _global->setScreen(new WifiAccessPointScreen());
   } else if (entry.label == "WiFi Analyzer")
   {
     _global->setScreen(new WifiAnalyzerScreen());

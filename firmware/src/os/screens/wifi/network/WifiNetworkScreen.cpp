@@ -4,9 +4,9 @@
 #include <WiFi.h>
 
 #include "os/component/Template.hpp"
-#include "os/screens/wifi/WifiNetworkScreen.h"
+#include "WifiNetworkScreen.h"
 
-#include "network/WiNetFileManager.h"
+#include "WiNetFileManager.h"
 #include "os/component/InputTextScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 #include "os/screens/wifi/network/WiNetClockScreen.h"

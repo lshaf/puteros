@@ -9,9 +9,14 @@
 
 bool WebFileManager::begin()
 {
-  if (WiFi.status() != WL_CONNECTED)
+  const wifi_mode_t mode = WiFi.getMode();
+  const bool apActive = (mode == WIFI_MODE_AP || mode == WIFI_MODE_APSTA);
+  const bool staConnected = (mode == WIFI_MODE_STA || mode == WIFI_MODE_APSTA) &&
+                      WiFi.status() == WL_CONNECTED;
+
+  if (!apActive && !staConnected)
   {
-    lastError = "WiFi not connected";
+    lastError = "WiFi not connected in any network";
     return false;
   }
 
