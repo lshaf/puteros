@@ -6,7 +6,9 @@
 
 #include "os/component/InputTextScreen.hpp"
 #include "os/screens/wifi/WifiNetworkScreen.h"
+
 #include <WiFi.h>
+#include <ESPmDNS.h>
 
 void WiNetFileManager::init()
 {
@@ -158,6 +160,11 @@ void WiNetFileManager::prepareServer()
     HelperUtility::delayMs(2000);
     renderMainMenu();
     return;
+  }
+
+  if (MDNS.begin("puteros"))
+  {
+    MDNS.addService("http", "tcp", 80);
   }
 
   const String indexPath = "/puteros/web/file_manager/index.htm";
@@ -455,7 +462,9 @@ void WiNetFileManager::prepareServer()
   server.serveStatic("/", SD, "/puteros/web/file_manager/");
 
   server.begin();
-  Template::renderStatus(("http://" + WiFi.localIP().toString() + "/").c_str(), TFT_GREEN);
+  const auto ipHost = "http://" + WiFi.localIP().toString() + "/";
+  const auto mdnsHost = "http://puteros.local/";
+  Template::renderStatus((ipHost + " or " + mdnsHost).c_str(), TFT_GREEN);
 }
 
 
@@ -477,6 +486,7 @@ void WiNetFileManager::update()
       if (_keeb->isKeyPressed(KEY_BACKSPACE) || _keeb->isKeyPressed('`'))
       {
         currentState = STATE_MENU;
+        MDNS.end();
         Template::renderStatus("Quit...");
         HelperUtility::delayMs(1000);
         renderMainMenu();
