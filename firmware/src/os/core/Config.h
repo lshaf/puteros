@@ -42,7 +42,8 @@ public:
       const int sep = line.indexOf('=');
       if (sep > 0) {
         const String key = line.substring(0, sep);
-        const String value = line.substring(sep + 1);
+        String value = line.substring(sep + 1);
+        value.trim();
         config_[key] = value;
       }
     }

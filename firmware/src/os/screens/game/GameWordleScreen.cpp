@@ -99,7 +99,32 @@ void GameWordleScreen::update()
 
         if (hasBlank) return;
 
-        playerInput[totalAttempt] = currentInput;
+        playerInput.push(currentInput);
+        for (uint8_t i = 0; i < 5; i++)
+        {
+          const char c = currentInput[i];
+          bool alreadyUsed = false;
+          for (const auto usedChar : alphabetUsed)
+          {
+            if (usedChar == c)
+            {
+              alreadyUsed = true;
+              break;
+            }
+          }
+          if (!alreadyUsed)
+          {
+            for (auto& usedChar : alphabetUsed)
+            {
+              if (usedChar == '\0')
+              {
+                usedChar = c;
+                break;
+              }
+            }
+          }
+        }
+
         totalAttempt++;
         currentInput.fill('\0');
         currentCursor = 0;
@@ -113,8 +138,8 @@ void GameWordleScreen::update()
       } else if (_keyboard->isKeyPressed(KEY_BACKSPACE))
       {
         currentCursor--;
-        currentInput[currentCursor] = '\0';
         if (currentCursor < 0) currentCursor = 0;
+        currentInput[currentCursor] = '\0';
         render();
       } else if (_keyboard->isKeyPressed('`'))
       {
@@ -136,15 +161,15 @@ void GameWordleScreen::update()
 
 void GameWordleScreen::riseDifficulty()
 {
-  if (currentDifficulty == Difficulty::EASY)
+  if (currentDifficulty == DIF_EASY)
   {
-    currentDifficulty = Difficulty::MEDIUM;
-  } else if (currentDifficulty == Difficulty::MEDIUM)
+    currentDifficulty = DIF_MEDIUM;
+  } else if (currentDifficulty == DIF_MEDIUM)
   {
-    currentDifficulty = Difficulty::HARD;
+    currentDifficulty = DIF_HARD;
   } else
   {
-    currentDifficulty = Difficulty::EASY;
+    currentDifficulty = DIF_EASY;
   }
 
   render();
@@ -197,8 +222,9 @@ void GameWordleScreen::initGame()
 
 void GameWordleScreen::resetGame()
 {
+  alphabetUsed.fill('\0');
   totalAttempt = 0;
-  for (auto &row : playerInput) row.fill({});
+  playerInput.clear();
   chosenWord.fill('\0');
   currentInput.fill('\0');
   currentCursor = 0;
@@ -222,10 +248,10 @@ void GameWordleScreen::renderGamePlay()
 
   for (int8_t t = 0;t < 6;t++)
   {
-    const int8_t topIndex = totalAttempt - (t + 1);
+    const int topIndex = std::min(7, static_cast<int>(totalAttempt)) - (t + 1);
     for (uint8_t ci = 0; ci < 5; ci++)
     {
-      const auto character = playerInput[topIndex][ci];
+      const auto character = playerInput.get(topIndex)[ci];
 
       auto color = TFT_DARKGREY;
       if (topIndex >= 0) color = getColorGuess(ci, character);
@@ -239,10 +265,43 @@ void GameWordleScreen::renderGamePlay()
   }
 
   body.setTextSize(2);
-  body.drawCenterString("Attempt", 156, 2);
-  body.drawCenterString("left", 156, body.fontHeight() + 2);
+  int y = 2;
+  body.drawCenterString("Attempt", 156, y);
+  y += body.fontHeight();
+  body.drawCenterString("left", 156, y);
+  y += body.fontHeight() + 7;
   body.setTextSize(3);
-  body.drawCenterString(std::to_string(getMaxAttempt() - totalAttempt).c_str(), 156, 58);
+  body.drawCenterString(std::to_string(getMaxAttempt() - totalAttempt).c_str(), 156, y);
+
+  int initial_x = 100;
+  int x = initial_x;
+  y += body.fontHeight() + 7;
+  body.setTextSize(1);
+  const int bodyOffset = body.fontWidth() * 2;
+  for (char c = 'A'; c <= 'Z'; c++)
+  {
+    auto color = turnOnHelp() ? TFT_WHITE : TFT_DARKGREY;
+    if (turnOnHelp())
+    {
+      for (const auto usedChar : alphabetUsed)
+      {
+        if (usedChar == c)
+        {
+          color = TFT_DARKGREY;
+          break;
+        }
+      }
+    }
+
+    body.setTextColor(color);
+    body.drawString(std::string(1, c).c_str(), x, y);
+    x += bodyOffset;
+    if (x + bodyOffset > body.width())
+    {
+      x = initial_x;
+      y += body.fontHeight() + 2;
+    }
+  }
 
   Template::renderBody(&body);
 }
@@ -266,11 +325,12 @@ void GameWordleScreen::renderResult(const bool isWin)
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1);
   body.drawCenterString(("Answer: " + std::string(chosenWord.data(), 5)).c_str(), body.width() / 2, body.height() / 2 + 2);
+  body.drawCenterString(("Turn: " + std::to_string(totalAttempt)).c_str(), body.width() / 2, body.height() / 2 + body.fontHeight() + 4);
 
   const unsigned long elapsedTime = (millis() - startTime) / 1000;
-  const uint16_t elapsedMinute = static_cast<uint16_t>(elapsedTime / 60);
-  const uint8_t elapsedSecond = static_cast<uint8_t>(elapsedTime % 60);
+  const auto elapsedMinute = static_cast<uint16_t>(elapsedTime / 60);
+  const auto elapsedSecond = static_cast<uint8_t>(elapsedTime % 60);
   const std::string timeStr = "Time: " + std::to_string(elapsedMinute) + "m " + std::to_string(elapsedSecond) + "s";
-  body.drawCenterString(timeStr.c_str(), body.width() / 2, body.height() / 2 + body.fontHeight() + 4);
+  body.drawCenterString(timeStr.c_str(), body.width() / 2, body.height() / 2 + (body.fontHeight() * 2) + 6);
   Template::renderBody(&body);
 }

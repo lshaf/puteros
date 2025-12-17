@@ -4,6 +4,7 @@
 
 #pragma once
 #include "os/core/ScreenState.hpp"
+#include "os/utility/CircularArray.h"
 
 
 class GameWordleScreen final : public ScreenState
@@ -42,36 +43,47 @@ public:
 
 private:
   unsigned long startTime;
-  enum class Difficulty : uint8_t
+  enum Difficulty
   {
-    EASY = 10,
-    MEDIUM = 7,
-    HARD = 5,
-  };
+    DIF_EASY,
+    DIF_MEDIUM,
+    DIF_HARD,
+  } currentDifficulty = DIF_EASY;
 
   int8_t currentCursor = 0;
   std::array<char, 5> currentInput = {};
   std::array<char, 5> chosenWord = {};
 
   uint8_t totalAttempt = 0;
-  std::array<char, 5> playerInput[10] = {};
+  std::array<char, 26> alphabetUsed = {};
+  CircularBuffer<std::array<char, 5>> playerInput{7};
 
   uint8_t selectedMenu = 0;
   Language currentLanguage;
-  Difficulty currentDifficulty = Difficulty::EASY;
 
   uint8_t getMaxAttempt() const
   {
-    return static_cast<uint8_t>(currentDifficulty);
+    switch (currentDifficulty)
+    {
+    case DIF_EASY: return 10;
+    case DIF_MEDIUM: return 7;
+    case DIF_HARD: return 7;
+    default: return 5;
+    }
+  }
+
+  bool turnOnHelp() const
+  {
+    return currentDifficulty != DIF_HARD;
   }
 
   std::string getDifficultyStr() const
   {
     switch (currentDifficulty)
     {
-    case Difficulty::EASY: return "Easy";
-    case Difficulty::MEDIUM: return "Medium";
-    case Difficulty::HARD: return "Hard";
+    case DIF_EASY: return "Easy";
+    case DIF_MEDIUM: return "Medium";
+    case DIF_HARD: return "Hard";
     default: return "Unknown";
     }
   }
@@ -80,7 +92,7 @@ private:
   {
     if (guessedChar == '\0') return TFT_DARKGREY;
     if (guessedChar == chosenWord[index]) return TFT_DARKGREEN;
-    for (int l = 0;l < 4;l++)
+    for (int l = 0;l < 5;l++)
     {
       if (guessedChar == chosenWord[l]) return TFT_ORANGE;
     }

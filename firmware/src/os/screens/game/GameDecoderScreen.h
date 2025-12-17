@@ -5,6 +5,7 @@
 #pragma once
 #include <M5Cardputer.h>
 #include "os/core/ScreenState.hpp"
+#include "os/utility/CircularArray.h"
 
 class GameDecoderScreen final : public ScreenState
 {
@@ -16,7 +17,6 @@ class GameDecoderScreen final : public ScreenState
   };
 
 public:
-  ~GameDecoderScreen() override;
   void init() override;
   void update() override;
   void render() override;
@@ -28,6 +28,9 @@ public:
   void navigate(const State_e newState)
   {
     currentState = newState;
+    if (newState == STATE_MAIN_MENU)
+      resetState();
+
     render();
   }
 
@@ -63,29 +66,30 @@ public:
     {
       case 0: return 14;
       case 1: return 7;
-      case 2: return 14;
-      case 3: return 7;
+      case 2: return -1;
+      case 3: return -1;
       default: return 14;
     }
   }
 
   int getColorGuess(const uint8_t index, const char guessedNumber) const
   {
-    if (guessedNumber == targetNumber[index]) return TFT_DARKGREEN;
+    if (guessedNumber == targetNumber[index]) return 3;
     for (int l = 0;l < 4;l++)
       if (guessedNumber == targetNumber[l])
-        return TFT_ORANGE;
+        return 2;
 
-    return TFT_RED;
+    return 1;
   }
 
 private:
   char charDatabase[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
   State_e currentState = STATE_MAIN_MENU;
+  unsigned long startTime = 0;
   unsigned long lastRender = 0;
   unsigned long endTime = 0;
 
-  std::array<char, 4> playerInput[14] = {};
+  CircularBuffer<std::array<char, 4>> playerInput{7};
   int currentInputCursor = 0;
   uint8_t totalUserInput = 0;
   std::array<char, 4> currentInput = {};

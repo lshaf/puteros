@@ -2,11 +2,6 @@
 #include "os/component/Template.hpp"
 #include "os/screens/game/GameMenuScreen.h"
 
-GameDecoderScreen::~GameDecoderScreen()
-{
-  playerInput->fill({});
-}
-
 void GameDecoderScreen::init()
 {
   Template::renderHead("HEX Decoder");
@@ -94,12 +89,12 @@ void GameDecoderScreen::update()
           return;
         }
 
-        playerInput[totalUserInput] = currentInput;
+        playerInput.push(currentInput);
         totalUserInput++;
         currentInput.fill('\0');
         currentInputCursor = 0;
 
-        if (totalUserInput < getMaxAttempt())
+        if (getMaxAttempt() == -1 || totalUserInput < getMaxAttempt())
         {
           render();
         } else {
@@ -108,8 +103,8 @@ void GameDecoderScreen::update()
       } else if (_keyboard->isKeyPressed(KEY_BACKSPACE))
       {
         currentInputCursor--;
-        currentInput[currentInputCursor] = '\0';
         if (currentInputCursor < 0) currentInputCursor = 0;
+        currentInput[currentInputCursor] = '\0';
         render();
       } else if (_keyboard->isKeyPressed('`'))
       {
@@ -165,7 +160,7 @@ void GameDecoderScreen::renderMainMenu()
 
 void GameDecoderScreen::initGame()
 {
-  resetState();
+  startTime = millis();
   endTime = millis() + getTimer() * 1000;
   for (int i = 0; i < 4; i++)
   {
@@ -192,20 +187,21 @@ void GameDecoderScreen::renderGamePlay()
     }
   }
 
+  const int colors[4] = {TFT_DARKGREY, TFT_RED, TFT_ORANGE, TFT_GREEN};
   for (int8_t t = 0;t < 6;t++)
   {
     int guessed[4] = {0, 0, 0, 0};
     const int startTop = (t + 1) * 17;
-    const int8_t topIndex = totalUserInput - (t + 1);
+    const int topIndex = std::min(7, static_cast<int>(totalUserInput)) - (t + 1);
     for (uint8_t ci = 1; ci <= 4; ci++)
     {
-      const auto character = playerInput[topIndex][ci - 1];
+      const auto character = playerInput.get(topIndex)[ci - 1];
 
-      auto color = TFT_DARKGREY;
+      auto color = 0;
       if (topIndex >= 0) color = getColorGuess(ci - 1, character);
       guessed[ci - 1] = color;
 
-      body.fillRoundRect(17 * ci, startTop, 15, 15, 2, currentDifficulty > 1 ? TFT_DARKGREY : color);
+      body.fillRoundRect(17 * ci, startTop, 15, 15, 2, currentDifficulty > 1 ? TFT_DARKGREY : colors[color]);
       if (topIndex >= 0 && character != '\0')
       {
         body.drawCentreString(std::string(1, character).c_str(), 17 * ci + 7, startTop + 2);
@@ -218,7 +214,8 @@ void GameDecoderScreen::renderGamePlay()
     {
       for (uint8_t x = 0; x < 2; x++)
       {
-        body.fillRoundRect(x * 7 + 1, startTop + y * 7 + 1, 6, 6, 1, guessed[counter]);
+        auto color = colors[guessed[counter]];
+        body.fillRoundRect(x * 7 + 1, startTop + y * 7 + 1, 6, 6, 1, color);
         counter++;
       }
     }
@@ -229,8 +226,15 @@ void GameDecoderScreen::renderGamePlay()
     remainingTime = static_cast<int>((endTime - millis()) / 1000);
 
   body.setTextSize(2);
-  body.drawCenterString("Attempt", 156, 2);
-  body.drawCenterString(std::to_string(getMaxAttempt() - totalUserInput).c_str(), 156, 24);
+  if (getMaxAttempt() == -1)
+  {
+    body.drawCenterString("Turn", 156, 2);
+    body.drawCenterString(std::to_string(totalUserInput).c_str(), 156, 24);
+  } else
+  {
+    body.drawCenterString("Attempt", 156, 2);
+    body.drawCenterString(std::to_string(getMaxAttempt() - totalUserInput).c_str(), 156, 24);
+  }
   body.drawCenterString("Timer", 156, body.height() - 38);
   body.drawCenterString(std::to_string(remainingTime).c_str(), 156, body.height() - 16);
 
@@ -256,18 +260,20 @@ void GameDecoderScreen::renderResult(const bool isWin)
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1);
   body.drawCenterString(("Answer: " + std::string(targetNumber.data(), 5)).c_str(), body.width() / 2, body.height() / 2 + 2);
+  body.drawCenterString(("Turn: " + std::to_string(totalUserInput)).c_str(), body.width() / 2, body.height() / 2 + body.fontHeight() + 4);
 
-  const unsigned long elapsedTime = getTimer() - static_cast<int>((endTime - millis()) / 1000);
+  const unsigned long elapsedTime = (millis() - startTime) / 1000;
   const auto elapsedMinute = static_cast<uint16_t>(elapsedTime / 60);
   const auto elapsedSecond = static_cast<uint8_t>(elapsedTime % 60);
   const std::string timeStr = "Time: " + std::to_string(elapsedMinute) + "m " + std::to_string(elapsedSecond) + "s";
-  body.drawCenterString(timeStr.c_str(), body.width() / 2, body.height() / 2 + body.fontHeight() + 4);
+  body.drawCenterString(timeStr.c_str(), body.width() / 2, body.height() / 2 + (body.fontHeight() * 2) + 6);
   Template::renderBody(&body);
 }
 
 void GameDecoderScreen::resetState()
 {
-  playerInput->fill({});
+  playerInput.clear();
+  startTime = 0;
   currentInputCursor = 0;
   currentInput = {0, 0, 0, 0};
   totalUserInput = 0;

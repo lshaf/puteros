@@ -35,13 +35,17 @@ std::string HelperUtility::generateRandomString(size_t length)
 
 void HelperUtility::makeDirectoryRecursive(const std::string& path)
 {
-  if (SD.exists(path.c_str())) return;
+  if (path.empty() || SD.exists(path.c_str())) return;
+
   const auto pathStr = String(path.c_str());
   const int lastSlash = pathStr.lastIndexOf('/');
+
   if (lastSlash > 0) {
-    const String folder = pathStr.substring(0, lastSlash);
-    if (!SD.exists(folder)) SD.mkdir(folder);
+    const String parent = pathStr.substring(0, lastSlash);
+    makeDirectoryRecursive(parent.c_str()); // recursive call to create parent chain
   }
+
+  SD.mkdir(path.c_str());
 }
 
 

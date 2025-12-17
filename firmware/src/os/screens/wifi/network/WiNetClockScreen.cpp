@@ -3,12 +3,11 @@
 //
 
 #include <WiFi.h>
-#include <time.h>
 
 #include "os/component/Template.hpp"
 #include "os/screens/wifi/network/WiNetClockScreen.h"
 
-#include "os/screens/wifi/WifiNetworkScreen.h"
+#include "WifiNetworkScreen.h"
 #include "os/screens/wifi/WifiMenuScreen.h"
 
 void WifiConnectClockScreen::init()
@@ -53,7 +52,7 @@ void WifiConnectClockScreen::render()
 {
   Template::renderHead("World Clock");
 
-  struct tm timeInfo;
+  tm timeInfo;
   if (!getLocalTime(&timeInfo))
   {
     Template::renderStatus("Retrying...");
