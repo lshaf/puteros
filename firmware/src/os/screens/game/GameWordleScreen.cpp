@@ -100,6 +100,31 @@ void GameWordleScreen::update()
         if (hasBlank) return;
 
         playerInput.push(currentInput);
+        for (uint8_t i = 0; i < 5; i++)
+        {
+          const char c = currentInput[i];
+          bool alreadyUsed = false;
+          for (const auto usedChar : alphabetUsed)
+          {
+            if (usedChar == c)
+            {
+              alreadyUsed = true;
+              break;
+            }
+          }
+          if (!alreadyUsed)
+          {
+            for (auto& usedChar : alphabetUsed)
+            {
+              if (usedChar == '\0')
+              {
+                usedChar = c;
+                break;
+              }
+            }
+          }
+        }
+
         totalAttempt++;
         currentInput.fill('\0');
         currentCursor = 0;
@@ -136,15 +161,15 @@ void GameWordleScreen::update()
 
 void GameWordleScreen::riseDifficulty()
 {
-  if (currentDifficulty == Difficulty::EASY)
+  if (currentDifficulty == DIF_EASY)
   {
-    currentDifficulty = Difficulty::MEDIUM;
-  } else if (currentDifficulty == Difficulty::MEDIUM)
+    currentDifficulty = DIF_MEDIUM;
+  } else if (currentDifficulty == DIF_MEDIUM)
   {
-    currentDifficulty = Difficulty::HARD;
+    currentDifficulty = DIF_HARD;
   } else
   {
-    currentDifficulty = Difficulty::EASY;
+    currentDifficulty = DIF_EASY;
   }
 
   render();
@@ -197,6 +222,7 @@ void GameWordleScreen::initGame()
 
 void GameWordleScreen::resetGame()
 {
+  alphabetUsed.fill('\0');
   totalAttempt = 0;
   playerInput.clear();
   chosenWord.fill('\0');
@@ -239,10 +265,43 @@ void GameWordleScreen::renderGamePlay()
   }
 
   body.setTextSize(2);
-  body.drawCenterString("Attempt", 156, 2);
-  body.drawCenterString("left", 156, body.fontHeight() + 2);
+  int y = 2;
+  body.drawCenterString("Attempt", 156, y);
+  y += body.fontHeight();
+  body.drawCenterString("left", 156, y);
+  y += body.fontHeight() + 7;
   body.setTextSize(3);
-  body.drawCenterString(std::to_string(getMaxAttempt() - totalAttempt).c_str(), 156, 58);
+  body.drawCenterString(std::to_string(getMaxAttempt() - totalAttempt).c_str(), 156, y);
+
+  int initial_x = 100;
+  int x = initial_x;
+  y += body.fontHeight() + 7;
+  body.setTextSize(1);
+  const int bodyOffset = body.fontWidth() * 2;
+  for (char c = 'A'; c <= 'Z'; c++)
+  {
+    auto color = turnOnHelp() ? TFT_WHITE : TFT_DARKGREY;
+    if (turnOnHelp())
+    {
+      for (const auto usedChar : alphabetUsed)
+      {
+        if (usedChar == c)
+        {
+          color = TFT_DARKGREY;
+          break;
+        }
+      }
+    }
+
+    body.setTextColor(color);
+    body.drawString(std::string(1, c).c_str(), x, y);
+    x += bodyOffset;
+    if (x + bodyOffset > body.width())
+    {
+      x = initial_x;
+      y += body.fontHeight() + 2;
+    }
+  }
 
   Template::renderBody(&body);
 }
