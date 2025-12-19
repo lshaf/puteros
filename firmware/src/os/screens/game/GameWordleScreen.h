@@ -54,11 +54,12 @@ private:
   std::array<char, 5> currentInput = {};
   std::array<char, 5> chosenWord = {};
 
+  bool useCommon = true;
   uint8_t totalAttempt = 0;
   std::array<char, 26> alphabetUsed = {};
   CircularBuffer<std::array<char, 5>> playerInput{7};
 
-  uint8_t selectedMenu = 0;
+  int8_t selectedMenu = 0;
   Language currentLanguage;
 
   uint8_t getMaxAttempt() const

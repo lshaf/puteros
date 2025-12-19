@@ -31,7 +31,7 @@ void ListScreen::render()
     const auto selectedIndexVisible = selectedIndex - scrollOffset;
     if (i == selectedIndexVisible)
     {
-      _body.fillRect(0, selectedIndexVisible  * _body.fontHeight() + selectedIndexVisible * 2, _body.width(), _body.fontHeight() + 3, BLUE);
+      _body.fillRect(0, selectedIndexVisible  * _body.fontHeight() + selectedIndexVisible * 2, _body.width(), _body.fontHeight() + 3, _global->getMainColor());
     }
 
     auto item = entries[scrollOffset + i];

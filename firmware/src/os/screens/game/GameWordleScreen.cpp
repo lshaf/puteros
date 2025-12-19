@@ -8,7 +8,9 @@
 #include "os/component/Template.hpp"
 
 #include "os/utility/wordle/id.h"
+#include "os/utility/wordle/id_common.h"
 #include "os/utility/wordle/en.h"
+#include "os/utility/wordle/en_common.h"
 
 void GameWordleScreen::init()
 {
@@ -39,7 +41,7 @@ void GameWordleScreen::update()
       if (_keyboard->isKeyPressed('.'))
       {
         selectedMenu = selectedMenu + 1;
-        if (selectedMenu > 2) selectedMenu = 0;
+        if (selectedMenu > 3) selectedMenu = 0;
         render();
       } else if (_keyboard->isKeyPressed(';'))
       {
@@ -53,8 +55,12 @@ void GameWordleScreen::update()
           initGame();
         } else if (selectedMenu == 1)
         {
-          riseDifficulty();
+          useCommon = !useCommon;
+          render();
         } else if (selectedMenu == 2)
+        {
+          riseDifficulty();
+        } else if (selectedMenu == 3)
         {
           _global->setScreen(new GameMenuScreen());
         }
@@ -180,6 +186,7 @@ void GameWordleScreen::renderMainMenu()
   auto body = Template::createBody();
   const std::vector<std::string> menuItems = {
     "Play",
+    "DB " + std::string(useCommon ? "Common" : "Full"),
     getDifficultyStr(),
     "Exit"
   };
@@ -190,7 +197,7 @@ void GameWordleScreen::renderMainMenu()
   for (size_t i = 0; i < menuItems.size(); i++)
   {
     auto textColor = TFT_WHITE;
-    if (i == selectedMenu) textColor = TFT_BLUE;
+    if (i == selectedMenu) textColor = _global->getMainColor();
 
     body.setTextColor(textColor);
     body.drawCenterString(menuItems[i].c_str(), body.width() / 2, startY + i * (body.fontHeight() + marginMenu));
@@ -201,16 +208,24 @@ void GameWordleScreen::renderMainMenu()
 
 void GameWordleScreen::initGame()
 {
+  const char (*wordList)[6];
+  size_t wordCount;
   // Select a random word from the word list based on the current language
-  const auto& wordList = (currentLanguage == Language::ID) ? WORDLE_DB_ID : WORDLE_DB_EN;
-  const size_t wordCount = (currentLanguage == Language::ID) ? WORDLE_DB_ID_COUNT : WORDLE_DB_EN_COUNT;
+  if (useCommon)
+  {
+    wordList = (currentLanguage == Language::ID) ? WORDLE_DB_ID_COMMON : WORDLE_DB_EN_COMMON;
+    wordCount = (currentLanguage == Language::ID) ? WORDLE_DB_ID_COMMON_COUNT : WORDLE_DB_EN_COMMON_COUNT;
+  } else
+  {
+    wordList = (currentLanguage == Language::ID) ? WORDLE_DB_ID : WORDLE_DB_EN;
+    wordCount = (currentLanguage == Language::ID) ? WORDLE_DB_ID_COUNT : WORDLE_DB_EN_COUNT;
+  }
   const size_t randomIndex = HelperUtility::true_random(static_cast<long>(wordCount));
-  const std::string& selectedWord = wordList[randomIndex];
 
   // Copy the selected word into chosenWord array
   for (size_t i = 0; i < 5; ++i)
   {
-    chosenWord[i] = selectedWord[i];
+    chosenWord[i] = wordList[randomIndex][i];
   }
 
   startTime = millis();
@@ -324,7 +339,8 @@ void GameWordleScreen::renderResult(const bool isWin)
 
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1);
-  body.drawCenterString(("Answer: " + std::string(chosenWord.data(), 5)).c_str(), body.width() / 2, body.height() / 2 + 2);
+  const std::string isCommon = useCommon ? "Common" : "Full";
+  body.drawCenterString(("Answer: [" + isCommon + "] " + std::string(chosenWord.data(), 5)).c_str(), body.width() / 2, body.height() / 2 + 2);
   body.drawCenterString(("Turn: " + std::to_string(totalAttempt)).c_str(), body.width() / 2, body.height() / 2 + body.fontHeight() + 4);
 
   const unsigned long elapsedTime = (millis() - startTime) / 1000;

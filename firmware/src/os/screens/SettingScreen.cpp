@@ -23,6 +23,7 @@ void SettingScreen::refreshMenu(const bool reset)
   const String brightnessValue = _config->get(APP_CONFIG_BRIGHTNESS, APP_CONFIG_BRIGHTNESS_DEFAULT);
   const String name = _config->get(APP_CONFIG_DEVICE_NAME, APP_CONFIG_DEVICE_NAME_DEFAULT);
   const String volume = _config->get(APP_CONFIG_VOLUME, APP_CONFIG_VOLUME_DEFAULT);
+  const String color = _config->get(APP_CONFIG_PRIMARY_COLOR, APP_CONFIG_PRIMARY_COLOR_DEFAULT);
   const bool navSound = _config->get(APP_CONFIG_NAV_SOUND, APP_CONFIG_NAV_SOUND_DEFAULT).toInt();
   Template::renderHead("Settings");
   std::vector<ListEntryItem> finalEntries = {
@@ -30,6 +31,7 @@ void SettingScreen::refreshMenu(const bool reset)
     {"Brightness", brightnessValue.c_str()},
     {"Volume", volume.c_str()},
     {"Navigation Sound", navSound ? "On" : "Off"},
+    {"Primary Color", color.c_str()},
     {"About", ""}
   };
 
@@ -50,90 +52,125 @@ void SettingScreen::renderAbout()
   body.fillSprite(BLACK);
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1.5);
-  body.drawCenterString("PuterOS v1.0.0", body.width() / 2, body.height() / 2 - body.fontHeight());
+  body.drawCenterString("PuterOS v1.2.1", body.width() / 2, body.height() / 2 - body.fontHeight());
   body.drawCenterString("Powered by M5Stack", body.width() / 2, body.height() / 2);
   Template::renderBody(&body);
 }
 
+void SettingScreen::renderPrimaryColor()
+{
+  currentState = STATE_PRIMARY_COLOR;
+  Template::renderHead("Set Primary Color", false);
+  const String color = _config->get(APP_CONFIG_PRIMARY_COLOR, APP_CONFIG_PRIMARY_COLOR_DEFAULT);
+
+  setEntries({
+    {"Blue", (color == "Blue") ? "Current" : ""},
+    {"Red", (color == "Red") ? "Current" : ""},
+    {"Green", (color == "Green") ? "Current" : ""},
+    {"Cyan", (color == "Cyan") ? "Current" : ""},
+    {"Purple", (color == "Purple") ? "Current" : ""},
+    {"Brown", (color == "Brown") ? "Current" : ""},
+    {"Orange", (color == "Orange") ? "Current" : ""},
+    {"Violet", (color == "Violet") ? "Current" : ""},
+  });
+}
+
 void SettingScreen::onEnter(const ListEntryItem entry)
 {
-  if (entry.label == "Brightness")
+  if (currentState == STATE_MAIN)
   {
-    const int currentValue = std::stoi(entry.value);
-    const int newBrightness = InputNumberScreen::popup("Brightness", currentValue, 5, 100);
-    if (newBrightness != currentValue)
+    if (entry.label == "Brightness")
     {
-      _config->set(APP_CONFIG_BRIGHTNESS, String(newBrightness));
-      const bool saved = _config->save();
-      if (saved) M5Cardputer.Lcd.setBrightness(static_cast<uint8_t>(newBrightness / 100.0 * 255));
-      else
+      const int currentValue = std::stoi(entry.value);
+      const int newBrightness = InputNumberScreen::popup("Brightness", currentValue, 5, 100);
+      if (newBrightness != currentValue)
       {
-        Template::renderStatus("Failed to save brightness.", TFT_RED);
-        HelperUtility::delayMs(1500);
-      }
-    }
-
-    refreshMenu();
-  } else if (entry.label == "Volume")
-  {
-    const int currentValue = std::stoi(entry.value);
-    const int newVolume = InputNumberScreen::popup("Volume", currentValue, 0, 100);
-    if (newVolume != currentValue)
-    {
-      _config->set(APP_CONFIG_VOLUME, String(newVolume));
-      const bool saved = _config->save();
-      if (saved)
-      {
-        M5Cardputer.Speaker.setVolume(static_cast<uint8_t>(newVolume / 100.0 * 255));
-        AudioUtility::playNotification();
-      } else
-      {
-        Template::renderStatus("Failed to save volume.", TFT_RED);
-        HelperUtility::delayMs(1500);
-      }
-    }
-
-    refreshMenu();
-  } else if (entry.label == "Name")
-  {
-    const auto newName = InputTextScreen::popup("Device Name", entry.value);
-    if (!newName.empty() && newName.size() <= 15)
-    {
-      if (newName != entry.value)
-      {
-        _config->set(APP_CONFIG_DEVICE_NAME, newName.c_str());
-        if (!_config->save())
+        _config->set(APP_CONFIG_BRIGHTNESS, String(newBrightness));
+        const bool saved = _config->save();
+        if (saved) M5Cardputer.Lcd.setBrightness(static_cast<uint8_t>(newBrightness / 100.0 * 255));
+        else
         {
-          Template::renderStatus("Failed to save device name.", TFT_RED);
+          Template::renderStatus("Failed to save brightness.", TFT_RED);
           HelperUtility::delayMs(1500);
         }
       }
-    } else
-    {
-      Template::renderStatus("Cannot have more than 15 characters.");
-      HelperUtility::delayMs(1500);
-    }
 
-    refreshMenu();
-  } else if (entry.label == "Navigation Sound")
-  {
-    _config->set(APP_CONFIG_NAV_SOUND, entry.value == "Off" ? "1" : "0");
-    if (!_config->save())
+      refreshMenu();
+    } else if (entry.label == "Volume")
     {
-      Template::renderStatus("Failed to save navigation sound.", TFT_RED);
-      HelperUtility::delayMs(1500);
-    }
+      const int currentValue = std::stoi(entry.value);
+      const int newVolume = InputNumberScreen::popup("Volume", currentValue, 0, 100);
+      if (newVolume != currentValue)
+      {
+        _config->set(APP_CONFIG_VOLUME, String(newVolume));
+        const bool saved = _config->save();
+        if (saved)
+        {
+          M5Cardputer.Speaker.setVolume(static_cast<uint8_t>(newVolume / 100.0 * 255));
+          AudioUtility::playNotification();
+        } else
+        {
+          Template::renderStatus("Failed to save volume.", TFT_RED);
+          HelperUtility::delayMs(1500);
+        }
+      }
 
-    refreshMenu();
-  }else if (entry.label == "About")
+      refreshMenu();
+    } else if (entry.label == "Name")
+    {
+      const auto newName = InputTextScreen::popup("Device Name", entry.value);
+      if (!newName.empty() && newName.size() <= 15)
+      {
+        if (newName != entry.value)
+        {
+          _config->set(APP_CONFIG_DEVICE_NAME, newName.c_str());
+          if (!_config->save())
+          {
+            Template::renderStatus("Failed to save device name.", TFT_RED);
+            HelperUtility::delayMs(1500);
+          }
+        }
+      } else
+      {
+        Template::renderStatus("Cannot have more than 15 characters.");
+        HelperUtility::delayMs(1500);
+      }
+
+      refreshMenu();
+    } else if (entry.label == "Navigation Sound")
+    {
+      _config->set(APP_CONFIG_NAV_SOUND, entry.value == "Off" ? "1" : "0");
+      if (!_config->save())
+      {
+        Template::renderStatus("Failed to save navigation sound.", TFT_RED);
+        HelperUtility::delayMs(1500);
+      }
+
+      refreshMenu();
+    } else if (entry.label == "Primary Color")
+    {
+      renderPrimaryColor();
+    } else if (entry.label == "About")
+    {
+      renderAbout();
+    }
+  } else if (currentState == STATE_PRIMARY_COLOR)
   {
-    renderAbout();
+    _config->set(APP_CONFIG_PRIMARY_COLOR, entry.label.c_str());
+    _config->save();
+    refreshMenu(true);
   }
 }
 
 void SettingScreen::onBack()
 {
-  _global->setScreen(new MainMenuScreen());
+  if (currentState == STATE_MAIN)
+  {
+    _global->setScreen(new MainMenuScreen());
+  } else if (currentState == STATE_PRIMARY_COLOR)
+  {
+    refreshMenu(true);
+  }
 }
 
 void SettingScreen::update()

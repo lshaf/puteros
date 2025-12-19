@@ -149,7 +149,7 @@ void GameDecoderScreen::renderMainMenu()
   for (size_t i = 0; i < menuItems.size(); i++)
   {
     auto textColor = TFT_WHITE;
-    if (i == currentMenu) textColor = TFT_BLUE;
+    if (i == currentMenu) textColor = _global->getMainColor();
 
     body.setTextColor(textColor);
     body.drawCenterString(menuItems[i].c_str(), body.width() / 2, startY + i * (body.fontHeight() + marginMenu));

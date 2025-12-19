@@ -94,7 +94,7 @@ void WifiPacketMonitorScreen::render()
       packetHistory[i] = packetHistory[i - 1];
     }
 
-    body.fillRect(i * 4, body.height() - 10 - packetHistory[i], 3, packetHistory[i], TFT_BLUE);
+    body.fillRect(i * 4, body.height() - 10 - packetHistory[i], 3, packetHistory[i], _global->getMainColor());
   }
 
   body.setTextColor(TFT_WHITE, TFT_BLACK);

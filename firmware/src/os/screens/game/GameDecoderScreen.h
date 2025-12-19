@@ -95,5 +95,5 @@ private:
   std::array<char, 4> currentInput = {};
   std::array<char, 4> targetNumber = {};
   uint8_t currentDifficulty = 0;
-  uint8_t currentMenu = 0;
+  int8_t currentMenu = 0;
 };
