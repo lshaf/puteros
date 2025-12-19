@@ -3,6 +3,7 @@
 //
 #pragma once
 
+#include "M5GFX.h"
 #include "core/Config.h"
 #include "core/Screen.hpp"
 #include <SD.h>
@@ -18,6 +19,8 @@
 #define APP_CONFIG_WIFI_AP_PASSWORD_DEFAULT "puteros123"
 
 // Device Settings
+#define APP_CONFIG_PRIMARY_COLOR "primary_color"
+#define APP_CONFIG_PRIMARY_COLOR_DEFAULT "Blue"
 #define APP_CONFIG_BRIGHTNESS "brightness"
 #define APP_CONFIG_BRIGHTNESS_DEFAULT "70"
 #define APP_CONFIG_DEVICE_NAME "device_name"
@@ -54,7 +57,7 @@ public:
     }
   }
 
-  bool getIsSDCardLoaded()
+  bool getIsSDCardLoaded() const
   {
     return isSDCardLoaded;
   }
@@ -69,6 +72,19 @@ public:
       currentScreen->init();
       currentScreen->render();
     }
+  }
+
+  int getMainColor()
+  {
+    const String color = getConfig()->get(APP_CONFIG_PRIMARY_COLOR, APP_CONFIG_PRIMARY_COLOR_DEFAULT);
+    if (color == "Red") return TFT_RED;
+    if (color == "Green") return TFT_DARKGREEN;
+    if (color == "Brown") return TFT_BROWN;
+    if (color == "Cyan") return TFT_DARKCYAN;
+    if (color == "Purple") return TFT_PURPLE;
+    if (color == "Orange") return TFT_ORANGE;
+    if (color == "Violet") return TFT_VIOLET;
+    return TFT_BLUE;
   }
 
   Screen* getScreen() const

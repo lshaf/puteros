@@ -36,7 +36,7 @@ void WiAPFileManagerScreen::onEnter(ListEntryItem entry)
     if (entry.label == "Start")
     {
       currentState = STATE_WEB_MANAGER;
-      Template::renderStatus("Starting server...", TFT_BLUE);
+      Template::renderStatus("Starting server...");
       if (!server.begin())
       {
         currentState = STATE_MENU;

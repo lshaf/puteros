@@ -97,7 +97,7 @@ void WifiESPNowChatScreen::render()
   currentState = STATE_CHAT;
   const int inputY = 14;
   auto body = Template::createBody();
-  body.drawRoundRect(0, body.height() - inputY, body.width(), inputY, 2.5, BLUE);
+  body.drawRoundRect(0, body.height() - inputY, body.width(), inputY, 2.5, _global->getMainColor());
   body.drawString("Press enter to send message", 4, body.height() - inputY + (inputY - body.fontHeight()) / 2);
 
   int y = body.height() - inputY - 2;

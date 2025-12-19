@@ -10,10 +10,12 @@ class SettingScreen final : public ListScreen
 private:
   enum State_t {
     STATE_MAIN,
-    STATE_ABOUT
+    STATE_ABOUT,
+    STATE_PRIMARY_COLOR
   } currentState = STATE_MAIN;
 
   void renderAbout();
+  void renderPrimaryColor();
   void refreshMenu(bool reset = false);
 protected:
   void onEnter(ListEntryItem entry) override;

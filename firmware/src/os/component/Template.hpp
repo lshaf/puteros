@@ -7,6 +7,7 @@
 #include <M5Cardputer.h>
 #include "BatteryIndicator.hpp"
 #include "os/utility/HelperUtility.h"
+#include "os/GlobalState.hpp"
 
 class Template
 {
@@ -48,7 +49,8 @@ public:
 
   static void renderBody(M5Canvas* bodyContent = nullptr)
   {
-    M5Cardputer.Lcd.drawRoundRect(3, 22, M5Cardputer.Lcd.width() - 6, M5Cardputer.Lcd.height() - 25, 4, BLUE);
+    auto _g = &GlobalState::getInstance();
+    M5Cardputer.Lcd.drawRoundRect(3, 22, M5Cardputer.Lcd.width() - 6, M5Cardputer.Lcd.height() - 25, 4, _g->getMainColor());
 
     M5Canvas body(&M5Cardputer.Lcd);
     const auto size = bodySize();
@@ -83,11 +85,12 @@ public:
 
   static void renderProgress(const uint8_t progress, const std::string& status, const int color = TFT_WHITE)
   {
+    auto _g = &GlobalState::getInstance();
     auto body = createBody();
     body.setTextColor(color);
     body.drawCenterString(status.c_str(), body.width() / 2, body.height() / 2 - body.fontHeight());
-    body.drawRect(6, body.height() / 2 + 4, body.width() - 12, 10, TFT_BLUE);
-    body.fillRect(6, body.height() / 2 + 4, static_cast<float>(body.width() - 12) * progress / 100.0f, 10, TFT_BLUE);
+    body.drawRect(6, body.height() / 2 + 4, body.width() - 12, 10, _g->getMainColor());
+    body.fillRect(6, body.height() / 2 + 4, static_cast<float>(body.width() - 12) * progress / 100.0f, 10, _g->getMainColor());
     renderBody(&body);
   }
 };
