@@ -32,6 +32,16 @@ private:
   bool isAuthenticated(const AsyncWebServerRequest* request, bool logout = false);
   bool removeDirectory(const String& path);
 
+  String color565ToWebHex(int color)
+  {
+    char hexCol[8];
+    snprintf(hexCol, sizeof(hexCol), "#%02X%02X%02X",
+             static_cast<uint8_t>((color >> 11) & 0x1F) * 255 / 31,
+             static_cast<uint8_t>((color >> 5) & 0x3F) * 255 / 63,
+             static_cast<uint8_t>(color & 0x1F) * 255 / 31);
+    return {hexCol};
+  }
+
   String getContentType(const String& filename)
   {
     if(filename.endsWith(".htm")) return "text/html";
