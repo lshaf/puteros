@@ -385,5 +385,13 @@ void WebFileManager::prepareServer()
     request->send(404, "text/plain", "404");
   });
 
+  server.on("/theme.css", HTTP_GET, [this](AsyncWebServerRequest* request)
+  {
+    const auto priColor = _global->getMainColor();
+    const String css = ":root{--color:" + color565ToWebHex(priColor) + ";}";
+    AsyncWebServerResponse *themeResponse = request->beginResponse(200, "text/css", css);
+    request->send(themeResponse);
+  });
+
   server.serveStatic("/", SD, "/puteros/web/file_manager/");
 }
