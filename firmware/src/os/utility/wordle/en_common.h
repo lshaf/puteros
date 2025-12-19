@@ -192,4 +192,4 @@ static constexpr char WORDLE_DB_EN_COMMON[][6] PROGMEM = {
   "YOUTH", "ZEBRA", "ZESTY", "ZONAL"
 };
 
-static constexpr auto WORDLE_DB_EN_COMMON_SIZE = sizeof(WORDLE_DB_EN_COMMON) / sizeof(WORDLE_DB_EN_COMMON[0]);
+static constexpr auto WORDLE_DB_EN_COMMON_COUNT = sizeof(WORDLE_DB_EN_COMMON) / sizeof(WORDLE_DB_EN_COMMON[0]);
