@@ -15,7 +15,7 @@
 
 void WifiNetworkScreen::init()
 {
-  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_MODE_STA);
   if (WiFi.status() == WL_CONNECTED)
   {
     showMenu();
@@ -43,6 +43,7 @@ void WifiNetworkScreen::showWifiList()
   Template::renderStatus("Scanning...");
 
   std::vector<ListEntryItem> wifiList = {};
+  WiFi.scanDelete();
   const int totalWifi = WiFi.scanNetworks();
   for (int i = 0; i < totalWifi; i++)
   {
@@ -59,10 +60,56 @@ void WifiNetworkScreen::showWifiList()
 
 void WifiNetworkScreen::onBack()
 {
-  WiFi.disconnect(true);
+  WiFi.disconnect(true, true);
   Template::renderStatus("Disconnecting...");
   HelperUtility::delayMs(1000);
   _global->setScreen(new WifiMenuScreen());
+}
+
+String WifiNetworkScreen::passwordWifiPath(const String& bssid, const String& ssid)
+{
+  auto cleanBssid = bssid;
+  cleanBssid.replace(":", "");
+  HelperUtility::makeDirectoryRecursive(passwordPath.c_str());
+  return passwordPath + "/" + cleanBssid.c_str() + "_" + ssid.c_str() + ".pass";
+}
+
+bool WifiNetworkScreen::connectToWifi(const String& bssid, const String& ssid, const String& password)
+{
+  Template::renderHead("Connecting");
+  Template::renderStatus(("Connecting to " + ssid + "...").c_str());
+  WiFi.begin(ssid, password);
+
+  const uint8_t res = WiFi.waitForConnectResult(10000);
+  if (res == WL_CONNECTED)
+  {
+    if (_global->getIsSDCardLoaded())
+    {
+      const auto path = passwordWifiPath(bssid, ssid);
+      File passwordFile = SD.open(path, FILE_WRITE);
+      if (passwordFile)
+      {
+        passwordFile.print(password);
+        passwordFile.close();
+      }
+    }
+
+    showMenu();
+    return true;
+  } else if (res == WL_CONNECT_FAILED)
+  {
+    Template::renderStatus("Connection Failed!");
+    HelperUtility::delayMs(1000);
+  } else if (res == WL_NO_SSID_AVAIL)
+  {
+    Template::renderStatus("SSID Not Available!");
+    HelperUtility::delayMs(1000);
+  } else
+  {
+    Template::renderStatus("Connection Error!");
+    HelperUtility::delayMs(1000);
+  }
+  return false;
 }
 
 void WifiNetworkScreen::onEnter(const ListEntryItem entry)
@@ -72,23 +119,26 @@ void WifiNetworkScreen::onEnter(const ListEntryItem entry)
     setEntries({});
 
     const std::string ssid = entry.label.substr(entry.label.find(']') + 2);
-    const auto password = InputTextScreen::popup(entry.label);
-    WiFi.begin(ssid.c_str(), password.c_str());
-    Template::renderHead("Connecting");
-    Template::renderStatus("Connecting to " + ssid + "...");
-
-    int attempts = 0;
-    while (WiFi.status() != WL_CONNECTED && attempts < 6)
+    if (_global->getIsSDCardLoaded())
     {
-      delay(500);
-      attempts++;
+      const auto path = passwordWifiPath(entry.value.c_str(), ssid.c_str());
+      if (SD.exists(path))
+      {
+        File passwordFile = SD.open(path, FILE_READ);
+        if (passwordFile)
+        {
+          const auto password = passwordFile.readString();
+          passwordFile.close();
+
+          const bool isConnected = connectToWifi(entry.value.c_str(), ssid.c_str(), password);
+          if (isConnected) return;
+        }
+      }
     }
 
-    if (WiFi.status() != WL_CONNECTED) {
-      onBack();
-    } else {
-      showMenu();
-    }
+    const auto password = InputTextScreen::popup(entry.label);
+    const bool isConnected = connectToWifi(entry.value.c_str(), ssid.c_str(), password.c_str());
+    if (!isConnected) onBack();
   } else if (currentState == STATE_MENU)
   {
     if (entry.label == "World Clock")
