@@ -13,6 +13,7 @@ void ModuleGPSScreen::init()
   lastUpdateTime = millis();
   Template::renderHead("Unit GPS v1.1");
   Serial1.begin(115200, SERIAL_8N1, 1);
+  render();
 }
 
 void ModuleGPSScreen::render()

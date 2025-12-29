@@ -28,7 +28,7 @@ protected:
     NAV_NEXT,
   };
 
-  virtual int getYOffset() const { return 0; }
+  virtual int getYOffset() const { return 2; }
   virtual void onEnter(ListEntryItem entry) = 0;
   virtual void onEscape() { onBack(); };
   virtual void onBack() = 0;

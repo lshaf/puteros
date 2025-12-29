@@ -10,7 +10,10 @@ public:
   Screen() = default;
   virtual ~Screen() = default;
 
-  virtual void init() = 0;
+  virtual void init()
+  {
+    render();
+  };
   virtual void update() = 0;
   virtual void render() = 0;
 };

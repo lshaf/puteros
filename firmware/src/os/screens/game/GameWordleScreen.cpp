@@ -19,6 +19,8 @@ void GameWordleScreen::init()
     Template::renderHead("Wordle Indonesia");
   else
     Template::renderHead("Wordle English");
+
+  render();
 }
 
 void GameWordleScreen::render()
@@ -47,7 +49,7 @@ void GameWordleScreen::update()
       } else if (_keyboard->isKeyPressed(';'))
       {
         selectedMenu = selectedMenu - 1;
-        if (selectedMenu < 0) selectedMenu = 2;
+        if (selectedMenu < 0) selectedMenu = 3;
         render();
       } else if (_keyboard->isKeyPressed(KEY_ENTER))
       {

@@ -6,6 +6,7 @@
 void GameDecoderScreen::init()
 {
   Template::renderHead("HEX Decoder");
+  render();
 }
 
 void GameDecoderScreen::update()

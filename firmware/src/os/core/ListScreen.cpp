@@ -17,7 +17,6 @@ void ListScreen::render()
 {
   auto _body = Template::createBody();
   preRender(_body);
-  visibleCount = (_body.height() - getYOffset()) / (_body.fontHeight() + 2);
 
   if (entries.empty())
   {
@@ -27,6 +26,7 @@ void ListScreen::render()
 
   _body.setTextSize(1);
   _body.setTextColor(TFT_WHITE);
+  visibleCount = (_body.height() - getYOffset()) / (_body.fontHeight() + 4);
   const int totalItem = std::min(visibleCount, static_cast<int>(entries.size()) - scrollOffset);
   const int lineHeight = _body.fontHeight() + 2;
   const int selectedIndexVisible = selectedIndex - scrollOffset;

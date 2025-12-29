@@ -69,6 +69,8 @@ void WifiESPNowChatScreen::init()
       _global->setScreen(new WifiMenuScreen());
     }
   }
+
+  render();
 }
 
 void WifiESPNowChatScreen::update()
