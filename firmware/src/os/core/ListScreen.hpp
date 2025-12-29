@@ -26,11 +26,13 @@ protected:
     NAV_DOWN,
     NAV_PREV,
     NAV_NEXT,
-};
+  };
 
+  virtual int getYOffset() const { return 0; }
   virtual void onEnter(ListEntryItem entry) = 0;
   virtual void onEscape() { onBack(); };
   virtual void onBack() = 0;
+  virtual void preRender(M5Canvas &body) {};
 
   void playSound();
   void navigate(NavAction_t direction);
