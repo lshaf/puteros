@@ -1,4 +1,5 @@
 #include <WiFi.h>
+#include <esp_now.h>
 #include "os/screens/wifi/WifiESPNowChatScreen.h"
 
 #include "os/component/InputTextScreen.hpp"
