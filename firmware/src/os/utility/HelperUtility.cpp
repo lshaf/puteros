@@ -12,21 +12,18 @@ std::string HelperUtility::generateRandomString(size_t length)
 {
   if (length == 0) return {};
 
-  const std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   constexpr size_t MAX_LEN = 4096;
   if (length > MAX_LEN) length = MAX_LEN;
 
-  const uint32_t charsetSize = charset.size();
-  const uint32_t randMax = std::numeric_limits<uint32_t>::max();
-  const uint32_t limit = randMax - (randMax % charsetSize);
+  static constexpr char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  static constexpr size_t charsetSize = sizeof(charset) - 1;
 
   std::string out;
   out.reserve(length);
 
   while (out.size() < length) {
-    const uint32_t r = esp_random();
-    if (r >= limit) continue; // rejection sampling to avoid modulo bias
-    out.push_back(charset[r % charsetSize]);
+    const uint32_t r = true_random(charsetSize);
+    out.push_back(charset[r]);
   }
 
   return out;
