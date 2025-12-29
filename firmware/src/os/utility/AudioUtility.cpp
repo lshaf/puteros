@@ -2,7 +2,9 @@
 // Created by l-sha on 30/10/2025.
 //
 #include "os/utility/AudioUtility.h"
-#include "os/utility/SoundNotification.h"
+#include "sounds/SoundNotification.h"
+#include "sounds/SoundWin.h"
+#include "sounds/SoundLose.h"
 
 std::vector<int> AudioUtility::c_major_scale = {60, 62, 64, 65, 67, 69, 71};
 
@@ -24,4 +26,14 @@ void AudioUtility::playRandomTone(const int semitoneShift, const double duration
 void AudioUtility::playNotification()
 {
   M5Cardputer.Speaker.playWav(NOTIFICATION_SOUND);
+}
+
+void AudioUtility::playLose()
+{
+  M5Cardputer.Speaker.playWav(LOSE_SOUND);
+}
+
+void AudioUtility::playWin()
+{
+  M5Cardputer.Speaker.playWav(WIN_SOUND);
 }

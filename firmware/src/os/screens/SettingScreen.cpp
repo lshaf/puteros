@@ -4,13 +4,11 @@
 
 #include "os/screens/SettingScreen.h"
 
-#include "lgfx/utility/lgfx_qrcode.h"
 #include "os/component/InputNumberScreen.h"
 #include "os/component/InputTextScreen.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/utility/AudioUtility.h"
 #include "os/utility/HelperUtility.h"
-#include "os/utility/SoundNotification.h"
 
 void SettingScreen::init()
 {
