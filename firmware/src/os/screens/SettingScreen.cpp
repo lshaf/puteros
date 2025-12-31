@@ -10,6 +10,10 @@
 #include "os/utility/AudioUtility.h"
 #include "os/utility/HelperUtility.h"
 
+#ifndef APP_VERSION
+#define APP_VERSION "dev"
+#endif
+
 void SettingScreen::init()
 {
   refreshMenu(true);
@@ -50,7 +54,7 @@ void SettingScreen::renderAbout()
   body.fillSprite(BLACK);
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1.5);
-  body.drawCenterString("PuterOS v1.2.1", body.width() / 2, body.height() / 2 - body.fontHeight());
+  body.drawCenterString("PuterOS v" + String(APP_VERSION), body.width() / 2, body.height() / 2 - body.fontHeight());
   body.drawCenterString("Powered by M5Stack", body.width() / 2, body.height() / 2);
   Template::renderBody(&body);
 }

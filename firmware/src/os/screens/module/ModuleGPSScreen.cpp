@@ -115,8 +115,8 @@ void ModuleGPSScreen::onEscape()
 void ModuleGPSScreen::endService()
 {
   Serial1.flush();
+  while (Serial1.available()) Serial1.read();
   Serial1.end();
-  gps = TinyGPSPlus();
 }
 
 void ModuleGPSScreen::preRender(M5Canvas &body)
