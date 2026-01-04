@@ -23,6 +23,7 @@ protected:
 
   void renderInfoScreen();
   void renderMenuScreen();
+  void renderWardriverScreen();
 
   void endService();
 
@@ -31,7 +32,11 @@ protected:
     STATE_LOADING,
     STATE_MENU,
     STATE_INFO,
+    STATE_WARDRIVER_MENU,
+    STATE_WARDRIVER_ACTION
   } currentState = STATE_LOADING;
+
+  
 
   unsigned long lastRenderTime = 0;
   unsigned long lastUpdateTime = 0;

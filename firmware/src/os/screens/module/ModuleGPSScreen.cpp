@@ -91,7 +91,7 @@ void ModuleGPSScreen::onEnter(ListEntryItem entry)
       renderInfoScreen();
     } else if (entry.label == "Wardriver")
     {
-      //
+      renderWardriverScreen();
     }
   }
 }
@@ -152,4 +152,10 @@ void ModuleGPSScreen::renderInfoScreen()
   body.println(("DATE: " + String(gps.date.day()) + "/" + String(gps.date.month()) + "/" + String(gps.date.year())).c_str());
   body.println(("TIME (UTC): " + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second())).c_str());
   Template::renderBody(&body);
+}
+
+void ModuleGPSScreen::renderWardriverScreen()
+{
+  currentState = STATE_WARDRIVER_MENU;
+  setEntries({});
 }
