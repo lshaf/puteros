@@ -143,20 +143,46 @@ void ModuleGPSScreen::onEnter(ListEntryItem entry)
       }
 
       buffer.println(
-        "WigleWifi-1.4,"
+        "WigleWifi-1.6,"
         "appRelease=" + String(APP_VERSION) + ","
         "model=M5Cardputer,release=" + String(APP_VERSION) + ","
-        "device=PuterOS,display=M5Cardputer,board=M5Cardputer,brand=M5Stack"
+        "device=PuterOS,display=M5Cardputer,board=M5Cardputer,brand=PuterOS,star=Sol,body=4,subBody=1"
       );
       buffer.println(
-        "MAC,SSID,AuthMode,FirstSeen,Channel,RSSI,CurrentLatitude,"
-        "CurrentLongitude,AltitudeMeters,AccuracyMeters,Type"
+        "MAC,SSID,AuthMode,FirstSeen,Channel,Frequency,RSSI,CurrentLatitude,CurrentLongitude,"
+        "AltitudeMeters,AccuracyMeters,RCOIs,MfgrId,Type"
       );
       buffer.close();
       WiFi.mode(WIFI_STA);
       renderWardriverScreen();
     }
   }
+}
+
+void ModuleGPSScreen::addWigleRecord(const std::string& ssid, const std::string& bssid, const std::string& authMode, const int32_t rssi, const int32_t channel)
+{
+  auto buffer = SD.open(filename.c_str(), FILE_APPEND);
+  if (!buffer)
+  {
+    return;
+  }
+
+  const int frequency = channel != 14 ? 2407 + (channel * 5) : 2484;
+  buffer.println(
+    String(bssid.c_str()) + "," +
+    "\"" + String(ssid.c_str()) + "\"," +
+    String(authMode.c_str()) + "," +
+    getCurrentGPSDate() + " " + getCurrentGPSTime() + "," +
+    String(channel) + "," +
+    String(frequency) + "," +
+    String(rssi) + "," +
+    String(gps.location.lat(), 6) + "," +
+    String(gps.location.lng(), 6) + "," +
+    String(gps.altitude.meters(), 2) + "," +
+    String(gps.hdop.hdop() * 1.0) + "," +
+    ",,WIFI"
+  );
+  buffer.close();
 }
 
 void ModuleGPSScreen::onBack()
@@ -198,30 +224,6 @@ void ModuleGPSScreen::renderMenuScreen()
   {"View GPS Info"},
     {"Wardriver"}
   });
-}
-
-void ModuleGPSScreen::addWigleRecord(const std::string& ssid, const std::string& bssid, const std::string& authMode, const int32_t rssi, const int32_t channel)
-{
-  auto buffer = SD.open(filename.c_str(), FILE_APPEND);
-  if (!buffer)
-  {
-    return;
-  }
-
-  buffer.println(
-    String(bssid.c_str()) + "," +
-    String(ssid.c_str()) + "," +
-    String(authMode.c_str()) + "," +
-    getCurrentGPSDate() + " " + getCurrentGPSTime() + "," +
-    String(channel) + "," +
-    String(rssi) + "," +
-    String(gps.location.lat(), 6) + "," +
-    String(gps.location.lng(), 6) + "," +
-    String(gps.altitude.meters(), 2) + "," +
-    String(gps.hdop.value()) + "," +
-    "WIFI"
-  );
-  buffer.close();
 }
 
 void ModuleGPSScreen::renderInfoScreen()
