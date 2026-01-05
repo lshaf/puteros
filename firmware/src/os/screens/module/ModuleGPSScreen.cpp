@@ -4,7 +4,10 @@
 
 #include "ModuleGPSScreen.h"
 
+#include <WiFi.h>
+
 #include "ModuleMenuScreen.h"
+#include "os/component/InputTextScreen.hpp"
 #include "os/component/Template.hpp"
 #include "os/screens/MainMenuScreen.hpp"
 
@@ -28,6 +31,9 @@ void ModuleGPSScreen::render()
   } else if (currentState == STATE_INFO)
   {
     renderInfoScreen();
+  } else if (currentState == STATE_WARDRIVER_ACTION)
+  {
+    renderWardriverScreen();
   }
 }
 
@@ -64,9 +70,9 @@ void ModuleGPSScreen::update()
     {
       ListScreen::render();
     }
-  } else if (currentState == STATE_INFO)
+  } else if (currentState == STATE_INFO || currentState == STATE_WARDRIVER_ACTION)
   {
-    if (millis() - lastRenderTime > 1000)
+    if (millis() - lastRenderTime > 500)
     {
       render();
     }
@@ -76,6 +82,13 @@ void ModuleGPSScreen::update()
     {
       if (_kb->isKeyPressed('`') || _kb->isKeyPressed(KEY_BACKSPACE))
       {
+        if (currentState == STATE_WARDRIVER_ACTION)
+        {
+          totalDiscovered = 0;
+          scannedBSSIDs.clear();
+          WiFi.scanDelete();
+        }
+
         renderMenuScreen();
       }
     }
@@ -91,6 +104,56 @@ void ModuleGPSScreen::onEnter(ListEntryItem entry)
       renderInfoScreen();
     } else if (entry.label == "Wardriver")
     {
+
+      setEntries({});
+      if (!_global->getIsSDCardLoaded())
+      {
+        Template::renderStatus("SD Card not detected! Please insert an SD Card.");
+        HelperUtility::delayMs(1000);
+        renderMenuScreen();
+        return;
+      }
+
+      const auto fn = InputTextScreen::popup("Filename");
+      if (fn.empty() || fn.rfind('/') != -1 || fn.rfind('\\') != -1)
+      {
+        Template::renderStatus("Filename is invalid!", TFT_RED);
+        HelperUtility::delayMs(1000);
+        renderMenuScreen();
+        return;
+      }
+
+      HelperUtility::makeDirectoryRecursive(savePath);
+      filename = savePath + "/" + fn + ".csv";
+      if (SD.exists(filename.c_str()))
+      {
+        Template::renderStatus(("File " + filename + " already exists!").c_str(), TFT_RED);
+        HelperUtility::delayMs(1000);
+        renderMenuScreen();
+        return;
+      }
+
+      auto buffer = SD.open(filename.c_str(), FILE_WRITE);
+      if (!buffer)
+      {
+        Template::renderStatus("Failed to create file!", TFT_RED);
+        HelperUtility::delayMs(1000);
+        renderMenuScreen();
+        return;
+      }
+
+      buffer.println(
+        "WigleWifi-1.4,"
+        "appRelease=" + String(APP_VERSION) + ","
+        "model=M5Cardputer,release=" + String(APP_VERSION) + ","
+        "device=PuterOS,display=M5Cardputer,board=M5Cardputer,brand=M5Stack"
+      );
+      buffer.println(
+        "MAC,SSID,AuthMode,FirstSeen,Channel,RSSI,CurrentLatitude,"
+        "CurrentLongitude,AltitudeMeters,AccuracyMeters,Type"
+      );
+      buffer.close();
+      WiFi.mode(WIFI_STA);
       renderWardriverScreen();
     }
   }
@@ -137,25 +200,108 @@ void ModuleGPSScreen::renderMenuScreen()
   });
 }
 
+void ModuleGPSScreen::addWigleRecord(const std::string& ssid, const std::string& bssid, const std::string& authMode, const int32_t rssi, const int32_t channel)
+{
+  auto buffer = SD.open(filename.c_str(), FILE_APPEND);
+  if (!buffer)
+  {
+    return;
+  }
+
+  buffer.println(
+    String(bssid.c_str()) + "," +
+    String(ssid.c_str()) + "," +
+    String(authMode.c_str()) + "," +
+    getCurrentGPSDate() + " " + getCurrentGPSTime() + "," +
+    String(channel) + "," +
+    String(rssi) + "," +
+    String(gps.location.lat(), 6) + "," +
+    String(gps.location.lng(), 6) + "," +
+    String(gps.altitude.meters(), 2) + "," +
+    String(gps.hdop.value()) + "," +
+    "WIFI"
+  );
+  buffer.close();
+}
+
 void ModuleGPSScreen::renderInfoScreen()
 {
   currentState = STATE_INFO;
   auto body = Template::createBody();
   body.setTextSize(1);
   body.setTextColor(TFT_WHITE);
-  body.println(("LAT: " + String(gps.location.lat(), 6)).c_str());
-  body.println(("LNG: " + String(gps.location.lng(), 6)).c_str());
+  body.println(("LAT: " + String(gps.location.lat(), 9)).c_str());
+  body.println(("LNG: " + String(gps.location.lng(), 9)).c_str());
   body.println(("SPEED: " + String(gps.speed.kmph(), 2) + " km/h").c_str());
   body.println(("COURSE: " + String(gps.course.deg(), 2) + " deg").c_str());
   body.println(("ALTITUDE: " + String(gps.altitude.meters(), 2) + " m").c_str());
   body.println(("SATELLITES: " + String(gps.satellites.value())).c_str());
-  body.println(("DATE: " + String(gps.date.day()) + "/" + String(gps.date.month()) + "/" + String(gps.date.year())).c_str());
-  body.println(("TIME (UTC): " + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second())).c_str());
+  body.println(("DATE: " + getCurrentGPSDate()).c_str());
+  body.println(("TIME: " + getCurrentGPSTime() + " UTC").c_str());
   Template::renderBody(&body);
 }
 
 void ModuleGPSScreen::renderWardriverScreen()
 {
-  currentState = STATE_WARDRIVER_MENU;
-  setEntries({});
+  currentState = STATE_WARDRIVER_ACTION;
+  if (!isScanning && (millis() - lastWifiScan > 5000))
+  {
+    WiFi.scanNetworks(true, true);
+    isScanning = true;
+  }
+
+  String status = "Idle";
+  if (isScanning) status = "Scanning...";
+  const int n = WiFi.scanComplete();
+  if (n > -1)
+  {
+    status = String(n) + " networks found";
+    for (int i = 0; i < n; ++i)
+    {
+      bool scanned = isBssidScanned(WiFi.BSSID(i));
+      if (scanned) continue;
+      String ssid = WiFi.SSID(i);
+      String bssid = WiFi.BSSIDstr(i);
+      String authMode;
+      switch (WiFi.encryptionType(i))
+      {
+        case WIFI_AUTH_OPEN: authMode = "[OPEN][ESS]"; break;
+        case WIFI_AUTH_WEP: authMode = "[WEP][ESS]"; break;
+        case WIFI_AUTH_WPA_PSK: authMode = "[WPA-PSK][ESS]"; break;
+        case WIFI_AUTH_WPA2_PSK: authMode = "[WPA2-PSK][ESS]"; break;
+        case WIFI_AUTH_WPA_WPA2_PSK: authMode = "[WPA-WPA2-PSK][ESS]"; break;
+        case WIFI_AUTH_WPA2_ENTERPRISE: authMode = "[WPA2-ENTERPRISE][ESS]"; break;
+        default: authMode = "[UNKNOWN]";
+      }
+      int32_t rssi = WiFi.RSSI(i);
+      int32_t channel = WiFi.channel(i);
+      addWigleRecord(ssid.c_str(), bssid.c_str(), authMode.c_str(), rssi, channel);
+      totalDiscovered++;
+    }
+    WiFi.scanDelete();
+    isScanning = false;
+    lastWifiScan = millis();
+  }
+
+  Template::renderHead("Wardriving");
+
+  // get csv name from full path
+  String csvName = filename.c_str();
+  int lastSlash = csvName.lastIndexOf('/');
+  if (lastSlash != -1) csvName = csvName.substring(lastSlash + 1);
+
+  auto body = Template::createBody();
+  body.setTextSize(1);
+  body.setTextColor(TFT_WHITE);
+  body.drawString(getCurrentGPSDate(), 0, 0);
+  body.drawString(getCurrentGPSTime() + " UTC", 0, body.fontHeight() + 2);
+  body.drawString("File: " + csvName, 0, body.fontHeight() * 2 + 4);
+  body.drawRightString(String(gps.location.lat(), 6), body.width(), 0);
+  body.drawRightString(String(gps.location.lng(), 6), body.width(), body.fontHeight() + 2);
+  body.drawString("Esc to exit", 0, body.height() - body.fontHeight());
+  body.drawRightString(status, body.width(), body.height() - body.fontHeight());
+  body.drawCenterString("WiFi Discovered", body.width() / 2, body.height() / 2 + body.fontHeight() + 2);
+  body.setTextSize(2);
+  body.drawCenterString(String(totalDiscovered), body.width() / 2, body.height() / 2 - body.fontHeight() / 2);
+  Template::renderBody(&body);
 }

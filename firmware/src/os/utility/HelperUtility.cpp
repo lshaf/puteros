@@ -177,3 +177,13 @@ long HelperUtility::true_random(const long max) {
 
   return random(max);
 }
+
+String HelperUtility::padNumber(int number, int width)
+{
+  String str = String(number);
+  while (str.length() < width)
+  {
+    str = "0" + str;
+  }
+  return str;
+}
