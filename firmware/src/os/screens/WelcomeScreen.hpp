@@ -12,7 +12,6 @@ private:
   bool _withBattery = true;
 public:
   WelcomeScreen() = default;
-  void init() override {};
   void update() override;
   void render() override;
 };

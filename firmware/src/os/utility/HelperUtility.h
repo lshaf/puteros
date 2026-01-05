@@ -17,4 +17,5 @@ public:
   static void makeDirectoryRecursive(const std::string& path);
   static bool parseInt32(const std::string& input, int32_t& value);
   static long true_random(long max);
+  static String padNumber(int number, int width);
 };

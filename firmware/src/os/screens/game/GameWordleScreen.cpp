@@ -6,6 +6,7 @@
 
 #include "GameMenuScreen.h"
 #include "os/component/Template.hpp"
+#include "os/utility/AudioUtility.h"
 
 #include "os/utility/wordle/id.h"
 #include "os/utility/wordle/id_common.h"
@@ -18,6 +19,8 @@ void GameWordleScreen::init()
     Template::renderHead("Wordle Indonesia");
   else
     Template::renderHead("Wordle English");
+
+  render();
 }
 
 void GameWordleScreen::render()
@@ -46,7 +49,7 @@ void GameWordleScreen::update()
       } else if (_keyboard->isKeyPressed(';'))
       {
         selectedMenu = selectedMenu - 1;
-        if (selectedMenu < 0) selectedMenu = 2;
+        if (selectedMenu < 0) selectedMenu = 3;
         render();
       } else if (_keyboard->isKeyPressed(KEY_ENTER))
       {
@@ -328,11 +331,12 @@ void GameWordleScreen::renderResult(const bool isWin)
   body.setTextSize(2);
   if (isWin)
   {
+    AudioUtility::playWin();
     body.setTextColor(TFT_GREEN);
     body.drawCenterString("You Win!", body.width() / 2, body.height() / 2 - body.fontHeight());
   } else
   {
-
+    AudioUtility::playLose();
     body.setTextColor(TFT_RED);
     body.drawCenterString("Game Over!", body.width() / 2, body.height() / 2 - body.fontHeight());
   }

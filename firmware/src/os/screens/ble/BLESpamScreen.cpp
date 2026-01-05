@@ -20,6 +20,7 @@ void BLESpamScreen::init()
 
   pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->enableScanResponse(true);
+  render();
 }
 
 void BLESpamScreen::render()

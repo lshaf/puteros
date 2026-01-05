@@ -1,10 +1,12 @@
 #include "os/screens/game/GameDecoderScreen.h"
 #include "os/component/Template.hpp"
 #include "os/screens/game/GameMenuScreen.h"
+#include "os/utility/AudioUtility.h"
 
 void GameDecoderScreen::init()
 {
   Template::renderHead("HEX Decoder");
+  render();
 }
 
 void GameDecoderScreen::update()
@@ -248,11 +250,12 @@ void GameDecoderScreen::renderResult(const bool isWin)
   body.setTextSize(2);
   if (isWin)
   {
+    AudioUtility::playWin();
     body.setTextColor(TFT_GREEN);
     body.drawCenterString("You Win!", body.width() / 2, body.height() / 2 - body.fontHeight());
   } else
   {
-
+    AudioUtility::playLose();
     body.setTextColor(TFT_RED);
     body.drawCenterString("Game Over!", body.width() / 2, body.height() / 2 - body.fontHeight());
   }

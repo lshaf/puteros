@@ -14,8 +14,12 @@ private:
     STATE_MENU
   } currentState = STATE_SELECT_WIFI;
 
+  String passwordPath = "/puteros/wifi/passwords";
+
   void showWifiList();
   void showMenu();
+  String passwordWifiPath(const String& bssid, const String& ssid);
+  bool connectToWifi(const String& bssid, const String& ssid, const String& password);
 public:
   void init() override;
   void onBack() override;

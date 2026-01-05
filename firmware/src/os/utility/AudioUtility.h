@@ -12,4 +12,6 @@ public:
   static std::vector<int> c_major_scale;
   static void playRandomTone(int semitoneShift = 0, double durationSec = 0.15);
   static void playNotification();
+  static void playWin();
+  static void playLose();
 };

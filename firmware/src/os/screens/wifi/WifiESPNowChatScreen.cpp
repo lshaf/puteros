@@ -1,6 +1,6 @@
 #include <WiFi.h>
+#include <esp_now.h>
 #include "os/screens/wifi/WifiESPNowChatScreen.h"
-#include "os/utility/SoundNotification.h"
 
 #include "os/component/InputTextScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
@@ -69,6 +69,8 @@ void WifiESPNowChatScreen::init()
       _global->setScreen(new WifiMenuScreen());
     }
   }
+
+  render();
 }
 
 void WifiESPNowChatScreen::update()

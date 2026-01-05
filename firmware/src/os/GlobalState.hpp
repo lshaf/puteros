@@ -70,7 +70,6 @@ public:
     if (currentScreen != nullptr)
     {
       currentScreen->init();
-      currentScreen->render();
     }
   }
 

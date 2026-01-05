@@ -16,7 +16,7 @@ void ListScreen::setEntries(const std::vector<ListEntryItem>& newEntries)
 void ListScreen::render()
 {
   auto _body = Template::createBody();
-  visibleCount = _body.height() / (_body.fontHeight() + 2);
+  preRender(_body);
 
   if (entries.empty())
   {
@@ -24,21 +24,32 @@ void ListScreen::render()
     return;
   }
 
+  _body.setTextSize(1);
   _body.setTextColor(TFT_WHITE);
+  visibleCount = (_body.height() - getYOffset()) / (_body.fontHeight() + 4);
   const int totalItem = std::min(visibleCount, static_cast<int>(entries.size()) - scrollOffset);
-  for (int i = 0; i < totalItem; i++)
+  const int lineHeight = _body.fontHeight() + 2;
+  const int selectedIndexVisible = selectedIndex - scrollOffset;
+  if (selectedIndexVisible >= 0 && selectedIndexVisible < totalItem)
   {
-    const auto selectedIndexVisible = selectedIndex - scrollOffset;
-    if (i == selectedIndexVisible)
-    {
-      _body.fillRect(0, selectedIndexVisible  * _body.fontHeight() + selectedIndexVisible * 2, _body.width(), _body.fontHeight() + 3, _global->getMainColor());
-    }
+    _body.fillRect(
+      0,
+      getYOffset() + selectedIndexVisible * lineHeight + selectedIndexVisible * 2,
+      _body.width(),
+      _body.fontHeight() + 3,
+      _global->getMainColor()
+    );
+  }
 
-    auto item = entries[scrollOffset + i];
-    _body.drawString(item.label.c_str(), 3, i * _body.fontHeight() + 2 + i * 2);
+  for (int i = 0; i < totalItem; ++i)
+  {
+    const auto &item = entries[scrollOffset + i];
+    const int y = getYOffset() + i * lineHeight + i * 2;
+
+    _body.drawString(item.label.c_str(), 3, y + 2);
     if (!item.value.empty())
     {
-      _body.drawRightString(item.value.c_str(), _body.width() - 3, i * _body.fontHeight() + 2 + i * 2);
+      _body.drawRightString(item.value.c_str(), _body.width() - 3, y + 2);
     }
   }
 
