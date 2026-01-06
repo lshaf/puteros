@@ -14,6 +14,7 @@
 class WifiDeauthDetectorScreen final : public ListScreen
 {
 public:
+  bool isAutoPowerOff() override {return false;}
   ~WifiDeauthDetectorScreen() override
   {
     esp_wifi_set_promiscuous(false);

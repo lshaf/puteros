@@ -32,8 +32,51 @@ void setup()
 void loop()
 {
   M5Cardputer.update();
+  const auto _lcd = &M5Cardputer.Lcd;
+  const auto _keeb = &M5Cardputer.Keyboard;
+
+  static bool isLcdSleep = false;
+  static unsigned long lastButtonPressed = millis();
+  if (_keeb->isPressed()) lastButtonPressed = millis();
 
   const auto _global = &GlobalState::getInstance();
   const auto screen = _global->getScreen();
-  if (screen != nullptr) screen->update();
+  if (screen != nullptr)
+  {
+    const bool enablePowerSaving = _global->getConfig()->get(
+      APP_CONFIG_ENABLE_POWER_SAVING,
+      APP_CONFIG_ENABLE_POWER_SAVING_DEFAULT
+    ).toInt();
+    if (enablePowerSaving && !screen->isKeepScreenOn())
+    {
+      const auto displayOffInterval = _global->getConfig()->get(
+        APP_CONFIG_INTERVAL_DISPLAY_OFF,
+        APP_CONFIG_INTERVAL_DISPLAY_OFF_DEFAULT
+      ).toInt() * 1000;
+      const auto autoPowerOffInterval = _global->getConfig()->get(
+        APP_CONFIG_INTERVAL_POWER_OFF,
+        APP_CONFIG_INTERVAL_POWER_OFF_DEFAULT
+      ).toInt() * 1000 + displayOffInterval;
+      if (!isLcdSleep && millis() - lastButtonPressed > displayOffInterval)
+      {
+        _lcd->sleep();
+        _keeb->isChange();
+        isLcdSleep = true;
+      }
+
+      if (isLcdSleep && millis() - lastButtonPressed <= displayOffInterval)
+      {
+        _lcd->wakeup();
+        _keeb->isChange();
+        isLcdSleep = false;
+      }
+
+      if (screen->isAutoPowerOff() && isLcdSleep && millis() - lastButtonPressed > autoPowerOffInterval)
+      {
+        M5Cardputer.Power.powerOff();
+      }
+    }
+
+    screen->update();
+  }
 }

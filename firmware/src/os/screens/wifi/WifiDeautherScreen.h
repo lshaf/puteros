@@ -9,6 +9,7 @@
 class WifiDeautherScreen final: public ListScreen
 {
 public:
+  bool isAutoPowerOff() override {return false;}
   ~WifiDeautherScreen() override;
   void init() override;
 

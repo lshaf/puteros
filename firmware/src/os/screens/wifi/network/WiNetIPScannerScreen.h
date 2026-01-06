@@ -7,6 +7,11 @@
 
 class WiNetIPScannerScreen final : public ListScreen
 {
+public:
+  bool isAutoPowerOff() override
+  {
+    return currentState != STATE_SCANNING_IP && currentState != STATE_SCANNING_PORT;
+  }
 private:
   enum State_e
   {

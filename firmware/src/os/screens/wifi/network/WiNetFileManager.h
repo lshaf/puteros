@@ -9,6 +9,7 @@
 class WiNetFileManager final : public ListScreen
 {
 public:
+  bool isAutoPowerOff() override {return currentState != STATE_WEB_MANAGER;}
   void init() override;
 
 protected:

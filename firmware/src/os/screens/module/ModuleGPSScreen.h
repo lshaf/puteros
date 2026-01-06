@@ -12,6 +12,10 @@ class ModuleGPSScreen final : public ListScreen
 {
 public:
   void init() override;
+  bool isAutoPowerOff() override
+  {
+    return currentState != STATE_WARDRIVER_ACTION;
+  }
 
 protected:
   int getYOffset() const override { return 16; }

@@ -20,6 +20,7 @@ protected:
 
   void stopBLE();
 public:
+  bool isAutoPowerOff() override {return false;}
   void init() override;
   void update() override;
   void render() override;
