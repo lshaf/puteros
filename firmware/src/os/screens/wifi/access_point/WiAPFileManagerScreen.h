@@ -1,12 +1,10 @@
 //
 // Created by L Shaf on 17/12/25.
 //
-
 #pragma once
 
 #include "os/core/ListScreen.hpp"
 #include "os/utility/website/WebFileManager.h"
-
 
 class WiAPFileManagerScreen final : public ListScreen
 {

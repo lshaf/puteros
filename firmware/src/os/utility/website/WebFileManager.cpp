@@ -48,6 +48,7 @@ bool WebFileManager::end()
 {
   MDNS.end();
   server.end();
+  server.reset();
   return true;
 }
 
