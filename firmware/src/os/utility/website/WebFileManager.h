@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <ESPAsyncWebServer.h>
 #include "os/GlobalState.hpp"
 
 class WebFileManager
@@ -22,7 +21,6 @@ private:
   int SESSION_COUNTER = 0;
   static constexpr int MAX_SESSIONS = 10;
   String activeSessions[MAX_SESSIONS];
-  AsyncWebServer server{80};
   File fsUpload;
 
   GlobalState* _global;
