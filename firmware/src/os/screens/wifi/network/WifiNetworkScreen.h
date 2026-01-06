@@ -11,13 +11,18 @@ private:
   enum
   {
     STATE_SELECT_WIFI,
-    STATE_MENU
+    STATE_MENU,
+    STATE_INFORMATION,
+    STATE_QR_WIFI
   } currentState = STATE_SELECT_WIFI;
 
   String passwordPath = "/puteros/wifi/passwords";
 
   void showWifiList();
   void showMenu();
+  void showQRCode();
+  void showInformation();
+
   String passwordWifiPath(const String& bssid, const String& ssid);
   bool connectToWifi(const String& bssid, const String& ssid, const String& password);
 public:

@@ -6,11 +6,12 @@
 #include "os/component/Template.hpp"
 #include "WifiNetworkScreen.h"
 
+#include <esp_wifi.h>
+
 #include "WiNetFileManager.h"
 #include "os/component/InputTextScreen.hpp"
 #include "os/screens/wifi/WifiMenuScreen.h"
 #include "os/screens/wifi/network/WiNetClockScreen.h"
-#include "os/screens/wifi/network/WiNetInformationScreen.h"
 #include "os/screens/wifi/network/WiNetIPScannerScreen.h"
 
 void WifiNetworkScreen::init()
@@ -31,6 +32,7 @@ void WifiNetworkScreen::showMenu()
   Template::renderHead("Network");
   setEntries({
     {"Information"},
+    {"WiFi QRCode"},
     {"World Clock"},
     {"IP Scanner"},
     {"Web File Manager"}
@@ -60,10 +62,19 @@ void WifiNetworkScreen::showWifiList()
 
 void WifiNetworkScreen::onBack()
 {
-  WiFi.disconnect(true, true);
-  Template::renderStatus("Disconnecting...");
-  HelperUtility::delayMs(1000);
-  _global->setScreen(new WifiMenuScreen());
+  if (currentState == STATE_QR_WIFI || currentState == STATE_INFORMATION)
+  {
+    if (currentState == STATE_QR_WIFI)
+      M5Cardputer.Lcd.fillScreen(TFT_BLACK);
+
+    showMenu();
+  } else
+  {
+    WiFi.disconnect(true, true);
+    Template::renderStatus("Disconnecting...");
+    HelperUtility::delayMs(1000);
+    _global->setScreen(new WifiMenuScreen());
+  }
 }
 
 String WifiNetworkScreen::passwordWifiPath(const String& bssid, const String& ssid)
@@ -146,15 +157,94 @@ void WifiNetworkScreen::onEnter(const ListEntryItem entry)
       _global->setScreen(new WifiConnectClockScreen());
     } else if (entry.label == "Information")
     {
-      _global->setScreen(new WiNetInformationScreen());
+      showInformation();
     } else if (entry.label == "IP Scanner")
     {
       _global->setScreen(new WiNetIPScannerScreen());
     } else if (entry.label == "Web File Manager")
     {
       _global->setScreen(new WiNetFileManager());
+    } else if (entry.label == "WiFi QRCode")
+    {
+      showQRCode();
     }
   }
+}
+
+void WifiNetworkScreen::showInformation()
+{
+  currentState = STATE_INFORMATION;
+  setEntries({});
+  auto body = Template::createBody();
+
+  body.drawRightString(WiFi.localIP().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("IP");
+
+  body.drawRightString(WiFi.dnsIP().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("DNS IP");
+
+  body.drawRightString(WiFi.gatewayIP().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("Gateway");
+
+  body.drawRightString(WiFi.subnetMask().toString().c_str(), body.width() - 3, body.getCursorY());
+  body.println("Subnet");
+  body.println();
+
+
+  body.drawRightString(String(WiFi.channel()), body.width() - 3, body.getCursorY());
+  body.println("Channel");
+
+  body.drawRightString(WiFi.SSID().c_str(), body.width() - 3, body.getCursorY());
+  body.println("SSID");
+
+  body.drawRightString(String(WiFi.psk()), body.width() - 3, body.getCursorY());
+  body.println("Password");
+
+  body.drawRightString(String(WiFi.RSSI()) + " dBm", body.width() - 3, body.getCursorY());
+  body.println("RSSI");
+
+  body.drawRightString(WiFi.getHostname(), body.width() - 3, body.getCursorY());
+  body.println("Hostname");
+
+  body.drawRightString(WiFi.macAddress().c_str(), body.width() - 3, body.getCursorY());
+  body.println("MAC");
+
+  body.drawRightString(WiFi.BSSIDstr().c_str(), body.width() - 3, body.getCursorY());
+  body.println("BSSID");
+
+  Template::renderBody(&body);
+}
+
+void WifiNetworkScreen::showQRCode()
+{
+  currentState = STATE_QR_WIFI;
+  setEntries({});
+
+  bool isHidden = false;
+  wifi_ap_record_t apInfo;
+  wifi_auth_mode_t authMode = WIFI_AUTH_OPEN;
+  if (esp_wifi_sta_get_ap_info(&apInfo) == ESP_OK) {
+    authMode = apInfo.authmode;
+    isHidden = (strlen(reinterpret_cast<const char*>(apInfo.ssid)) == 0);
+  }
+
+  String authType;
+  switch (authMode) {
+    case WIFI_AUTH_OPEN:            authType = "OPEN";   break;
+    case WIFI_AUTH_WEP:             authType = "WEP";    break;
+    case WIFI_AUTH_WPA_PSK:         authType = "WPA-PSK";    break;
+    case WIFI_AUTH_WPA2_PSK:        authType = "WPA2-PSK";   break;
+    case WIFI_AUTH_WPA_WPA2_PSK:    authType = "WPA/WPA2-PSK"; break;
+    case WIFI_AUTH_WPA2_ENTERPRISE: authType = "WPA2-ENT";   break;
+    case WIFI_AUTH_WPA3_PSK:        authType = "WPA3-PSK";   break;
+    case WIFI_AUTH_WPA2_WPA3_PSK:   authType = "WPA2/WPA3-PSK"; break;
+    default:                        authType = "UNKNOWN";    break;
+  }
+
+  String password = WiFi.psk();
+  String wifiQRData = "WIFI:T:"+ authType+ ";S:" + WiFi.SSID();
+  wifiQRData += (password.isEmpty() ? "" : ";P:" + WiFi.psk() ) + ";H:" + (isHidden ? "true" : "false") + ";;";
+  Template::renderQRCode(wifiQRData.c_str());
 }
 
 void WifiNetworkScreen::update()
