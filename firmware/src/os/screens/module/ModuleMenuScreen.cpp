@@ -4,6 +4,7 @@
 
 #include "os/screens/module/ModuleMenuScreen.h"
 
+#include "ModuleCapLoraScreen.h"
 #include "ModuleCATMScreen.h"
 #include "ModuleGPSScreen.h"
 #include "os/screens/MainMenuScreen.hpp"
@@ -17,7 +18,8 @@ void ModuleMenuScreen::init()
     {"RC522 I2C"},
     {"MToolsTech PN532"},
     {"Unit GPS v1.1"},
-    {"Unit Cat-M"}
+    // {"Unit Cat-M"},
+    {"Cap Lora-1262"}
   });
 }
 
@@ -40,5 +42,8 @@ void ModuleMenuScreen::onEnter(ListEntryItem entry)
   } else if (entry.label == "Unit Cat-M")
   {
     _global->setScreen(new ModuleCATMScreen());
+  } else if (entry.label == "Cap Lora-1262")
+  {
+    _global->setScreen(new ModuleCapLoraScreen());
   }
 }

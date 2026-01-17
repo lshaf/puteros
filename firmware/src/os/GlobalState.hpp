@@ -39,6 +39,9 @@
 #define APP_CONFIG_INTERVAL_POWER_OFF "interval_power_off"
 #define APP_CONFIG_INTERVAL_POWER_OFF_DEFAULT "60"
 
+#define LORA_IRQ_PIN      4
+#define LORA_RESET_PIN    3
+#define LORA_BUSY_PIN     6
 #define LORA_SPI_SCK_PIN  40
 #define LORA_SPI_MISO_PIN 39
 #define LORA_SPI_MOSI_PIN 14
@@ -65,35 +68,49 @@ public:
   {
     pinMode(SD_SPI_CS_PIN, OUTPUT);
     pinMode(LORA_SPI_CS_PIN, OUTPUT);
-    useSDCard();
     loadSDCard();
   }
 
-  void useLora()
+  void loadLora()
   {
-    digitalWrite(SD_SPI_CS_PIN, HIGH);
-    digitalWrite(LORA_SPI_CS_PIN, LOW);
-  }
+    if (spiUsedFor != SPI_LOADED_LORA)
+    {
+      if (isSDCardLoaded)
+      {
+        SD.end();
+        isSDCardLoaded = false;
+      }
+      if (spiUsedFor == SPI_LOADED_SD_CARD)
+      {
+        SPI.end();
+      }
 
-  void useSDCard()
-  {
-    digitalWrite(SD_SPI_CS_PIN, LOW);
-    digitalWrite(LORA_SPI_CS_PIN, HIGH);
+      digitalWrite(SD_SPI_CS_PIN, HIGH);
+      digitalWrite(LORA_SPI_CS_PIN, LOW);
+      SPI.begin(LORA_SPI_SCK_PIN, LORA_SPI_MISO_PIN, LORA_SPI_MOSI_PIN, LORA_SPI_CS_PIN);
+    }
   }
 
   void loadSDCard()
   {
-    if (!isSDCardInit)
+    if (spiUsedFor != SPI_LOADED_SD_CARD)
     {
+      if (spiUsedFor == SPI_LOADED_LORA)
+      {
+        SPI.end();
+      }
+
+      digitalWrite(SD_SPI_CS_PIN, LOW);
+      digitalWrite(LORA_SPI_CS_PIN, HIGH);
       SPI.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
       isSDCardLoaded = SD.begin(SD_SPI_CS_PIN, SPI, 25000000);
-      isSDCardInit = true;
+      spiUsedFor = SPI_LOADED_SD_CARD;
     }
   }
 
   bool getIsSDCardLoaded() const
   {
-    return isSDCardLoaded;
+    return spiUsedFor == SPI_LOADED_SD_CARD && isSDCardLoaded;
   }
 
   void setScreen(Screen* screen)
@@ -153,6 +170,11 @@ private:
   Config* config = nullptr;
   AsyncWebServer* server = nullptr;
 
-  bool isSDCardInit = false;
+  enum
+  {
+    SPI_LOADED_NONE,
+    SPI_LOADED_SD_CARD,
+    SPI_LOADED_LORA
+  } spiUsedFor = SPI_LOADED_NONE;
   bool isSDCardLoaded = false;
 };
