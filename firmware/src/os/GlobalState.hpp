@@ -39,6 +39,11 @@
 #define APP_CONFIG_INTERVAL_POWER_OFF "interval_power_off"
 #define APP_CONFIG_INTERVAL_POWER_OFF_DEFAULT "60"
 
+#define LORA_SPI_SCK_PIN  40
+#define LORA_SPI_MISO_PIN 39
+#define LORA_SPI_MOSI_PIN 14
+#define LORA_SPI_CS_PIN   5
+
 #define SD_SPI_SCK_PIN  40
 #define SD_SPI_MISO_PIN 39
 #define SD_SPI_MOSI_PIN 14
@@ -54,6 +59,26 @@ public:
   {
     static GlobalState instance;
     return instance;
+  }
+
+  void init()
+  {
+    pinMode(SD_SPI_CS_PIN, OUTPUT);
+    pinMode(LORA_SPI_CS_PIN, OUTPUT);
+    useSDCard();
+    loadSDCard();
+  }
+
+  void useLora()
+  {
+    digitalWrite(SD_SPI_CS_PIN, HIGH);
+    digitalWrite(LORA_SPI_CS_PIN, LOW);
+  }
+
+  void useSDCard()
+  {
+    digitalWrite(SD_SPI_CS_PIN, LOW);
+    digitalWrite(LORA_SPI_CS_PIN, HIGH);
   }
 
   void loadSDCard()

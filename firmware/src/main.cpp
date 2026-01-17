@@ -19,7 +19,7 @@ void setup()
 
   M5Cardputer.Speaker.begin();
   const auto _global = &GlobalState::getInstance();
-  _global->loadSDCard();
+  _global->init();
   _global->setScreen(new WelcomeScreen());
   const auto config = _global->getConfig();
   const auto brightness = config->get("brightness", APP_CONFIG_BRIGHTNESS_DEFAULT).toInt();
