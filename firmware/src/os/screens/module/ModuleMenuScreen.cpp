@@ -4,6 +4,7 @@
 
 #include "os/screens/module/ModuleMenuScreen.h"
 
+#include "ModuleCATMScreen.h"
 #include "ModuleGPSScreen.h"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/module/ModulePN532Screen.h"
@@ -16,6 +17,7 @@ void ModuleMenuScreen::init()
     {"RC522 I2C"},
     {"MToolsTech PN532"},
     {"Unit GPS v1.1"},
+    {"Unit Cat-M"}
   });
 }
 
@@ -35,5 +37,8 @@ void ModuleMenuScreen::onEnter(ListEntryItem entry)
   } else if (entry.label == "Unit GPS v1.1")
   {
     _global->setScreen(new ModuleGPSScreen());
+  } else if (entry.label == "Unit Cat-M")
+  {
+    _global->setScreen(new ModuleCATMScreen());
   }
 }

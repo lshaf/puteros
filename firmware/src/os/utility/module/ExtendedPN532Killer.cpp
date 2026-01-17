@@ -2,7 +2,7 @@
 // Created by l-sha on 19/10/2025.
 //
 
-#include "os/utility/ExtendedPN532Killer.h"
+#include "ExtendedPN532Killer.h"
 
 ExtendedPN532Killer::ExtendedPN532Killer(HardwareSerial &serial)
     : PN532Killer(serial) {}
