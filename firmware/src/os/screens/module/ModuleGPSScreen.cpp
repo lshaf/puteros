@@ -114,17 +114,13 @@ void ModuleGPSScreen::onEnter(ListEntryItem entry)
         return;
       }
 
-      const auto fn = InputTextScreen::popup("Filename");
-      if (fn.empty() || fn.rfind('/') != -1 || fn.rfind('\\') != -1)
-      {
-        Template::renderStatus("Filename is invalid!", TFT_RED);
-        HelperUtility::delayMs(1000);
-        renderMenuScreen();
-        return;
-      }
-
+      auto cleanDate = String(getCurrentGPSDate());
+      auto cleanTime = String(getCurrentGPSTime());
+      cleanDate.replace("-", "");
+      cleanTime.replace(":", "");
+      const String fn = cleanDate + "_" + cleanTime;
       HelperUtility::makeDirectoryRecursive(savePath);
-      filename = savePath + "/" + fn + ".csv";
+      filename = savePath + "/" + fn.c_str() + ".csv";
       if (SD.exists(filename.c_str()))
       {
         Template::renderStatus(("File " + filename + " already exists!").c_str(), TFT_RED);
