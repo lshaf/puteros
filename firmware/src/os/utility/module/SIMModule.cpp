@@ -4,7 +4,7 @@
 
 #include "SIMModule.h"
 
-void SIMModule::begin(HardwareSerial *serial, const int txPin, const int rxPin)
+void SIMModule::begin(HardwareSerial *serial, const int8_t txPin, const int8_t rxPin)
 {
     _serial = serial;
     serial->begin(115200, SERIAL_8N1, rxPin, txPin);
@@ -23,8 +23,8 @@ String SIMModule::readResponse()
     {
         while (_serial->available())
         {
-            char c = _serial->read();
-            response += c;
+            const String s = _serial->readString();
+            response += s;
             startTime = millis();
         }
 
@@ -37,9 +37,7 @@ String SIMModule::readResponse()
 
 bool SIMModule::checkConnection()
 {
-    Serial.println("SIMModule::checkConnection()");
     const String response = sendAndReceive("AT\r\n");
-    Serial.println(response);
     return response.indexOf("OK") != -1;
 }
 
@@ -48,14 +46,27 @@ String SIMModule::getFirmwareVersion()
     return sendAndReceive("AT+CGMR\r\n");
 }
 
-String SIMModule::getIMSI()
+String SIMModule::getCardStatus()
 {
-    return sendAndReceive("AT+CIMI\r\n");
+    return sendAndReceive("AT+CPIN?\r\n");
 }
 
 String SIMModule::getIMEI()
 {
-    return sendAndReceive("AT+CGSN\r\n");
+    // r = AT+CGSN\r\n863866071636971\r\nOK\r\m
+    String r = sendAndReceive("AT+CGSN\r\n");
+    const int index = r.indexOf("\r\n");
+    if (index != -1)
+    {
+        r = r.substring(index + 2);
+        const int okIndex = r.indexOf("\r\nOK");
+        if (okIndex != -1)
+        {
+            r = r.substring(0, okIndex);
+        }
+        r.trim();
+    }
+    return r;
 }
 
 int SIMModule::getSignalQuality()

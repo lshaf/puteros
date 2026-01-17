@@ -9,18 +9,30 @@
 class SIMModule
 {
 public:
-    void begin(HardwareSerial *serial, int txPin, int rxPin);
+    void begin(HardwareSerial *serial, int8_t txPin, int8_t rxPin);
     void end();
 
     String sendAndReceive(const String& command)
     {
         sendCommand(command);
-        return readResponse();
+        auto r = readResponse();
+
+        String dc = String(command);
+        dc.replace("\r", "\\r");
+        dc.replace("\n", "\\n");
+        Serial.println("Invoke command to SIM module: " + dc);
+
+        String d = r;
+        d.replace("\r", "\\r");
+        d.replace("\n", "\\n");
+        Serial.println("Response from SIM module: " + d);
+
+        return r;
     }
 
     bool checkConnection();
     String getFirmwareVersion();
-    String getIMSI();
+    String getCardStatus();
     String getIMEI();
     int getSignalQuality();
 
