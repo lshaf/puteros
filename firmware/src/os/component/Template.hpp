@@ -53,12 +53,11 @@ public:
     auto _g = &GlobalState::getInstance();
     M5Cardputer.Lcd.drawRoundRect(3, 22, M5Cardputer.Lcd.width() - 6, M5Cardputer.Lcd.height() - 25, 4, _g->getMainColor());
 
-    M5Canvas body(&M5Cardputer.Lcd);
-    const auto size = bodySize();
-    body.createSprite(size.width, size.height);
-    if (bodyContent != nullptr) bodyContent->pushSprite(&body, 0, 0);
-    body.pushSprite(8, 26);
-    body.deleteSprite();
+    if (bodyContent != nullptr)
+    {
+      bodyContent->pushSprite(8, 26);
+      bodyContent->deleteSprite();
+    }
   }
 
   static M5Canvas createBody()

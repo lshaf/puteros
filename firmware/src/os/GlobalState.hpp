@@ -6,7 +6,10 @@
 #include "M5GFX.h"
 #include "core/Config.h"
 #include "core/Screen.hpp"
+
 #include <SD.h>
+#include <ESPmDNS.h>
+#include <ESPAsyncWebServer.h>
 
 // Wifi File Manager Password
 #define APP_CONFIG_WIFI_WEB_PASSWORD "wifi_web_password"
@@ -92,6 +95,20 @@ public:
     return TFT_BLUE;
   }
 
+  AsyncWebServer* getServer()
+  {
+    if (server == nullptr)
+    {
+      if (MDNS.begin("puteros"))
+        MDNS.addService("http", "tcp", 80);
+
+      server = new AsyncWebServer(80);
+      server->begin();
+    }
+
+    return server;
+  }
+
   Screen* getScreen() const
   {
     return currentScreen;
@@ -109,6 +126,8 @@ public:
 private:
   Screen* currentScreen = nullptr;
   Config* config = nullptr;
+  AsyncWebServer* server = nullptr;
+
   bool isSDCardInit = false;
   bool isSDCardLoaded = false;
 };
