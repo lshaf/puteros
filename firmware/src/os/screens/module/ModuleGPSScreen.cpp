@@ -104,7 +104,13 @@ void ModuleGPSScreen::onEnter(ListEntryItem entry)
     } else if (entry.label == "Wardriver")
     {
       setEntries({});
-      gps_module.initWardrive();
+      if (gps_module.initWardrive() == false)
+      {
+        Template::renderStatus(("Wardrive Error: " + gps_module.getLastWardriveError()).c_str(), TFT_RED);
+        HelperUtility::delayMs(2000);
+        renderMenuScreen();
+        return;
+      }
       renderWardriverScreen();
     }
   }

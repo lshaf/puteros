@@ -19,7 +19,7 @@ void ModuleMenuScreen::init()
     {"MToolsTech PN532"},
     {"Unit GPS v1.1"},
     // {"Unit Cat-M"},
-    {"Cap Lora-1262"}
+    {"Cap Lora-1262"},
   });
 }
 
