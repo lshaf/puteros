@@ -34,9 +34,11 @@ public:
   void render() override;
   bool isAutoPowerOff() override { return false; }
 
+  static volatile bool flagInterrupt;
   static volatile bool flagReceived;
   static void onReceiveFlag()
   {
+    if (!flagInterrupt) return;
     flagReceived = true;
   }
 
@@ -46,6 +48,7 @@ private:
   SX1262 lora = new Module(LORA_SPI_CS_PIN, LORA_IRQ_PIN, LORA_RESET_PIN, LORA_BUSY_PIN);
   float currentFreq = 868.0;
   int chatCounter = 0;
+  int maxChatCounter = 20;
   CircularBuffer<String> chatHistories{20};
 
   enum

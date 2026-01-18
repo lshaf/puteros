@@ -6,7 +6,9 @@
 #include "ModuleMenuScreen.h"
 #include "os/component/InputNumberScreen.h"
 #include "os/component/InputTextScreen.hpp"
+#include "os/utility/AudioUtility.h"
 
+volatile bool ModuleCapLoraScreen::flagInterrupt = true;
 volatile bool ModuleCapLoraScreen::flagReceived = false;
 bool ModuleCapLoraScreen::isLoraAttached()
 {
@@ -130,12 +132,14 @@ void ModuleCapLoraScreen::update()
           String fullMsg = getDeviceName() + ": " + String(message.c_str());
           Serial.println("Sending message: " + fullMsg);
           chatHistories.push(fullMsg);
+          chatCounter++;
+          render();
+
+          flagInterrupt = false;
           lora.transmit(fullMsg);
           lora.startReceive();
-          chatCounter++;
-        }
-
-        render();
+          flagInterrupt = true;
+        } else render();
       } else if (_keyboard->isKeyPressed('`'))
       {
         currentState = STATE_MENU;
@@ -245,9 +249,10 @@ void ModuleCapLoraScreen::showChatScreen()
   // show newest message that fit to screen
   int yPos = 0;
   const int maxLines = (body.height() - inputY) / body.fontHeight();
-  int startLine = chatCounter - maxLines;
+  int startLine = std::min(maxChatCounter, chatCounter) - maxLines;
   if (startLine < 0) startLine = 0;
-  for (int i = startLine; i < chatCounter; i++)
+  const int maxLine = std::min(chatCounter, maxChatCounter);
+  for (int i = startLine; i < maxLine; i++)
   {
     body.drawString(chatHistories.get(i), 0, yPos);
     yPos += body.fontHeight();
@@ -260,16 +265,22 @@ void ModuleCapLoraScreen::showChatScreen()
 void ModuleCapLoraScreen::msgReceiver()
 {
   if (flagReceived == false) return;
+  flagInterrupt = false;
   flagReceived = false;
 
   String incoming;
   int state = lora.readData(incoming);
   if (state == RADIOLIB_ERR_NONE)
   {
+    if (incoming.isEmpty()) return;
     chatCounter++;
+    Serial.println("Received message: " + incoming);
     chatHistories.push(incoming);
+    AudioUtility::playNotification();
     render();
   }
+
+  flagInterrupt = true;
 }
 
 void ModuleCapLoraScreen::initChat()
