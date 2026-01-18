@@ -18,9 +18,9 @@ public:
     WARDRIVE_STATE_SAVING
   } wardriveState = WARDRIVE_STATE_IDLE;
 
-  void begin(HardwareSerial &serialPort, uint32_t baudRate = 115200, const int8_t rxPin = 1)
+  void begin(HardwareSerial *serialPort, uint32_t baudRate = 115200, const int8_t rxPin = 1)
   {
-    serial = &serialPort;
+    serial = serialPort;
     serial->begin(baudRate, SERIAL_8N1, rxPin);
   }
 

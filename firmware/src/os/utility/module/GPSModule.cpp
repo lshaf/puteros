@@ -83,6 +83,7 @@ void GPSModule::endWardrive()
   currentFilename = "";
   totalDiscovered = 0;
   scannedBSSIDs.clear();
+  WiFi.scanDelete();
   WiFi.mode(WIFI_STA);
 }
 

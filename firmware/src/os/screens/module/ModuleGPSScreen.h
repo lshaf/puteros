@@ -5,8 +5,7 @@
 #pragma once
 
 #include "os/core/ListScreen.hpp"
-#include "TinyGPS++.h"
-#include "os/utility/CircularArray.h"
+#include "os/utility/module/GPSModule.h"
 
 class ModuleGPSScreen final : public ListScreen
 {
@@ -30,8 +29,6 @@ protected:
   void renderMenuScreen();
   void renderWardriverScreen();
 
-  void endService();
-
   enum
   {
     STATE_LOADING,
@@ -40,48 +37,7 @@ protected:
     STATE_WARDRIVER_ACTION
   } currentState = STATE_LOADING;
 
-  std::string savePath = "/puteros/gps/wardriver";
-  std::string filename;
-
   unsigned long lastRenderTime = 0;
   unsigned long lastUpdateTime = 0;
-  TinyGPSPlus gps;
-
-  bool isScanning = false;
-  uint16_t totalDiscovered = 0;
-  unsigned long lastWifiScan = 0;
-  using BSSID = std::array<uint8_t, 6>;
-  CircularBuffer<BSSID> scannedBSSIDs{50};
-
-private:
-  void addWigleRecord(
-    const std::string& ssid, const std::string& bssid, const std::string& authMode,
-    int32_t rssi, int32_t channel
-  );
-
-  String getCurrentGPSDate()
-  {
-    return String(gps.date.year()) + "-" + HelperUtility::padNumber(gps.date.month(), 2) + "-" + HelperUtility::padNumber(gps.date.day(), 2);
-  }
-
-  String getCurrentGPSTime()
-  {
-    return HelperUtility::padNumber(gps.time.hour(), 2) + ":" + HelperUtility::padNumber(gps.time.minute(), 2) + ":" + HelperUtility::padNumber(gps.time.second(), 2);
-  }
-
-  bool isBssidScanned(const uint8_t* bssid)
-  {
-    BSSID bssidArray;
-    std::copy(bssid, bssid + 6, bssidArray.begin());
-    for (int i = 0; i < scannedBSSIDs.size(); ++i)
-    {
-      const auto& scanned = scannedBSSIDs.get(i);
-      if (scanned == bssidArray)
-      {
-        return true;
-      }
-    }
-    scannedBSSIDs.push(bssidArray);
-    return false;
-  }
+  GPSModule gps_module;
 };
