@@ -34,6 +34,12 @@ public:
   void render() override;
   bool isAutoPowerOff() override { return false; }
 
+  static volatile bool flagReceived;
+  static void onReceiveFlag()
+  {
+    flagReceived = true;
+  }
+
 private:
   GPSModule gps_module;
   unsigned long lastRefreshTime = 0;

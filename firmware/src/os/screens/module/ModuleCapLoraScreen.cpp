@@ -7,6 +7,7 @@
 #include "os/component/InputNumberScreen.h"
 #include "os/component/InputTextScreen.hpp"
 
+volatile bool ModuleCapLoraScreen::flagReceived = false;
 bool ModuleCapLoraScreen::isLoraAttached()
 {
   _global->loadLora();
@@ -258,23 +259,22 @@ void ModuleCapLoraScreen::showChatScreen()
 
 void ModuleCapLoraScreen::msgReceiver()
 {
+  if (flagReceived == false) return;
+  flagReceived = false;
+
   String incoming;
   int state = lora.readData(incoming);
   if (state == RADIOLIB_ERR_NONE)
   {
-    if (!incoming.isEmpty())
-    {
-      chatCounter++;
-      chatHistories.push(incoming);
-      render();
-    }
+    chatCounter++;
+    chatHistories.push(incoming);
+    render();
   }
-
-  lora.startReceive();
 }
 
 void ModuleCapLoraScreen::initChat()
 {
+  flagReceived = false;
   const int state = lora.begin(
     currentFreq, LORA_BW, LORA_SF, LORA_CR,
     LORA_SYNC_WORD, LORA_TX_POWER, LORA_PREAMBLE_LEN
@@ -287,6 +287,8 @@ void ModuleCapLoraScreen::initChat()
     return;
   }
 
+  lora.startReceive();
+  lora.setPacketReceivedAction(onReceiveFlag);
   currentState = STATE_CHAT;
   showChatScreen();
 }
