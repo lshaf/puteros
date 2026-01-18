@@ -88,6 +88,7 @@ public:
       digitalWrite(SD_SPI_CS_PIN, HIGH);
       digitalWrite(LORA_SPI_CS_PIN, LOW);
       SPI.begin(LORA_SPI_SCK_PIN, LORA_SPI_MISO_PIN, LORA_SPI_MOSI_PIN, LORA_SPI_CS_PIN);
+      spiUsedFor = SPI_LOADED_LORA;
     }
   }
 
@@ -103,10 +104,12 @@ public:
       digitalWrite(SD_SPI_CS_PIN, LOW);
       digitalWrite(LORA_SPI_CS_PIN, HIGH);
       SPI.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
+
       isSDCardLoaded = SD.begin(SD_SPI_CS_PIN, SPI, 25000000);
       spiUsedFor = SPI_LOADED_SD_CARD;
     }
   }
+
 
   bool getIsSDCardLoaded() const
   {
