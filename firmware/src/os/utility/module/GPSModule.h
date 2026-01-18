@@ -61,7 +61,7 @@ public:
 
 private:
   HardwareSerial *serial = nullptr;
-  std::string savePath = "/puteros/gps/wardriver";
+  std::string savePath = "/m5geek/gps/wardriver";
   std::string currentFilename = "";
 
   uint16_t totalDiscovered = 0;

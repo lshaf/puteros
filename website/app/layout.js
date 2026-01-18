@@ -16,8 +16,8 @@ const robotoMono = Roboto_Mono({
   display: "swap",
 });
 export const metadata = {
-  title: "PuterOS - Pentesting Firmware",
-  description: "ESP32 S3 based Pentesting Firmware",
+  title: "M5Geek - Utilize Cardputer to the Fullest",
+  description: "ESP32 S3 for Cardputer Firmware",
 };
 
 export default function RootLayout({ children }) {

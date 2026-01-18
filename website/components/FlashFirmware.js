@@ -82,8 +82,8 @@ const FlashFirmware = () => {
 
   const doInstall = async () => {
     espLoaderTerminal.writeLine(`Download firmware bin...`);
-    // download puteros-latest.bin
-    const firmwareUrl = '/puteros-latest.bin';
+    // download m5geek-latest.bin
+    const firmwareUrl = '/m5geek-latest.bin';
     const response = await fetch(firmwareUrl);
     const firmwareBuffer = await response.arrayBuffer();
     const firmwareString = arrayBufferToBinaryString(firmwareBuffer);
@@ -136,7 +136,7 @@ const FlashFirmware = () => {
             ) : (
               <Fragment>
                 <button className="btn" onClick={doConnect}>Connect</button>
-                <a className="btn" href="/puteros-latest.bin">Download</a>
+                <a className="btn" href="/m5geek-latest.bin">Download</a>
               </Fragment>
             )
           }

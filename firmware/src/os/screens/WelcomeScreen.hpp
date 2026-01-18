@@ -8,7 +8,7 @@
 class WelcomeScreen final : public ScreenState
 {
 private:
-  std::string _title = "PuterOS";
+  std::string _title = "M5Geek";
   bool _withBattery = true;
 public:
   WelcomeScreen() = default;

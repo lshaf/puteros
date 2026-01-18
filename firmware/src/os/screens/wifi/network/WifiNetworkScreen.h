@@ -16,7 +16,7 @@ private:
     STATE_QR_WIFI
   } currentState = STATE_SELECT_WIFI;
 
-  String passwordPath = "/puteros/wifi/passwords";
+  String passwordPath = "/m5geek/wifi/passwords";
 
   void showWifiList();
   void showMenu();

@@ -32,7 +32,7 @@ private:
     MODE_FILE,
   } currentMode = MODE_WRITE;
 
-  std::string qrPath = "/puteros/qrcode";
+  std::string qrPath = "/m5geek/qrcode";
   std::string currentPath = "";
   bool generateQRCode(File &file);
   bool generateQRCode(const std::string& data);

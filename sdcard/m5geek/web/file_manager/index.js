@@ -102,7 +102,7 @@ async function requestPost (url, param) {
     }
 
     let realUrl = url;
-    if (IS_DEV) realUrl = "/puteros" + url;
+    if (IS_DEV) realUrl = "/m5geek" + url;
     let req = new XMLHttpRequest();
     req.open("POST", realUrl, true);
     req.withCredentials = true;
@@ -185,7 +185,7 @@ async function uploadFile () {
     fd.append("folder", currentPath);
 
     let realUrl = `/upload`;
-    if (IS_DEV) realUrl = "/puteros" + realUrl;
+    if (IS_DEV) realUrl = "/m5geek" + realUrl;
     let req = new XMLHttpRequest();
     req.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -250,7 +250,7 @@ function renderFileRow(fileList) {
       e.querySelector(".col-action").classList.add("type-file");
 
       let downloadUrl = `/download?file=${encodeURIComponent(dPath)}`;
-      if (IS_DEV) downloadUrl = "/puteros" + downloadUrl;
+      if (IS_DEV) downloadUrl = "/m5geek" + downloadUrl;
       e.querySelector(".act-download").setAttribute("download", name);
       e.querySelector(".act-download").setAttribute("href", downloadUrl);
     } else if (type === "DIR") {

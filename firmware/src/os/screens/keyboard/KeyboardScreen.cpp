@@ -17,7 +17,7 @@ KeyboardScreen::KeyboardScreen(const int mode) : mode(mode)
   } else
   {
     const auto batLevel = M5Cardputer.Power.getBatteryLevel();
-    keyboard = new BLEKeyboardUtility("PuterOS", "M5Stack", batLevel);
+    keyboard = new BLEKeyboardUtility("M5Geek", "M5Stack", batLevel);
   }
 }
 

@@ -25,7 +25,7 @@ bool WebFileManager::begin()
     return false;
   }
 
-  const String indexPath = "/puteros/web/file_manager/index.htm";
+  const String indexPath = "/m5geek/web/file_manager/index.htm";
   if (SD.exists(indexPath) == false)
   {
     lastError = indexPath + " not found";
@@ -204,7 +204,7 @@ void WebFileManager::prepareServer()
       request->send(200, "text/plain", resp);
     } else if (command == "sysinfo")
     {
-      String resp = "PuterOS File Manager\n";
+      String resp = "M5Geek File Manager\n";
       resp += "FS:" + String(SD.totalBytes() - SD.usedBytes()) + "\n";
       resp += "US:" + String(SD.usedBytes()) + "\n";
       resp += "TS:" + String(SD.totalBytes()) + "\n";
@@ -386,5 +386,5 @@ void WebFileManager::prepareServer()
     request->send(themeResponse);
   });
 
-  server->serveStatic("/", SD, "/puteros/web/file_manager/");
+  server->serveStatic("/", SD, "/m5geek/web/file_manager/");
 }

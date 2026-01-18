@@ -13,13 +13,13 @@
 
 // Wifi File Manager Password
 #define APP_CONFIG_WIFI_WEB_PASSWORD "wifi_web_password"
-#define APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT "puteros123"
+#define APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT "m5geek12"
 
 // Wifi Access Point
 #define APP_CONFIG_WIFI_AP_SSID "wifi_ap_ssid"
-#define APP_CONFIG_WIFI_AP_SSID_DEFAULT "PuterOS"
+#define APP_CONFIG_WIFI_AP_SSID_DEFAULT "M5Geek"
 #define APP_CONFIG_WIFI_AP_PASSWORD "wifi_ap_password"
-#define APP_CONFIG_WIFI_AP_PASSWORD_DEFAULT "puteros123"
+#define APP_CONFIG_WIFI_AP_PASSWORD_DEFAULT "m5geek12"
 
 // Device Settings
 #define APP_CONFIG_PRIMARY_COLOR "primary_color"
@@ -144,7 +144,7 @@ public:
   {
     if (server == nullptr)
     {
-      if (MDNS.begin("puteros"))
+      if (MDNS.begin("m5geek"))
         MDNS.addService("http", "tcp", 80);
 
       server = new AsyncWebServer(80);
@@ -163,7 +163,7 @@ public:
   {
     if (config == nullptr)
     {
-      config = new Config("/puteros/config");
+      config = new Config("/m5geek/config");
     }
 
     return config;

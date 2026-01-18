@@ -47,7 +47,7 @@ void WiNetFileManager::onEnter(ListEntryItem entry)
       }
 
       const auto ipHost = "http://" + WiFi.localIP().toString() + "/";
-      const auto mdnsHost = "http://puteros.local/";
+      const auto mdnsHost = "http://m5geek.local/";
       Template::renderStatus((ipHost + " or " + mdnsHost).c_str(), TFT_GREEN);
     } else if (entry.label == "Password")
     {
