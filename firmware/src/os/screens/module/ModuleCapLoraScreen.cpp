@@ -4,12 +4,14 @@
 
 #include "ModuleCapLoraScreen.h"
 #include "ModuleMenuScreen.h"
+#include "os/component/InputNumberScreen.h"
+#include "os/component/InputTextScreen.hpp"
 
 bool ModuleCapLoraScreen::isLoraAttached()
 {
   _global->loadLora();
   const int state = lora.begin(
-    LORA_FREQ, LORA_BW, LORA_SF, LORA_CR,
+    currentFreq, LORA_BW, LORA_SF, LORA_CR,
     LORA_SYNC_WORD, LORA_TX_POWER, LORA_PREAMBLE_LEN
   );
   if (state != RADIOLIB_ERR_NONE)
@@ -44,8 +46,17 @@ void ModuleCapLoraScreen::onEnter(ListEntryItem entry)
     if (entry.label == "Chatting")
     {
       initChat();
-    } else if (entry.label == "Lora Setting")
-    {} else if (entry.label == "GPS Data")
+    } else if (entry.label == "Frequency")
+    {
+      int newFreq = InputNumberScreen::popup("Frequency (kHz)", currentFreq, 868, 923);
+      if (newFreq != currentFreq)
+      {
+        currentFreq = newFreq / 1.0;
+        lora.setFrequency(currentFreq);
+      }
+
+      showMainMenuScreen();
+    } else if (entry.label == "GPS Data")
     {
       currentState = STATE_GPS_DATA;
       render();
@@ -104,12 +115,41 @@ void ModuleCapLoraScreen::onBack()
 void ModuleCapLoraScreen::update()
 {
   gps_module.update();
-  if ((currentState == STATE_GPS_DATA || currentState == STATE_WARDRIVING) && millis() - lastRefreshTime > 500)
+  if (currentState == STATE_CHAT)
   {
-    if (currentState == STATE_WARDRIVING) gps_module.doWardrive();
-    render();
+    msgReceiver();
+    const auto _keyboard = &M5Cardputer.Keyboard;
+    if (_keyboard->isChange() && _keyboard->isPressed())
+    {
+      if (_keyboard->isKeyPressed(KEY_ENTER))
+      {
+        const std::string message = InputTextScreen::popup("Message");
+        if (!message.empty())
+        {
+          String fullMsg = getDeviceName() + ": " + String(message.c_str());
+          Serial.println("Sending message: " + fullMsg);
+          chatHistories.push(fullMsg);
+          lora.transmit(fullMsg);
+          lora.startReceive();
+          chatCounter++;
+        }
+
+        render();
+      } else if (_keyboard->isKeyPressed('`'))
+      {
+        currentState = STATE_MENU;
+        showMainMenuScreen();
+      }
+    }
+  } else
+  {
+    if ((currentState == STATE_GPS_DATA || currentState == STATE_WARDRIVING) && millis() - lastRefreshTime > 500)
+    {
+      if (currentState == STATE_WARDRIVING) gps_module.doWardrive();
+      render();
+    }
+    ListScreen::update();
   }
-  ListScreen::update();
 }
 
 void ModuleCapLoraScreen::render()
@@ -123,6 +163,9 @@ void ModuleCapLoraScreen::render()
   } else if (currentState == STATE_WARDRIVING)
   {
     showWardriveScreen();
+  } else if (currentState == STATE_CHAT)
+  {
+    showChatScreen();
   }
 }
 
@@ -181,8 +224,8 @@ void ModuleCapLoraScreen::showMainMenuScreen()
 {
   Template::renderHead("Cap Lora-1262");
   setEntries({
+    {"Frequency", getFrequencyString().c_str()},
     {"Chatting"},
-    {"Lora Setting"},
     {"GPS Data"},
     {"Wardriving"},
   });
@@ -190,10 +233,60 @@ void ModuleCapLoraScreen::showMainMenuScreen()
 
 void ModuleCapLoraScreen::showChatScreen()
 {
-  //
+  Template::renderHead("Cap Lora-1262 Chat");
+  const int inputY = 14;
+  auto body = Template::createBody();
+  body.setTextSize(1);
+  body.drawRoundRect(0, body.height() - inputY, body.width(), inputY, 2.5, _global->getMainColor());
+  body.drawString("Press enter to send message", 4, body.height() - inputY + (inputY - body.fontHeight()) / 2);
+  body.setTextColor(TFT_WHITE);
+
+  // show newest message that fit to screen
+  int yPos = 0;
+  const int maxLines = (body.height() - inputY) / body.fontHeight();
+  int startLine = chatCounter - maxLines;
+  if (startLine < 0) startLine = 0;
+  for (int i = startLine; i < chatCounter; i++)
+  {
+    body.drawString(chatHistories.get(i), 0, yPos);
+    yPos += body.fontHeight();
+  }
+
+  Serial.println("Printed " + String(chatCounter - startLine) + " messages from " + String(startLine) + " to " + String(chatCounter - 1));
+  Template::renderBody(&body);
+}
+
+void ModuleCapLoraScreen::msgReceiver()
+{
+  String incoming;
+  int state = lora.readData(incoming);
+  if (state == RADIOLIB_ERR_NONE)
+  {
+    if (!incoming.isEmpty())
+    {
+      chatCounter++;
+      chatHistories.push(incoming);
+      render();
+    }
+  }
+
+  lora.startReceive();
 }
 
 void ModuleCapLoraScreen::initChat()
 {
+  const int state = lora.begin(
+    currentFreq, LORA_BW, LORA_SF, LORA_CR,
+    LORA_SYNC_WORD, LORA_TX_POWER, LORA_PREAMBLE_LEN
+  );
+  if (state != RADIOLIB_ERR_NONE)
+  {
+    Template::renderStatus("Lora Init Failed", TFT_RED);
+    HelperUtility::delayMs(2000);
+    showMainMenuScreen();
+    return;
+  }
+
+  currentState = STATE_CHAT;
   showChatScreen();
 }
