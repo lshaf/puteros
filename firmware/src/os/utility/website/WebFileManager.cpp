@@ -208,6 +208,7 @@ void WebFileManager::prepareServer()
       resp += "FS:" + String(SD.totalBytes() - SD.usedBytes()) + "\n";
       resp += "US:" + String(SD.usedBytes()) + "\n";
       resp += "TS:" + String(SD.totalBytes()) + "\n";
+      resp += "VR:" + String(APP_VERSION) + "\n";
       request->send(200, "text/plain", resp);
     } else if (command == "sudo")
     {

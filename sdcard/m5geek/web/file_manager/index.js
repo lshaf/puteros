@@ -297,7 +297,9 @@ async function fetchSystemInfo() {
   let data = req.split("\n");
   let usedSpace = parseInt(data[2].split(":")[1]);
   let totalSpace = parseInt(data[3].split(":")[1]);
+  let appVersion = data[4].split(":")[1];
   $(".free-space .free-sd span").innerHTML = `${formatBytes(usedSpace)} / ${formatBytes(totalSpace)}`;
+  $(".m5geek-version").innerHTML = appVersion;
   Dialog.loading.hide();
 }
 
