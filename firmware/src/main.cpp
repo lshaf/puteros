@@ -12,7 +12,7 @@ void setup()
   M5Cardputer.Lcd.setTextColor(DARKCYAN, BLACK);
   M5Cardputer.Lcd.setTextSize(2.5);
   M5Cardputer.Lcd.drawCenterString(
-    "PuterOS",
+    "M5Geek",
     M5Cardputer.Lcd.width() / 2,
     M5Cardputer.Lcd.height() / 2 - M5Cardputer.Lcd.fontHeight() / 2
   );
