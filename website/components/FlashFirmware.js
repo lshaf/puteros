@@ -117,7 +117,7 @@ const FlashFirmware = () => {
     <div className="section installation">
       <div className="content">
         <div className="title">
-          <div className="title_inner">Installation (v1.0.1)</div>
+          <div className="title_inner">Installation</div>
         </div>
         <p>This firmware only support Cardputer / Cardputer ADV for now</p>
         <div className="action">

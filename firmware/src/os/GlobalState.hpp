@@ -11,6 +11,8 @@
 #include <ESPmDNS.h>
 #include <ESPAsyncWebServer.h>
 
+#include "M5Cardputer.h"
+
 // Wifi File Manager Password
 #define APP_CONFIG_WIFI_WEB_PASSWORD "wifi_web_password"
 #define APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT "m5geek12"
@@ -105,6 +107,13 @@ public:
       digitalWrite(LORA_SPI_CS_PIN, HIGH);
       SPI.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
 
+      auto _speaker = &M5Cardputer.Speaker;
+      if (_speaker->isRunning())
+      {
+        _speaker->end();
+      }
+
+      M5Cardputer.Speaker.begin();
       isSDCardLoaded = SD.begin(SD_SPI_CS_PIN, SPI, 25000000);
       spiUsedFor = SPI_LOADED_SD_CARD;
     }

@@ -130,7 +130,6 @@ void ModuleCapLoraScreen::update()
         if (!message.empty())
         {
           String fullMsg = getDeviceName() + ": " + String(message.c_str());
-          Serial.println("Sending message: " + fullMsg);
           chatHistories.push(fullMsg);
           chatCounter++;
           render();
@@ -258,7 +257,6 @@ void ModuleCapLoraScreen::showChatScreen()
     yPos += body.fontHeight();
   }
 
-  Serial.println("Printed " + String(chatCounter - startLine) + " messages from " + String(startLine) + " to " + String(chatCounter - 1));
   Template::renderBody(&body);
 }
 
@@ -274,7 +272,6 @@ void ModuleCapLoraScreen::msgReceiver()
   {
     if (incoming.isEmpty()) return;
     chatCounter++;
-    Serial.println("Received message: " + incoming);
     chatHistories.push(incoming);
     AudioUtility::playNotification();
     render();
