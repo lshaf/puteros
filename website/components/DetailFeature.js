@@ -7,6 +7,7 @@ const features = [
         name: 'IP Scanner',
         desc: 'Discover devices on the local network and also ports available on every IP.',
       },
+      { name: 'AP Mode', desc: 'Create WiFi Access Point to do lot stuff' },
       { name: 'Analyzer', desc: 'Inspect packets and signals for debugging.' },
       { name: 'Beacon SPAM', desc: 'Send beacon frames for testing (use responsibly).' },
       { name: 'Deauthenticator', desc: 'Send deauth frames for testing only.' },
@@ -39,6 +40,8 @@ const features = [
     children: [
       { name: 'PN532Killer', desc: 'PN532 RFID testing tools (use responsibly).' },
       { name: 'MFRC522 (M5 RFID 2)', desc: 'Interact with M5 RFID tags.' },
+      { name: 'Unit GPS v1.1', desc: 'Display GPS data from Unit GPS module and Wardriving.' },
+      { name: 'Cap Lora-1262', desc: 'Send and receive messages using LoRa module and Wardriving using GPS Module.' },
     ],
   },
   {
