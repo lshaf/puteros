@@ -15,7 +15,7 @@ void BLESpamScreen::init()
   Template::renderHead("BLE Spam");
   Template::renderStatus("Preparing...");
 
-  BLEDevice::init("PuterOS BLE Spam");
+  BLEDevice::init("M5Geek BLE Spam");
   BLEDevice::startAdvertising();
 
   pAdvertising = BLEDevice::getAdvertising();

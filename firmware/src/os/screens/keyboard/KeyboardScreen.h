@@ -28,8 +28,8 @@ protected:
   void renderPathEntries(const std::string& path);
   void runDuckyScript(const std::string& path);
 private:
-  std::string duckyScriptPath = "/puteros/keyboard/duckyscript";
-  std::string shortcutPath = "/puteros/keyboard/function";
+  std::string duckyScriptPath = "/m5geek/keyboard/duckyscript";
+  std::string shortcutPath = "/m5geek/keyboard/function";
   std::string currentPath;
   int mode = MODE_USB;
 

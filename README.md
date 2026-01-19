@@ -1,6 +1,6 @@
-# PuterOS
+# M5Geek
 
-PuterOS is a compact, modular firmware for the M5Stack Cardputer (ESP32-S3). It provides a screen-driven UI and a set of tools that demonstrate and leverage the hardware capabilities of the device.
+m5geek is a compact, modular firmware for the M5Stack Cardputer (ESP32-S3). It provides a screen-driven UI and a set of tools that demonstrate and leverage the hardware capabilities of the device.
 
 ## High-level overview
 

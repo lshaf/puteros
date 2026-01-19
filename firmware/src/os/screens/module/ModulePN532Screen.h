@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 #include "os/core/ListScreen.hpp"
-#include "os/utility/ExtendedPN532Killer.h"
+#include "os/utility/module/ExtendedPN532Killer.h"
 #include "os/utility/NFCUtility.h"
 
 class ModulePN532Screen final : public ListScreen

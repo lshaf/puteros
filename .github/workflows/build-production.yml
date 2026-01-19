@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: firmware-bin
-          path: puteros-latest.bin
+          path: m5geek-latest.bin
 
   build-website:
     runs-on: ubuntu-latest
@@ -55,8 +55,8 @@ jobs:
       - name: Place firmware into website static folder
         run: |
           mkdir -p website/public
-          if [ -f ./puteros-latest.bin ]; then
-            cp ./puteros-latest.bin website/public/puteros-latest.bin
+          if [ -f ./m5geek-latest.bin ]; then
+            cp ./m5geek-latest.bin website/public/m5geek-latest.bin
           fi
           ls -la website/public || true
 

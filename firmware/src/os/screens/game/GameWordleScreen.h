@@ -10,6 +10,7 @@
 class GameWordleScreen final : public ScreenState
 {
 public:
+  bool isKeepScreenOn() override {return true;}
   enum Language : uint8_t
   {
     ID = 0,

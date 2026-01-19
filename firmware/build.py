@@ -7,7 +7,7 @@ import traceback
 pioenv    = env.subst("${PIOENV}")
 BUILD_DIR = env.subst("$BUILD_DIR")
 PROJECT_DIR = env.get("PROJECT_DIR")
-OUTPUT_PATH = os.path.join(PROJECT_DIR, "puteros-latest.bin")
+OUTPUT_PATH = os.path.join(PROJECT_DIR, "m5geek-latest.bin")
 
 DEFAULT_OFFSETS = {
     "boot": 0,

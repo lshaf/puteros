@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && echo puteros.xid.run > build/CNAME",
+    "build": "next build && echo m5geek.xid.run > build/CNAME",
     "start": "next start",
     "lint": "next lint"
   },

@@ -17,6 +17,8 @@ class GameDecoderScreen final : public ScreenState
   };
 
 public:
+  bool isKeepScreenOn() override {return true;}
+
   void init() override;
   void update() override;
   void render() override;

@@ -102,7 +102,7 @@ async function requestPost (url, param) {
     }
 
     let realUrl = url;
-    if (IS_DEV) realUrl = "/puteros" + url;
+    if (IS_DEV) realUrl = "/m5geek" + url;
     let req = new XMLHttpRequest();
     req.open("POST", realUrl, true);
     req.withCredentials = true;
@@ -185,7 +185,7 @@ async function uploadFile () {
     fd.append("folder", currentPath);
 
     let realUrl = `/upload`;
-    if (IS_DEV) realUrl = "/puteros" + realUrl;
+    if (IS_DEV) realUrl = "/m5geek" + realUrl;
     let req = new XMLHttpRequest();
     req.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -250,7 +250,7 @@ function renderFileRow(fileList) {
       e.querySelector(".col-action").classList.add("type-file");
 
       let downloadUrl = `/download?file=${encodeURIComponent(dPath)}`;
-      if (IS_DEV) downloadUrl = "/puteros" + downloadUrl;
+      if (IS_DEV) downloadUrl = "/m5geek" + downloadUrl;
       e.querySelector(".act-download").setAttribute("download", name);
       e.querySelector(".act-download").setAttribute("href", downloadUrl);
     } else if (type === "DIR") {
@@ -297,7 +297,9 @@ async function fetchSystemInfo() {
   let data = req.split("\n");
   let usedSpace = parseInt(data[2].split(":")[1]);
   let totalSpace = parseInt(data[3].split(":")[1]);
+  let appVersion = data[4].split(":")[1];
   $(".free-space .free-sd span").innerHTML = `${formatBytes(usedSpace)} / ${formatBytes(totalSpace)}`;
+  $(".m5geek-version").innerHTML = appVersion;
   Dialog.loading.hide();
 }
 

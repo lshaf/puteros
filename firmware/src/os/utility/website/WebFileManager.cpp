@@ -5,7 +5,6 @@
 #include "WebFileManager.h"
 
 #include <WiFi.h>
-#include <ESPmDNS.h>
 
 bool WebFileManager::begin()
 {
@@ -26,28 +25,21 @@ bool WebFileManager::begin()
     return false;
   }
 
-  const String indexPath = "/puteros/web/file_manager/index.htm";
+  const String indexPath = "/m5geek/web/file_manager/index.htm";
   if (SD.exists(indexPath) == false)
   {
     lastError = indexPath + " not found";
     return false;
   }
 
-  if (!MDNS.begin("puteros"))
-  {
-    return false;
-  }
-
-  MDNS.addService("http", "tcp", 80);
   prepareServer();
-  server.begin();
   return true;
 }
 
 bool WebFileManager::end()
 {
-  MDNS.end();
-  server.end();
+  if (fsUpload) fsUpload.close();
+  _global->getServer()->reset();
   return true;
 }
 
@@ -102,7 +94,8 @@ bool WebFileManager::removeDirectory(const String& path)
 
 void WebFileManager::prepareServer()
 {
-  server.on("/download", HTTP_GET, [this](AsyncWebServerRequest *request)
+  const auto server = _global->getServer();
+  server->on("/download", HTTP_GET, [this](AsyncWebServerRequest *request)
   {
     if (!isAuthenticated(request))
     {
@@ -125,7 +118,7 @@ void WebFileManager::prepareServer()
 
     request->send(SD, filePath, getContentType(filePath), true);
   });
-  server.on("/upload", HTTP_POST, [this](AsyncWebServerRequest *request)
+  server->on("/upload", HTTP_POST, [this](AsyncWebServerRequest *request)
   {
     if (!isAuthenticated(request))
     {
@@ -173,7 +166,7 @@ void WebFileManager::prepareServer()
   });
 
   const auto currentPassword = _global->getConfig()->get(APP_CONFIG_WIFI_WEB_PASSWORD, APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT);
-  server.on("/", HTTP_POST, [this, currentPassword](AsyncWebServerRequest* request)
+  server->on("/", HTTP_POST, [this, currentPassword](AsyncWebServerRequest* request)
   {
     if (!request->hasParam("command", true))
     {
@@ -211,10 +204,11 @@ void WebFileManager::prepareServer()
       request->send(200, "text/plain", resp);
     } else if (command == "sysinfo")
     {
-      String resp = "PuterOS File Manager\n";
+      String resp = "M5Geek File Manager\n";
       resp += "FS:" + String(SD.totalBytes() - SD.usedBytes()) + "\n";
       resp += "US:" + String(SD.usedBytes()) + "\n";
       resp += "TS:" + String(SD.totalBytes()) + "\n";
+      resp += "VR:" + String(APP_VERSION) + "\n";
       request->send(200, "text/plain", resp);
     } else if (command == "sudo")
     {
@@ -380,12 +374,12 @@ void WebFileManager::prepareServer()
     }
   });
 
-  server.onNotFound([](AsyncWebServerRequest* request)
+  server->onNotFound([](AsyncWebServerRequest* request)
   {
     request->send(404, "text/plain", "404");
   });
 
-  server.on("/theme.css", HTTP_GET, [this](AsyncWebServerRequest* request)
+  server->on("/theme.css", HTTP_GET, [this](AsyncWebServerRequest* request)
   {
     const auto priColor = _global->getMainColor();
     const String css = ":root{--color:" + color565ToWebHex(priColor) + ";}";
@@ -393,5 +387,5 @@ void WebFileManager::prepareServer()
     request->send(themeResponse);
   });
 
-  server.serveStatic("/", SD, "/puteros/web/file_manager/");
+  server->serveStatic("/", SD, "/m5geek/web/file_manager/");
 }

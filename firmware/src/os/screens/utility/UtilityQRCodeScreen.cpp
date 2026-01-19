@@ -3,7 +3,6 @@
 //
 
 #include <SD.h>
-#include "lgfx/utility/lgfx_qrcode.h"
 
 #include "os/screens/utility/UtilityQRCodeScreen.h"
 #include "os/component/InputFileScreen.h"
@@ -188,7 +187,7 @@ void UtilityQRCodeScreen::onEscape()
 
 bool UtilityQRCodeScreen::generateQRCode(File& qrFile)
 {
-  std::string data = "";
+  std::string data;
 
   const size_t fileSize = qrFile.size();
   data.resize(fileSize);
@@ -201,57 +200,10 @@ bool UtilityQRCodeScreen::generateQRCode(File& qrFile)
   if (readBytes != fileSize) data.resize(readBytes);
   qrFile.close();
 
-  return generateQRCode(data);
+  return Template::renderQRCode(data);
 }
-
 
 bool UtilityQRCodeScreen::generateQRCode(const std::string& data)
 {
-  const auto _lcd = &M5Cardputer.Lcd;
-  const int w = _lcd->height();
-  const int x = _lcd->width() / 2 - w / 2;
-  const int y = 0;
-  const char* string = data.c_str();
-  bool isPrinted = false;
-
-  for (int version = 1; version <= 40; ++version)
-  {
-    QRCode qrcode;
-    auto qrcodeData = (uint8_t*)alloca(lgfx_qrcode_getBufferSize(version));
-    if (0 != lgfx_qrcode_initText(&qrcode, qrcodeData, version, 0, string)) continue;
-    int_fast16_t thickness = w / qrcode.size;
-    int_fast16_t lineLength = qrcode.size * thickness;
-    int_fast16_t offset = (w - lineLength) >> 1;
-
-    _lcd->startWrite();
-    _lcd->fillScreen(isInverted ? TFT_BLACK : TFT_WHITE);
-    _lcd->writeFillRect(x, y, w, offset, isInverted ? TFT_BLACK : TFT_WHITE);
-    int_fast16_t dy = y + offset;
-    if (thickness)
-    {
-      int_fast16_t iy = 0;
-      do {
-        _lcd->writeFillRect(x, dy, offset, thickness, isInverted ? TFT_BLACK : TFT_WHITE);
-        int_fast16_t ix = 0;
-        int_fast16_t dx = x + offset;
-        do {
-          if (isInverted)
-            _lcd->setColor(lgfx_qrcode_getModule(&qrcode, ix, iy) ? TFT_WHITE : TFT_BLACK);
-          else
-            _lcd->setColor(lgfx_qrcode_getModule(&qrcode, ix, iy) ? TFT_BLACK : TFT_WHITE);
-
-          _lcd->writeFillRect(dx, dy, thickness, thickness);
-          dx += thickness;
-        } while (++ix < qrcode.size);
-        _lcd->writeFillRect(dx, dy, x + w - dx, thickness, isInverted ? TFT_BLACK : TFT_WHITE);
-        dy += thickness;
-      } while (++iy < qrcode.size);
-    }
-    _lcd->writeFillRect(x, dy, w, y + w - dy, isInverted ? TFT_BLACK : TFT_WHITE);
-    _lcd->endWrite();
-    isPrinted = true;
-    break;
-  }
-
-  return isPrinted;
+  return Template::renderQRCode(data, isInverted);
 }

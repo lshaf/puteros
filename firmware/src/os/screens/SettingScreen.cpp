@@ -26,10 +26,16 @@ void SettingScreen::refreshMenu(const bool reset)
   const String name = _config->get(APP_CONFIG_DEVICE_NAME, APP_CONFIG_DEVICE_NAME_DEFAULT);
   const String volume = _config->get(APP_CONFIG_VOLUME, APP_CONFIG_VOLUME_DEFAULT);
   const String color = _config->get(APP_CONFIG_PRIMARY_COLOR, APP_CONFIG_PRIMARY_COLOR_DEFAULT);
+  const String displayOff = _config->get(APP_CONFIG_INTERVAL_DISPLAY_OFF, APP_CONFIG_INTERVAL_DISPLAY_OFF_DEFAULT);
+  const String autoPowerOff = _config->get(APP_CONFIG_INTERVAL_POWER_OFF, APP_CONFIG_INTERVAL_POWER_OFF_DEFAULT);
+  const bool powerSaving = _config->get(APP_CONFIG_ENABLE_POWER_SAVING, APP_CONFIG_ENABLE_POWER_SAVING_DEFAULT).toInt();
   const bool navSound = _config->get(APP_CONFIG_NAV_SOUND, APP_CONFIG_NAV_SOUND_DEFAULT).toInt();
   Template::renderHead("Settings");
   std::vector<ListEntryItem> finalEntries = {
     {"Name", name.c_str()},
+    {"Power Saving", powerSaving ? "On" : "Off"},
+    {"Display Off", (displayOff + "s").c_str()},
+    {"Auto Power Off", (autoPowerOff + "s").c_str()},
     {"Brightness", brightnessValue.c_str()},
     {"Volume", volume.c_str()},
     {"Navigation Sound", navSound ? "On" : "Off"},
@@ -54,8 +60,8 @@ void SettingScreen::renderAbout()
   body.fillSprite(BLACK);
   body.setTextColor(TFT_WHITE);
   body.setTextSize(1.5);
-  body.drawCenterString("PuterOS v" + String(APP_VERSION), body.width() / 2, body.height() / 2 - body.fontHeight());
-  body.drawCenterString("Powered by M5Stack", body.width() / 2, body.height() / 2);
+  body.drawCenterString("M5Geek v" + String(APP_VERSION), body.width() / 2, body.height() / 2 - body.fontHeight());
+  body.drawCenterString("Created by lshaf", body.width() / 2, body.height() / 2);
   Template::renderBody(&body);
 }
 
@@ -81,7 +87,39 @@ void SettingScreen::onEnter(const ListEntryItem entry)
 {
   if (currentState == STATE_MAIN)
   {
-    if (entry.label == "Brightness")
+    if (entry.label == "Display Off")
+    {
+      const int currentValue = std::stoi(entry.value);
+      const int newDispOff = InputNumberScreen::popup("Display Off", currentValue, 5, 3600);
+      if (newDispOff != currentValue)
+      {
+        _config->set(APP_CONFIG_INTERVAL_DISPLAY_OFF, String(newDispOff));
+        const bool saved = _config->save();
+        if (!saved)
+        {
+          Template::renderStatus("Failed to save display off.", TFT_RED);
+          HelperUtility::delayMs(1500);
+        }
+      }
+
+      refreshMenu();
+    } else if (entry.label == "Auto Power Off")
+    {
+      const int currentValue = std::stoi(entry.value);
+      const int newPowerOff = InputNumberScreen::popup("Auto Power Off", currentValue, 5, 3600);
+      if (newPowerOff != currentValue)
+      {
+        _config->set(APP_CONFIG_INTERVAL_POWER_OFF, String(newPowerOff));
+        const bool saved = _config->save();
+        if (!saved)
+        {
+          Template::renderStatus("Failed to save auto power off.", TFT_RED);
+          HelperUtility::delayMs(1500);
+        }
+      }
+
+      refreshMenu();
+    } else if (entry.label == "Brightness")
     {
       const int currentValue = std::stoi(entry.value);
       const int newBrightness = InputNumberScreen::popup("Brightness", currentValue, 5, 100);
@@ -135,6 +173,16 @@ void SettingScreen::onEnter(const ListEntryItem entry)
       } else
       {
         Template::renderStatus("Cannot have more than 15 characters.");
+        HelperUtility::delayMs(1500);
+      }
+
+      refreshMenu();
+    } else if (entry.label == "Power Saving")
+    {
+      _config->set(APP_CONFIG_ENABLE_POWER_SAVING, entry.value == "Off" ? "1" : "0");
+      if (!_config->save())
+      {
+        Template::renderStatus("Failed to save power saving.", TFT_RED);
         HelperUtility::delayMs(1500);
       }
 

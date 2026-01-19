@@ -31,6 +31,7 @@ private:
     STATE_QUIT
   } currentState = STATE_GRAPH;
 public:
+  bool isKeepScreenOn() override {return true;}
   void init() override;
   void update() override;
   void render() override;

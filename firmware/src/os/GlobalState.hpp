@@ -6,17 +6,20 @@
 #include "M5GFX.h"
 #include "core/Config.h"
 #include "core/Screen.hpp"
+
 #include <SD.h>
+#include <ESPmDNS.h>
+#include <ESPAsyncWebServer.h>
 
 // Wifi File Manager Password
 #define APP_CONFIG_WIFI_WEB_PASSWORD "wifi_web_password"
-#define APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT "puteros123"
+#define APP_CONFIG_WIFI_WEB_PASSWORD_DEFAULT "m5geek12"
 
 // Wifi Access Point
 #define APP_CONFIG_WIFI_AP_SSID "wifi_ap_ssid"
-#define APP_CONFIG_WIFI_AP_SSID_DEFAULT "PuterOS"
+#define APP_CONFIG_WIFI_AP_SSID_DEFAULT "M5Geek"
 #define APP_CONFIG_WIFI_AP_PASSWORD "wifi_ap_password"
-#define APP_CONFIG_WIFI_AP_PASSWORD_DEFAULT "puteros123"
+#define APP_CONFIG_WIFI_AP_PASSWORD_DEFAULT "m5geek12"
 
 // Device Settings
 #define APP_CONFIG_PRIMARY_COLOR "primary_color"
@@ -29,6 +32,20 @@
 #define APP_CONFIG_VOLUME_DEFAULT "75"
 #define APP_CONFIG_NAV_SOUND "nav_sound"
 #define APP_CONFIG_NAV_SOUND_DEFAULT "0"
+#define APP_CONFIG_ENABLE_POWER_SAVING "enable_power_saving"
+#define APP_CONFIG_ENABLE_POWER_SAVING_DEFAULT "1"
+#define APP_CONFIG_INTERVAL_DISPLAY_OFF "interval_display_off"
+#define APP_CONFIG_INTERVAL_DISPLAY_OFF_DEFAULT "10"
+#define APP_CONFIG_INTERVAL_POWER_OFF "interval_power_off"
+#define APP_CONFIG_INTERVAL_POWER_OFF_DEFAULT "60"
+
+#define LORA_IRQ_PIN      4
+#define LORA_RESET_PIN    3
+#define LORA_BUSY_PIN     6
+#define LORA_SPI_SCK_PIN  40
+#define LORA_SPI_MISO_PIN 39
+#define LORA_SPI_MOSI_PIN 14
+#define LORA_SPI_CS_PIN   5
 
 #define SD_SPI_SCK_PIN  40
 #define SD_SPI_MISO_PIN 39
@@ -47,19 +64,56 @@ public:
     return instance;
   }
 
-  void loadSDCard()
+  void init()
   {
-    if (!isSDCardInit)
+    pinMode(SD_SPI_CS_PIN, OUTPUT);
+    pinMode(LORA_SPI_CS_PIN, OUTPUT);
+    loadSDCard();
+  }
+
+  void loadLora()
+  {
+    if (spiUsedFor != SPI_LOADED_LORA)
     {
-      SPI.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
-      isSDCardLoaded = SD.begin(SD_SPI_CS_PIN, SPI, 25000000);
-      isSDCardInit = true;
+      if (isSDCardLoaded)
+      {
+        SD.end();
+        isSDCardLoaded = false;
+      }
+      if (spiUsedFor == SPI_LOADED_SD_CARD)
+      {
+        SPI.end();
+      }
+
+      digitalWrite(SD_SPI_CS_PIN, HIGH);
+      digitalWrite(LORA_SPI_CS_PIN, LOW);
+      SPI.begin(LORA_SPI_SCK_PIN, LORA_SPI_MISO_PIN, LORA_SPI_MOSI_PIN, LORA_SPI_CS_PIN);
+      spiUsedFor = SPI_LOADED_LORA;
     }
   }
 
+  void loadSDCard()
+  {
+    if (spiUsedFor != SPI_LOADED_SD_CARD)
+    {
+      if (spiUsedFor == SPI_LOADED_LORA)
+      {
+        SPI.end();
+      }
+
+      digitalWrite(SD_SPI_CS_PIN, LOW);
+      digitalWrite(LORA_SPI_CS_PIN, HIGH);
+      SPI.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
+
+      isSDCardLoaded = SD.begin(SD_SPI_CS_PIN, SPI, 25000000);
+      spiUsedFor = SPI_LOADED_SD_CARD;
+    }
+  }
+
+
   bool getIsSDCardLoaded() const
   {
-    return isSDCardLoaded;
+    return spiUsedFor == SPI_LOADED_SD_CARD && isSDCardLoaded;
   }
 
   void setScreen(Screen* screen)
@@ -86,6 +140,20 @@ public:
     return TFT_BLUE;
   }
 
+  AsyncWebServer* getServer()
+  {
+    if (server == nullptr)
+    {
+      if (MDNS.begin("m5geek"))
+        MDNS.addService("http", "tcp", 80);
+
+      server = new AsyncWebServer(80);
+      server->begin();
+    }
+
+    return server;
+  }
+
   Screen* getScreen() const
   {
     return currentScreen;
@@ -95,7 +163,7 @@ public:
   {
     if (config == nullptr)
     {
-      config = new Config("/puteros/config");
+      config = new Config("/m5geek/config");
     }
 
     return config;
@@ -103,6 +171,13 @@ public:
 private:
   Screen* currentScreen = nullptr;
   Config* config = nullptr;
-  bool isSDCardInit = false;
+  AsyncWebServer* server = nullptr;
+
+  enum
+  {
+    SPI_LOADED_NONE,
+    SPI_LOADED_SD_CARD,
+    SPI_LOADED_LORA
+  } spiUsedFor = SPI_LOADED_NONE;
   bool isSDCardLoaded = false;
 };
