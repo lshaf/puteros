@@ -21,6 +21,8 @@ public:
   void menuUpdater(Keyboard_Class* _keeb);
   void resultUpdater(Keyboard_Class* _keeb);
 
+  bool isKeepScreenOn() override {return true;}
+
 private:
   int8_t selectedMenu = 0;
   uint16_t score = 0;

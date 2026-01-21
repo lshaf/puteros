@@ -54,7 +54,7 @@ void AudioUtility::playWrongAnswer()
 {
   if (M5Cardputer.Speaker.getVolume() <= 0) return;
 
-  const int notes[] = {90, 90};
+  const int notes[] = {85, 85};
   for (int midi : notes) {
     const double freq = 440.0 * pow(2.0, (static_cast<double>(midi - 69) / 12.0));
     if (M5Cardputer.Speaker.isPlaying()) M5Cardputer.Speaker.stop();
