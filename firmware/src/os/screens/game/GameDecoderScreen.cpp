@@ -166,7 +166,7 @@ void GameDecoderScreen::initGame()
   endTime = millis() + getTimer() * 1000;
   for (int i = 0; i < 4; i++)
   {
-    targetNumber[i] = charDatabase[HelperUtility::true_random(16)];
+    targetNumber[i] = charDatabase[HelperUtility::trueRandom(16)];
   }
 
   navigate(STATE_PLAY);

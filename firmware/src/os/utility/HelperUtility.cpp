@@ -22,7 +22,7 @@ std::string HelperUtility::generateRandomString(size_t length)
   out.reserve(length);
 
   while (out.size() < length) {
-    const uint32_t r = true_random(charsetSize);
+    const uint32_t r = trueRandom(charsetSize);
     out.push_back(charset[r]);
   }
 
@@ -159,7 +159,8 @@ bool HelperUtility::parseInt32(const std::string& input, int32_t &value) {
   return true;
 }
 
-long HelperUtility::true_random(const long max) {
+void HelperUtility::shuffleSeed()
+{
   Preferences prefs;
   prefs.begin("game_decoder", false);
   const uint32_t last = prefs.getUInt("seed", 0);
@@ -174,7 +175,10 @@ long HelperUtility::true_random(const long max) {
   prefs.end();
 
   randomSeed(newSeed);
+}
 
+long HelperUtility::trueRandom(const long max) {
+  shuffleSeed();
   return random(max);
 }
 
