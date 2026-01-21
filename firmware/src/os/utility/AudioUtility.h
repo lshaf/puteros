@@ -14,4 +14,6 @@ public:
   static void playNotification();
   static void playWin();
   static void playLose();
+  static void playCorrectAnswer();
+  static void playWrongAnswer();
 };

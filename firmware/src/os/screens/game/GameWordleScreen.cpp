@@ -223,7 +223,7 @@ void GameWordleScreen::initGame()
     wordList = (currentLanguage == Language::ID) ? WORDLE_DB_ID : WORDLE_DB_EN;
     wordCount = (currentLanguage == Language::ID) ? WORDLE_DB_ID_COUNT : WORDLE_DB_EN_COUNT;
   }
-  const size_t randomIndex = HelperUtility::true_random(static_cast<long>(wordCount));
+  const size_t randomIndex = HelperUtility::trueRandom(static_cast<long>(wordCount));
 
   // Copy the selected word into chosenWord array
   for (size_t i = 0; i < 5; ++i)

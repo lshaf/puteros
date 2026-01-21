@@ -4,6 +4,7 @@
 
 #include "os/screens/game/GameMenuScreen.h"
 
+#include "GameMathScreen.h"
 #include "GameWordleScreen.h"
 #include "os/screens/MainMenuScreen.hpp"
 #include "os/screens/game/GameDecoderScreen.h"
@@ -15,6 +16,7 @@ void GameMenuScreen::init()
     {"HEX Decoder"},
     {"Wordle Indonesia"},
     {"Wordle English"},
+    {"Math Score"}
   });
 }
 
@@ -29,6 +31,9 @@ void GameMenuScreen::onEnter(ListEntryItem entry)
   } else if (entry.label == "Wordle English")
   {
     _global->setScreen(new GameWordleScreen(GameWordleScreen::Language::EN));
+  } else if (entry.label == "Math Score")
+  {
+    _global->setScreen(new GameMathScreen());
   }
 }
 
