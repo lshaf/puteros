@@ -65,6 +65,7 @@ void ModuleCapLoraScreen::onEnter(ListEntryItem entry)
       render();
     } else if (entry.label == "Wardriving")
     {
+      setEntries({});
       _global->loadSDCard();
       if (!_global->getIsSDCardLoaded())
       {
