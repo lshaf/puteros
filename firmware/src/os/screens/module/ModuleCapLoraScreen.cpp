@@ -30,7 +30,7 @@ bool ModuleCapLoraScreen::isLoraAttached()
 void ModuleCapLoraScreen::init()
 {
   Template::renderHead("Cap Lora-1262");
-  gps_module.begin(&Serial0, 115200, 15);
+  gps_module.begin(&Serial1, 115200, 15);
   if (!isLoraAttached())
   {
     Template::renderStatus("Lora Module not found", TFT_RED);

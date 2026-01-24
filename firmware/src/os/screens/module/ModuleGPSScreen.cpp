@@ -15,7 +15,7 @@ void ModuleGPSScreen::init()
 {
   lastUpdateTime = millis();
   Template::renderHead("Unit GPS v1.1");
-  gps_module.begin(&Serial0, 115200, 1);
+  gps_module.begin(&Serial1, 115200, 1);
   render();
 }
 
@@ -40,6 +40,13 @@ void ModuleGPSScreen::render()
 void ModuleGPSScreen::update()
 {
   gps_module.update();
+  if (currentState == STATE_MENU && millis() - lastRenderTime > 2000) ListScreen::render();
+  if (currentState == STATE_INFO || currentState == STATE_WARDRIVER_ACTION)
+  {
+    if (currentState == STATE_WARDRIVER_ACTION) gps_module.doWardrive();
+    if (millis() - lastRenderTime > 500) render();
+  }
+
   if (currentState == STATE_LOADING)
   {
     if (gps_module.gps.location.isValid())
@@ -51,47 +58,9 @@ void ModuleGPSScreen::update()
       HelperUtility::delayMs(2000);
       onBack();
     }
-
-    const auto _kb = &M5Cardputer.Keyboard;
-    if (_kb->isChange() && _kb->isPressed())
-    {
-      if (_kb->isKeyPressed('`'))
-      {
-        onEscape();
-      } else if (_kb->isKeyPressed(KEY_BACKSPACE))
-      {
-        onBack();
-      }
-    }
-  } else if (currentState == STATE_MENU)
-  {
-    ListScreen::update();
-    if (millis() - lastRenderTime > 2000)
-    {
-      ListScreen::render();
-    }
-  } else if (currentState == STATE_INFO || currentState == STATE_WARDRIVER_ACTION)
-  {
-    if (currentState == STATE_WARDRIVER_ACTION) gps_module.doWardrive();
-    if (millis() - lastRenderTime > 500)
-    {
-      render();
-    }
-
-    const auto _kb = &M5Cardputer.Keyboard;
-    if (_kb->isChange() && _kb->isPressed())
-    {
-      if (_kb->isKeyPressed('`') || _kb->isKeyPressed(KEY_BACKSPACE))
-      {
-        if (currentState == STATE_WARDRIVER_ACTION)
-        {
-          gps_module.endWardrive();
-        }
-
-        renderMenuScreen();
-      }
-    }
   }
+
+  ListScreen::update();
 }
 
 void ModuleGPSScreen::onEnter(ListEntryItem entry)
@@ -100,17 +69,22 @@ void ModuleGPSScreen::onEnter(ListEntryItem entry)
   {
     if (entry.label == "View GPS Info")
     {
+      currentState = STATE_INFO;
       renderInfoScreen();
     } else if (entry.label == "Wardriver")
     {
       setEntries({});
       if (gps_module.initWardrive() == false)
       {
-        Template::renderStatus(("Wardrive Error: " + gps_module.getLastWardriveError()).c_str(), TFT_RED);
+        Template::renderStatus("Wardrive Error: " + gps_module.getLastWardriveError(), TFT_RED);
         HelperUtility::delayMs(2000);
-        renderMenuScreen();
+        currentState = STATE_MENU;
+        render();
         return;
       }
+
+      Template::renderHead("Wardriving");
+      currentState = STATE_WARDRIVER_ACTION;
       renderWardriverScreen();
     }
   }
@@ -118,14 +92,23 @@ void ModuleGPSScreen::onEnter(ListEntryItem entry)
 
 void ModuleGPSScreen::onBack()
 {
-  Template::renderStatus("Stopping GPS Module...");
-  gps_module.end();
-  HelperUtility::delayMs(1000);
-  _global->setScreen(new ModuleMenuScreen());
+  if (currentState == STATE_MENU || currentState == STATE_LOADING)
+  {
+    Template::renderStatus("Stopping GPS Module...");
+    gps_module.end();
+    HelperUtility::delayMs(1000);
+    _global->setScreen(new ModuleMenuScreen());
+  } else
+  {
+    if (currentState == STATE_WARDRIVER_ACTION) gps_module.endWardrive();
+    currentState = STATE_MENU;
+    renderMenuScreen();
+  }
 }
 
 void ModuleGPSScreen::onEscape()
 {
+  if (currentState == STATE_WARDRIVER_ACTION) gps_module.endWardrive();
   Template::renderStatus("Stopping GPS Module...");
   gps_module.end();
   HelperUtility::delayMs(1000);
@@ -134,12 +117,15 @@ void ModuleGPSScreen::onEscape()
 
 void ModuleGPSScreen::preRender(M5Canvas &body)
 {
-  lastRenderTime = millis();
-  auto gps = gps_module.gps;
-  const String position = String(gps.location.lat(), 6) + "#" + String(gps.location.lng(), 6);
-  body.setTextSize(1.5);
-  body.setTextColor(TFT_WHITE);
-  body.drawCenterString(position, body.width() / 2, 2);
+  if (currentState == STATE_MENU)
+  {
+    lastRenderTime = millis();
+    auto gps = gps_module.gps;
+    const String position = String(gps.location.lat(), 6) + "#" + String(gps.location.lng(), 6);
+    body.setTextSize(1.5);
+    body.setTextColor(TFT_WHITE);
+    body.drawCenterString(position, body.width() / 2, 2);
+  }
 }
 
 void ModuleGPSScreen::renderMenuScreen()
@@ -153,7 +139,6 @@ void ModuleGPSScreen::renderMenuScreen()
 
 void ModuleGPSScreen::renderInfoScreen()
 {
-  currentState = STATE_INFO;
   auto gps = gps_module.gps;
   auto body = Template::createBody();
   body.setTextSize(1);
@@ -171,9 +156,6 @@ void ModuleGPSScreen::renderInfoScreen()
 
 void ModuleGPSScreen::renderWardriverScreen()
 {
-
-  Template::renderHead("Wardriving");
-
   // get csv name from full path
   String csvName = gps_module.getCurrentFilename().c_str();
 
