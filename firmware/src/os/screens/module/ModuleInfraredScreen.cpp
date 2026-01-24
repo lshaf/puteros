@@ -14,8 +14,9 @@ void ModuleInfraredScreen::init()
   IrReceiver.begin(1, false);
   IrSender.begin(2, false);
   setEntries({
-    {"Receive IR Signal"},
-    {"Send IR Signal"}
+    {"Add New Remote"},
+    {"Emulate Remote"},
+    {"TV B-Gone"}
   });
 }
 
