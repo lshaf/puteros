@@ -108,23 +108,24 @@ void ListScreen::update()
   if (_keyboard->isChange() && _keyboard->isPressed())
   {
     if (_keyboard->isKeyPressed(';')) navigate(NAV_UP);
-    if (_keyboard->isKeyPressed('.')) navigate(NAV_DOWN);
-    if (_keyboard->isKeyPressed(',')) navigate(NAV_PREV);
-    if (_keyboard->isKeyPressed('/')) navigate(NAV_NEXT);
-    if (_keyboard->isKeyPressed(KEY_ENTER) && !entries.empty())
+    else if (_keyboard->isKeyPressed('.')) navigate(NAV_DOWN);
+    else if (_keyboard->isKeyPressed(',')) navigate(NAV_PREV);
+    else if (_keyboard->isKeyPressed('/')) navigate(NAV_NEXT);
+    else if (_keyboard->isKeyPressed(KEY_ENTER) && !entries.empty())
     {
       this->playSound();
       onEnter(entries[selectedIndex]);
-    }
-    if (_keyboard->isKeyPressed(KEY_BACKSPACE))
+    } else if (_keyboard->isKeyPressed(KEY_BACKSPACE))
     {
       this->playSound();
       onBack();
-    }
-    if (_keyboard->isKeyPressed('`'))
+    } else if (_keyboard->isKeyPressed('`'))
     {
       this->playSound();
       onEscape();
+    } else
+    {
+      customKeyHandler(*_keyboard);
     }
   }
 }

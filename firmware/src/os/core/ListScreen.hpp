@@ -33,6 +33,7 @@ protected:
   virtual void onEscape() { onBack(); };
   virtual void onBack() = 0;
   virtual void preRender(M5Canvas &body) {};
+  virtual void customKeyHandler(Keyboard_Class& keyboard) {};
 
   void playSound();
   void navigate(NavAction_t direction);
