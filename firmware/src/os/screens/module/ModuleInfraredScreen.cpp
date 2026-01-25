@@ -2,10 +2,11 @@
 // Created by l-sha on 22/01/2026.
 //
 
-#include "ModuleInfraredScreen.h"
-#include <IRremote.h>
+#define SEND_PWM_BY_TIMER
 
+#include "ModuleInfraredScreen.h"
 #include "ModuleMenuScreen.h"
+#include <IRremote.hpp>
 
 void ModuleInfraredScreen::init()
 {
@@ -20,7 +21,7 @@ void ModuleInfraredScreen::init()
   });
 }
 
-void ModuleInfraredScreen::onEnter(ListEntryItem entry)
+void ModuleInfraredScreen::onEnter(const ListEntryItem& entry)
 {
   //
 }
