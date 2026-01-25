@@ -49,7 +49,7 @@ void MainMenuScreen::onEnter(const ListEntryItem& entry)
     _global->setScreen(new ModuleMenuScreen());
   } else if (entry.label == "Files")
   {
-    _global->setScreen(new FileNavigatorScreen("/"));
+    _global->setScreen(new FileNavigatorScreen());
   } else if (entry.label == "Settings")
   {
     _global->setScreen(new SettingScreen());

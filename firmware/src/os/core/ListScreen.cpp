@@ -14,40 +14,68 @@ void ListScreen::setEntries(const std::vector<ListEntryItem>& newEntries)
 
 void ListScreen::render()
 {
-  auto _body = Template::createBody();
-  preRender(_body);
-
   if (entries.empty())
   {
     Template::clearBody();
     return;
   }
 
+  auto _body = Template::createBody();
+  preRender(_body);
+
   _body.setTextSize(1);
   _body.setTextColor(TFT_WHITE);
-  visibleCount = (_body.height() - getYOffset()) / (_body.fontHeight() + 4);
-  const int totalItem = std::min(visibleCount, static_cast<int>(entries.size()) - scrollOffset);
-  const int lineHeight = _body.fontHeight() + 2;
+
+  // Calculate basic metrics
+  const int itemHeight = _body.fontHeight() + 4; // fontHeight + padding
+  const int availableHeight = _body.height() - getYOffset();
+
+  // Calculate maximum items that can fit (no partial items)
+  visibleCount = availableHeight / itemHeight;
+  // if (_body.height() - visibleCount * itemHeight > 3) visibleCount++;
+
+  // If there are fewer entries than can fit, just show them all
+  if (entries.size() <= visibleCount) {
+    scrollOffset = 0;
+    visibleCount = entries.size();
+  } else {
+    // Adjust scroll to ensure selected item is fully visible
+    if (selectedIndex < scrollOffset) {
+      // Selected item is above current view
+      scrollOffset = selectedIndex;
+    } else if (selectedIndex >= scrollOffset + visibleCount) {
+      // Selected item is below current view
+      scrollOffset = selectedIndex - visibleCount + 1;
+    }
+
+    // Ensure scrollOffset stays within bounds
+    if (scrollOffset + visibleCount > entries.size()) {
+      scrollOffset = entries.size() - visibleCount;
+    }
+    if (scrollOffset < 0) {
+      scrollOffset = 0;
+    }
+  }
+
+  // Draw selection highlight
   const int selectedIndexVisible = selectedIndex - scrollOffset;
-  if (selectedIndexVisible >= 0 && selectedIndexVisible < totalItem)
-  {
+  if (selectedIndexVisible >= 0 && selectedIndexVisible < visibleCount) {
     _body.fillRect(
       0,
-      getYOffset() + selectedIndexVisible * lineHeight + selectedIndexVisible * 2,
+      getYOffset() + selectedIndexVisible * itemHeight,
       _body.width(),
-      _body.fontHeight() + 3,
+      itemHeight,
       _global->getMainColor()
     );
   }
 
-  for (int i = 0; i < totalItem; ++i)
-  {
+  // Draw all visible items
+  for (int i = 0; i < visibleCount; ++i) {
     const auto &item = entries[scrollOffset + i];
-    const int y = getYOffset() + i * lineHeight + i * 2;
+    const int y = getYOffset() + i * itemHeight;
 
     _body.drawString(item.label.c_str(), 3, y + 2);
-    if (!item.value.empty())
-    {
+    if (!item.value.empty()) {
       _body.drawRightString(item.value.c_str(), _body.width() - 3, y + 2);
     }
   }
@@ -57,38 +85,18 @@ void ListScreen::render()
 
 void ListScreen::navigate(const NavAction_t direction)
 {
-  if (direction == NAV_UP && selectedIndex > 0)
-  {
+  const int totalEntries = static_cast<int>(entries.size());
+  if (totalEntries == 0) return;
+  if (direction == NAV_UP && selectedIndex > 0) {
     selectedIndex--;
-    if (selectedIndex < scrollOffset)
-    {
-      scrollOffset--;
-    }
-  }
-  if (direction == NAV_DOWN && selectedIndex < entries.size() - 1)
-  {
+  } else if (direction == NAV_DOWN && selectedIndex < totalEntries - 1) {
     selectedIndex++;
-    if (selectedIndex >= scrollOffset + visibleCount)
-    {
-      scrollOffset++;
-    }
-  }
-  // Add to ListScreen::navigate
-  if (direction == NAV_NEXT && selectedIndex < entries.size() - 1)
-  {
-    selectedIndex = std::min(selectedIndex + 10, static_cast<int>(entries.size()) - 1);
-    if (selectedIndex >= scrollOffset + visibleCount)
-    {
-      scrollOffset = selectedIndex - visibleCount + 1;
-    }
-  }
-  if (direction == NAV_PREV && selectedIndex > 0)
-  {
-    selectedIndex = std::max(selectedIndex - 10, 0);
-    if (selectedIndex < scrollOffset)
-    {
-      scrollOffset = selectedIndex;
-    }
+  } else if (direction == NAV_NEXT && selectedIndex < totalEntries - 1) {
+    // Jump by visibleCount items or to last item
+    selectedIndex = std::min(selectedIndex + visibleCount, totalEntries - 1);
+  } else if (direction == NAV_PREV && selectedIndex > 0) {
+    // Jump by visibleCount items or to first item
+    selectedIndex = std::max(selectedIndex - visibleCount, 0);
   }
 
   this->playSound();
