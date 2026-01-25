@@ -16,7 +16,7 @@ void WifiDeauthDetectorScreen::onBack()
   _global->setScreen(new WifiMenuScreen());
 }
 
-void WifiDeauthDetectorScreen::onEnter(ListEntryItem entry)
+void WifiDeauthDetectorScreen::onEnter(const ListEntryItem& entry)
 {
   // do nothing
 }

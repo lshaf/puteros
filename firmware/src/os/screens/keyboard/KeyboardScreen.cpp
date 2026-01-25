@@ -74,7 +74,7 @@ void KeyboardScreen::refreshBatteryLevel()
   keyboard->setBatteryLevel(batLevel);
 }
 
-void KeyboardScreen::onEnter(ListEntryItem entry)
+void KeyboardScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MENU)
   {

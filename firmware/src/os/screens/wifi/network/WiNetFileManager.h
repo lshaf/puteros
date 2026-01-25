@@ -22,7 +22,7 @@ protected:
     STATE_WEB_MANAGER
   } currentState = STATE_MENU;
 
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
   void update() override;
 

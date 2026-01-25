@@ -20,7 +20,7 @@ void GameMenuScreen::init()
   });
 }
 
-void GameMenuScreen::onEnter(ListEntryItem entry)
+void GameMenuScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.label == "HEX Decoder")
   {

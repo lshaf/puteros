@@ -31,7 +31,7 @@ private:
   void configuration();
 protected:
   void init() override;
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
   void onEscape() override;
 };

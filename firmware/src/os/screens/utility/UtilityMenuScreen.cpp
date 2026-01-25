@@ -17,7 +17,7 @@ void UtilityMenuScreen::init()
   });
 }
 
-void UtilityMenuScreen::onEnter(ListEntryItem entry)
+void UtilityMenuScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.label == "I2C Detector")
   {

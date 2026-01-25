@@ -29,7 +29,7 @@ void WiAPFileManagerScreen::onBack()
   _global->setScreen(new WifiAccessPointScreen());
 }
 
-void WiAPFileManagerScreen::onEnter(ListEntryItem entry)
+void WiAPFileManagerScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MENU)
   {

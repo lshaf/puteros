@@ -29,5 +29,5 @@ public:
   void init() override;
   void onBack() override;
   void update() override;
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
 };

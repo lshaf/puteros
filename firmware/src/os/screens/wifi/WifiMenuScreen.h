@@ -9,6 +9,6 @@ class WifiMenuScreen final : public ListScreen
 public:
   void init() override;
 
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
 };

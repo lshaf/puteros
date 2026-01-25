@@ -2,12 +2,11 @@
 // Created by l-sha on 9/19/2025.
 //
 #include "os/core/ListScreen.hpp"
-
 #include "os/utility/AudioUtility.h"
 
 void ListScreen::setEntries(const std::vector<ListEntryItem>& newEntries)
 {
-  entries = newEntries;
+  entries = std::move(newEntries);
   selectedIndex = 0;
   scrollOffset = 0;
   render();

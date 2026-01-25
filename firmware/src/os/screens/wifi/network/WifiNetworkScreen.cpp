@@ -123,7 +123,7 @@ bool WifiNetworkScreen::connectToWifi(const String& bssid, const String& ssid, c
   return false;
 }
 
-void WifiNetworkScreen::onEnter(const ListEntryItem entry)
+void WifiNetworkScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_SELECT_WIFI)
   {

@@ -34,7 +34,7 @@ void InputFileScreen::init()
   setEntries(fileEntries);
 }
 
-void InputFileScreen::onEnter(ListEntryItem entry)
+void InputFileScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.value == "DIR")
   {

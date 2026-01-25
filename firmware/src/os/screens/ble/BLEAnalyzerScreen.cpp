@@ -87,7 +87,7 @@ void BLEAnalyzerScreen::showInfo()
   });
 }
 
-void BLEAnalyzerScreen::onEnter(ListEntryItem entry)
+void BLEAnalyzerScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_LIST)
   {

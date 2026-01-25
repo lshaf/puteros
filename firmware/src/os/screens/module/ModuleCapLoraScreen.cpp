@@ -42,7 +42,7 @@ void ModuleCapLoraScreen::init()
   showMainMenuScreen();
 }
 
-void ModuleCapLoraScreen::onEnter(ListEntryItem entry)
+void ModuleCapLoraScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MENU)
   {

@@ -63,7 +63,7 @@ void ModuleGPSScreen::update()
   ListScreen::update();
 }
 
-void ModuleGPSScreen::onEnter(ListEntryItem entry)
+void ModuleGPSScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MENU)
   {

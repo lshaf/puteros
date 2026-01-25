@@ -117,7 +117,7 @@ void WiNetIPScannerScreen::scanPort(const std::string& ip)
   setEntries(openPorts);
 }
 
-void WiNetIPScannerScreen::onEnter(const ListEntryItem entry)
+void WiNetIPScannerScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_RESULT_IP)
   {

@@ -29,7 +29,7 @@ void WiNetFileManager::onBack()
   _global->setScreen(new WifiNetworkScreen());
 }
 
-void WiNetFileManager::onEnter(ListEntryItem entry)
+void WiNetFileManager::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MENU)
   {

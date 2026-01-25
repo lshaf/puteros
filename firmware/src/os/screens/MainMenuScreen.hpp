@@ -12,5 +12,5 @@ public:
 
 protected:
   void onBack() override;
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
 };

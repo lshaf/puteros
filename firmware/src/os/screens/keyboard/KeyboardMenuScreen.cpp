@@ -13,7 +13,7 @@ void KeyboardMenuScreen::init()
   refreshMenu();
 }
 
-void KeyboardMenuScreen::onEnter(ListEntryItem entry)
+void KeyboardMenuScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.label == "Start")
   {

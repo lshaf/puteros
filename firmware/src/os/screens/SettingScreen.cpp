@@ -83,7 +83,7 @@ void SettingScreen::renderPrimaryColor()
   });
 }
 
-void SettingScreen::onEnter(const ListEntryItem entry)
+void SettingScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MAIN)
   {

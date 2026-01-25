@@ -30,7 +30,7 @@ void WifiMenuScreen::init()
   });
 }
 
-void WifiMenuScreen::onEnter(const ListEntryItem entry)
+void WifiMenuScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.label == "Network")
   {

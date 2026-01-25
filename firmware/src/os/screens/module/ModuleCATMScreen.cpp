@@ -30,7 +30,7 @@ void ModuleCATMScreen::init()
   });
 }
 
-void ModuleCATMScreen::onEnter(ListEntryItem entry)
+void ModuleCATMScreen::onEnter(const ListEntryItem& entry)
 {
   // No action on enter
 }

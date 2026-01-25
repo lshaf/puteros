@@ -20,7 +20,7 @@ protected:
     STATE_QR_CODE
   } currentState = STATE_MENU;
 
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
   void onEscape() override;
   void preRender(M5Canvas& body) override;

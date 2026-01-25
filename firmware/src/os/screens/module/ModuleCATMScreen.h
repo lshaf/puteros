@@ -13,7 +13,7 @@ public:
   bool isKeepScreenOn() override {return true;}
 
 protected:
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
 
 private:

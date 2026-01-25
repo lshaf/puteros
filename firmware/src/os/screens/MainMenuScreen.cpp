@@ -33,7 +33,7 @@ void MainMenuScreen::onBack()
   _global->setScreen(new WelcomeScreen());
 }
 
-void MainMenuScreen::onEnter(ListEntryItem entry)
+void MainMenuScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.label == "Wifi")
   {

@@ -341,7 +341,7 @@ void ModuleMFRC522Screen::callMemoryReader()
   setEntries(memoryEntries);
 }
 
-void ModuleMFRC522Screen::onEnter(ListEntryItem entry)
+void ModuleMFRC522Screen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MAIN_MENU)
   {

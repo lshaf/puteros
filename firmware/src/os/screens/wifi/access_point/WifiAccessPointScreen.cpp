@@ -63,7 +63,7 @@ void WifiAccessPointScreen::renderQRCode()
   Template::renderQRCode(qrData.c_str());
 }
 
-void WifiAccessPointScreen::onEnter(ListEntryItem entry)
+void WifiAccessPointScreen::onEnter(const ListEntryItem& entry)
 {
   if (!isAPCreated())
   {

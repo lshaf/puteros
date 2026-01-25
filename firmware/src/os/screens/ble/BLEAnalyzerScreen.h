@@ -32,7 +32,7 @@ public:
   }
 
 protected:
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onEscape() override;
   void onBack() override;
 

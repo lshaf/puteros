@@ -14,7 +14,7 @@ public:
   void init() override;
 
 protected:
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
   void onEscape() override;
   void update() override;

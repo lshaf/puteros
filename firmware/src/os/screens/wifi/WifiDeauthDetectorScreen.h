@@ -54,7 +54,7 @@ public:
   static void deauthDetectedCallback(void* buf, wifi_promiscuous_pkt_type_t type);
 
 protected:
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
 
 private:

@@ -18,7 +18,7 @@ public:
 
 protected:
   int getYOffset() const override { return 16; }
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
   void onEscape() override;
   void update() override;

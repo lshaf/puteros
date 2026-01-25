@@ -288,7 +288,7 @@ void ModulePN532Screen::callMemoryReader()
   setEntries(memoryEntries);
 }
 
-void ModulePN532Screen::onEnter(ListEntryItem entry)
+void ModulePN532Screen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_PN532_KILLER || currentState == STATE_PN532)
   {

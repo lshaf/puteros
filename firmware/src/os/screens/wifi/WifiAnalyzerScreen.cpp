@@ -58,7 +58,7 @@ void WifiAnalyzerScreen::showWifiScreen()
   setEntries(wifiEntries);
 }
 
-void WifiAnalyzerScreen::onEnter(const ListEntryItem entry)
+void WifiAnalyzerScreen::onEnter(const ListEntryItem& entry)
 {
   if (screenState == SCREEN_SCAN) {
     screenState = SCREEN_INFO;

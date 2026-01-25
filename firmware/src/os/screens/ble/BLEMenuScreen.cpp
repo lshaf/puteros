@@ -22,7 +22,7 @@ void BLEMenuScreen::onBack()
   _global->setScreen(new MainMenuScreen());
 }
 
-void BLEMenuScreen::onEnter(const ListEntryItem entry)
+void BLEMenuScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.label == "BLE Analyzer")
   {

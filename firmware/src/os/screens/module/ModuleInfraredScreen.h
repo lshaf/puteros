@@ -8,7 +8,7 @@
 class ModuleInfraredScreen final : public ListScreen
 {
 protected:
-  void onEnter(ListEntryItem entry) override;
+  void onEnter(const ListEntryItem& entry) override;
   void onBack() override;
 
   int getYOffset() const override {return 0;}

@@ -61,7 +61,7 @@ void UtilityQRCodeScreen::renderPathEntries(const std::string& path)
 }
 
 
-void UtilityQRCodeScreen::onEnter(ListEntryItem entry)
+void UtilityQRCodeScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_QRCODE)
   {

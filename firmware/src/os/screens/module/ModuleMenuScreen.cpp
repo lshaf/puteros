@@ -29,7 +29,7 @@ void ModuleMenuScreen::onBack()
   _global->setScreen(new MainMenuScreen());
 }
 
-void ModuleMenuScreen::onEnter(ListEntryItem entry)
+void ModuleMenuScreen::onEnter(const ListEntryItem& entry)
 {
   if (entry.label == "MToolsTech PN532")
   {

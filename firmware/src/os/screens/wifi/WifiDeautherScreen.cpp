@@ -24,7 +24,7 @@ void WifiDeautherScreen::init()
   });
 }
 
-void WifiDeautherScreen::onEnter(ListEntryItem entry)
+void WifiDeautherScreen::onEnter(const ListEntryItem& entry)
 {
   if (currentState == STATE_MAIN)
   {
