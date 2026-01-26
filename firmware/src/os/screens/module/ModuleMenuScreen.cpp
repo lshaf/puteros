@@ -5,7 +5,6 @@
 #include "os/screens/module/ModuleMenuScreen.h"
 
 #include "ModuleCapLoraScreen.h"
-#include "ModuleCATMScreen.h"
 #include "ModuleGPSScreen.h"
 #include "ModuleInfraredScreen.h"
 #include "os/screens/MainMenuScreen.hpp"
@@ -40,9 +39,6 @@ void ModuleMenuScreen::onEnter(const ListEntryItem& entry)
   } else if (entry.label == "Unit GPS v1.1")
   {
     _global->setScreen(new ModuleGPSScreen());
-  } else if (entry.label == "Unit Cat-M")
-  {
-    _global->setScreen(new ModuleCATMScreen());
   } else if (entry.label == "Cap Lora-1262")
   {
     _global->setScreen(new ModuleCapLoraScreen());
