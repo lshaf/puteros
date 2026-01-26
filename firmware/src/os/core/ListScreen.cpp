@@ -32,7 +32,6 @@ void ListScreen::render()
 
   // Calculate maximum items that can fit (no partial items)
   visibleCount = availableHeight / itemHeight;
-  // if (_body.height() - visibleCount * itemHeight > 3) visibleCount++;
 
   // If there are fewer entries than can fit, just show them all
   if (entries.size() <= visibleCount) {
@@ -70,7 +69,10 @@ void ListScreen::render()
   }
 
   // Draw all visible items
-  for (int i = 0; i < visibleCount; ++i) {
+  int actualShowItem = visibleCount;
+  if (_body.height() - visibleCount * itemHeight > 3) actualShowItem++;
+  actualShowItem = std::min(actualShowItem, static_cast<int>(entries.size()) - scrollOffset);
+  for (int i = 0; i < actualShowItem; ++i) {
     const auto &item = entries[scrollOffset + i];
     const int y = getYOffset() + i * itemHeight;
 
